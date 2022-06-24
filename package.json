@@ -1,0 +1,30 @@
+{
+  "name": "CallerPackage",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Caller Package",
+  "main": "./src/app.js",
+  "scripts": {
+    "build": "browserify ./src/app.js > ./dist/bundle.js -t babelify"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/divyatez-sprinklr/CallerPackage.git"
+  },
+  "keywords": [],
+  "author": "sprinklr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/divyatez-sprinklr/CallerPackage/issues"
+  },
+  "homepage": "https://github.com/divyatez-sprinklr/CallerPackage#readme",
+  "dependencies": {
+    "jssip": "^3.9.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.18.2",
+    "@babel/preset-env": "^7.18.2",
+    "babelify": "^10.0.0",
+    "browserify": "^17.0.0"
+  }
+}
