@@ -1,12 +1,15 @@
 # CallerPackage
+- Run following after save to make bundle
 ```
 browserify ./src/app.js -o ./dist/bundle.js
-Then -> Live Server
+```
+- Then use Live Server
 
-## For convinence
-Download "run on save" extention.
-Open its setting.json in settings>extentions>Run On Save> edit in settings.json
-Paste following:-
+## For convenience
+- Download "run on save" extention.
+- Open its setting.json in settings>extentions>Run On Save> edit in settings.json
+- Paste following:-
+```
 {
     "workbench.startupEditor": "none",
     "window.zoomLevel": 1,
@@ -19,6 +22,5 @@ Paste following:-
         ]
     }
 }
-
-Now command will auto run with save.
 ```
+- Now command will auto run with save.
