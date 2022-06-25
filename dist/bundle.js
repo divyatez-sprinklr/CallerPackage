@@ -16513,7 +16513,7 @@ module.exports = /*#__PURE__*/function (_EventEmitter) {
 
   return Message;
 }(EventEmitter);
-},{"./Constants":2,"./Exceptions":6,"./Logger":9,"./RequestSender":20,"./SIPMessage":21,"./URI":27,"./Utils":28,"events":42}],11:[function(require,module,exports){
+},{"./Constants":2,"./Exceptions":6,"./Logger":9,"./RequestSender":20,"./SIPMessage":21,"./URI":27,"./Utils":28,"events":43}],11:[function(require,module,exports){
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -16955,7 +16955,7 @@ module.exports = /*#__PURE__*/function (_EventEmitter) {
 
   return Options;
 }(EventEmitter);
-},{"./Constants":2,"./Exceptions":6,"./Logger":9,"./RequestSender":20,"./SIPMessage":21,"./Utils":28,"events":42}],13:[function(require,module,exports){
+},{"./Constants":2,"./Exceptions":6,"./Logger":9,"./RequestSender":20,"./SIPMessage":21,"./Utils":28,"events":43}],13:[function(require,module,exports){
 "use strict";
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
@@ -20586,7 +20586,7 @@ module.exports = /*#__PURE__*/function (_EventEmitter) {
 
   return RTCSession;
 }(EventEmitter);
-},{"./Constants":2,"./Dialog":3,"./Exceptions":6,"./Logger":9,"./RTCSession/DTMF":15,"./RTCSession/Info":16,"./RTCSession/ReferNotifier":17,"./RTCSession/ReferSubscriber":18,"./RequestSender":20,"./SIPMessage":21,"./Timers":23,"./Transactions":24,"./URI":27,"./Utils":28,"events":42,"sdp-transform":36}],15:[function(require,module,exports){
+},{"./Constants":2,"./Dialog":3,"./Exceptions":6,"./Logger":9,"./RTCSession/DTMF":15,"./RTCSession/Info":16,"./RTCSession/ReferNotifier":17,"./RTCSession/ReferSubscriber":18,"./RequestSender":20,"./SIPMessage":21,"./Timers":23,"./Transactions":24,"./URI":27,"./Utils":28,"events":43,"sdp-transform":36}],15:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -20787,7 +20787,7 @@ module.exports = /*#__PURE__*/function (_EventEmitter) {
 
 
 module.exports.C = C;
-},{"../Constants":2,"../Exceptions":6,"../Logger":9,"../Utils":28,"events":42}],16:[function(require,module,exports){
+},{"../Constants":2,"../Exceptions":6,"../Logger":9,"../Utils":28,"events":43}],16:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -20923,7 +20923,7 @@ module.exports = /*#__PURE__*/function (_EventEmitter) {
 
   return Info;
 }(EventEmitter);
-},{"../Constants":2,"../Exceptions":6,"../Utils":28,"events":42}],17:[function(require,module,exports){
+},{"../Constants":2,"../Exceptions":6,"../Utils":28,"events":43}],17:[function(require,module,exports){
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -21178,7 +21178,7 @@ module.exports = /*#__PURE__*/function (_EventEmitter) {
 
   return ReferSubscriber;
 }(EventEmitter);
-},{"../Constants":2,"../Grammar":7,"../Logger":9,"../Utils":28,"events":42}],19:[function(require,module,exports){
+},{"../Constants":2,"../Grammar":7,"../Logger":9,"../Utils":28,"events":43}],19:[function(require,module,exports){
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -23499,7 +23499,7 @@ module.exports = {
   InviteServerTransaction: InviteServerTransaction,
   checkTransaction: checkTransaction
 };
-},{"./Constants":2,"./Logger":9,"./SIPMessage":21,"./Timers":23,"events":42}],25:[function(require,module,exports){
+},{"./Constants":2,"./Logger":9,"./SIPMessage":21,"./Timers":23,"events":43}],25:[function(require,module,exports){
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -24888,7 +24888,7 @@ function onTransportData(data) {
     }
   }
 }
-},{"./Config":1,"./Constants":2,"./Exceptions":6,"./Logger":9,"./Message":10,"./Options":12,"./Parser":13,"./RTCSession":14,"./Registrator":19,"./SIPMessage":21,"./Transactions":24,"./Transport":25,"./URI":27,"./Utils":28,"./sanityCheck":30,"events":42}],27:[function(require,module,exports){
+},{"./Config":1,"./Constants":2,"./Exceptions":6,"./Logger":9,"./Message":10,"./Options":12,"./Parser":13,"./RTCSession":14,"./Registrator":19,"./SIPMessage":21,"./Transactions":24,"./Transport":25,"./URI":27,"./Utils":28,"./sanityCheck":30,"events":43}],27:[function(require,module,exports){
 "use strict";
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
@@ -26442,7 +26442,7 @@ formatters.j = function (v) {
 };
 
 }).call(this)}).call(this,require('_process'))
-},{"./common":33,"_process":43}],33:[function(require,module,exports){
+},{"./common":33,"_process":44}],33:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -27637,16 +27637,66 @@ module.exports = function (session, opts) {
 const JsSIP = require("JsSIP");
 var {obj1,obj2} = require('./obj1');
 var {fn,fn2} = require('./fn');
+const {eventEmitter} = require('./constants')
+// const EventEmitter = require('events');
+// const eventEmitter = new EventEmitter();
 
-//const obj1 = object1.obj1;
-console.log('Hello');
 
 
+///Class testing//
+console.log('-----------Module Class----------------');
+eventEmitter.on('module_from_class_emit', () => {
+    console.log('This is reply to emit sent from class');
+});
 let a = new obj1();
+console.log('');
 let b = new obj2();
+console.log('------------------------------------------');
+console.log('------------------------------------------');
+console.log('');
+////
+
+
+
+///module function
+eventEmitter.on('module_function_emit', () => {
+    console.log('This is reply to emit that was declared in other module and listener in other');
+});
+console.log('-----------Module Function----------------');
 fn();
 fn2();
-},{"./fn":40,"./obj1":41,"JsSIP":8}],40:[function(require,module,exports){
+console.log('------------------------------------------');
+console.log('------------------------------------------');
+console.log('');
+////
+
+
+
+// local emit and listener
+console.log('-----------Local emit testing----------------');
+eventEmitter.on('local_emit', () => {
+    console.log('reply to local emit');
+});
+function f3(){
+    eventEmitter.emit('local_emit');
+}
+f3();
+console.log('------------------------------------------');
+console.log('------------------------------------------');
+console.log('');
+////
+
+
+},{"./constants":40,"./fn":41,"./obj1":42,"JsSIP":8}],40:[function(require,module,exports){
+
+const EventEmitter = require('events');
+const eventEmitter = new EventEmitter();
+
+module.exports = {eventEmitter: eventEmitter};
+},{"events":43}],41:[function(require,module,exports){
+
+const {eventEmitter} = require('./constants')
+
 module.exports = {fn: fn, fn2:fn2};
 
 function fn(){
@@ -27654,9 +27704,12 @@ function fn(){
 }
 
 function fn2(){
-    console.log('fn2 working');
+    console.log('fn2 : emit testing');
+    eventEmitter.emit('module_function_emit');
 }
-},{}],41:[function(require,module,exports){
+},{"./constants":40}],42:[function(require,module,exports){
+
+const {eventEmitter} = require('./constants')
 
 class obj1{
     constructor(){
@@ -27665,7 +27718,7 @@ class obj1{
     }
 
     testFn(){
-        console.log('Test fn in constructor working obj2');
+        console.log('Test fn in constructor working obj1');
     }
 }
 
@@ -27677,8 +27730,15 @@ class obj2{
     }
 
     testFn(){
-        console.log('Test fn in constructor working obj2');
+        console.log('Obj2: Emit testing');
+        this.emit();
     }
+
+    emit(params) {
+        eventEmitter.emit('module_from_class_emit'); 
+    }
+
+
 }
 
 
@@ -27686,7 +27746,7 @@ module.exports = {obj1: obj1, obj2: obj2}
 
 
 
-},{}],42:[function(require,module,exports){
+},{"./constants":40}],43:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -28185,7 +28245,7 @@ function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
   }
 }
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
