@@ -27738,7 +27738,6 @@ class obj2{
         eventEmitter.emit('module_from_class_emit'); 
     }
 
-
 }
 
 
