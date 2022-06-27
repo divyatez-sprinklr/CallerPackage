@@ -12,6 +12,18 @@ channel.onmessage = (messageEvent) => {
 setInterval(()=>{
 channel.postMessage('sending from popup');
 },1000);
+
+
+
+function sendEngine(message){
+
+}
+
+function recieveEngine(message){
+
+}
+
+// JsSiP Here
 },{"./popup_constants":2}],2:[function(require,module,exports){
 
 // Here constants are important.
@@ -24,7 +36,7 @@ const channel = new BroadcastChannel('window_popup_channel');
 module.exports = {eventEmitter: eventEmitter, channel: channel};
 
 
-// 
+
 },{"events":3}],3:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
