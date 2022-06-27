@@ -27738,7 +27738,7 @@ class obj1{
     constructor(a1){
         this.attri = a1; 
         console.log('Constructor started obj1');
-        this.testFn();
+        //this.testFn();
         this.obj22 = new obj2(this.attri);
     }
     testFn(){
@@ -27759,7 +27759,7 @@ class obj2{
     attri=2;
     constructor(a2){
         console.log('Constructor started obj2');
-        this.testFn();
+       // this.testFn();
         this.attri = a2;
     }
 
