@@ -22,3 +22,8 @@ Paste following:-
 
 Now command will auto run with save.
 ```
+
+```
+browserify src/popup/popup.js -o src/child_bundle.js 
+browserify src/client/client.js -o src/parent_bundle.js
+```
