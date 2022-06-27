@@ -27648,8 +27648,29 @@ console.log('-----------Module Class----------------');
 eventEmitter.on('module_from_class_emit', () => {
     console.log('This is reply to emit sent from class');
 });
-let a = new obj1();
+
+console.log('------------------------------------------');
+console.log('------------------------------------------');
+console.log('------------------------------------------');
+console.log('------------------------------------------');
+console.log('------------------------------------------');
+console.log('------------------------------------------');
+let o1 = new obj1(45);
 console.log('');
+o1.ppfa();
+o1.obj22.pcfa();
+console.log('updating---------------------------------------');
+o1.upa(97);
+o1.ppfa();
+o1.obj22.pcfa();
+console.log('updating---------------------------------------');
+
+console.log('------------------------------------------');
+console.log('------------------------------------------');
+console.log('------------------------------------------');
+console.log('------------------------------------------');
+console.log('------------------------------------------');
+console.log('------------------------------------------');
 let b = new obj2();
 console.log('------------------------------------------');
 console.log('------------------------------------------');
@@ -27712,21 +27733,34 @@ function fn2(){
 const {eventEmitter} = require('./constants')
 
 class obj1{
-    constructor(){
+    attri =0;
+    obj22;
+    constructor(a1){
+        this.attri = a1; 
         console.log('Constructor started obj1');
         this.testFn();
+        this.obj22 = new obj2(this.attri);
     }
-
     testFn(){
         console.log('Test fn in constructor working obj1');
+    }
+
+    ppfa(){
+        console.log("Parent func attri:"+this.attri);
+    }
+    upa(p){
+        this.attri = p;
+        console.log("Parent func attri:"+this.attri);
     }
 }
 
 
 class obj2{
-    constructor(){
+    attri=2;
+    constructor(a2){
         console.log('Constructor started obj2');
         this.testFn();
+        this.attri = a2;
     }
 
     testFn(){
@@ -27736,6 +27770,15 @@ class obj2{
 
     emit(params) {
         eventEmitter.emit('module_from_class_emit'); 
+    }
+
+    pcfa(){
+        console.log("child func attri:"+this.attri);
+    }
+
+    ucfa(p){
+        this.attri = p;
+        console.log("child func attri:"+this.attri);
     }
 
 }
