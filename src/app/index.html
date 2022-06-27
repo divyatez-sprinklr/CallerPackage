@@ -10,10 +10,10 @@
       <title>Library</title>
       <link rel="stylesheet"
       type="text/css"
-      href="./style.css">
+      href="./css/style.css">
 <link rel="stylesheet"
       type="text/css"
-      href="./dialpad.css">
+      href="./css/dialpad.css">
 </head>
 
 <body>
@@ -54,10 +54,6 @@
                     </div>
                 </div>
                 </div>
-                <div class="flexRow flexGap">
-                    <button id="reset-button"  class="align-left buttons">Reset</button>
-                    <button id="dialpad-open-button"  class="align-left buttons">Dialpad</button>
-                </div>
                 <div class ='width25vw' id="Notification">
                 </div>
                 <div class ='width25vw'>
@@ -68,299 +64,22 @@
                 </br>
             </div>
         </div>
-      <script src="/dist/bundle.js"
-              type="module"></script>
-              <script src="./dialpad.js"></script>
+     
+              <script src="./js/dialpad.js"></script>
 
               <script>
-              
-              let callActive = 0;
-              let call_object = {};
-              var bc = new BroadcastChannel('gator_channel');
-              let minimized =0;
-              (()=>{
-              
-                bc.onmessage = (messageEvent) => {
-                  addToLogs(str(messageEvent.data));
-                  recieve(messageEvent.data);
-                }
-              
-              })()
-              
-              
-              
-              /// engine code //
-              setInterval(()=>{
-                  console.log("Arr:"+localStorage.getItem('window_ids'));
-                  console.log("Popup:"+localStorage.getItem('popup_assigned'));
-                  console.log("Popup call active: "+localStorage.getItem('popup_call_active'));
-              },10000);
-              
-              
-              let config = {};
-              
-              window.onbeforeunload = function(){
-                  unregisterWindow();
-              }
-              
-              
-              function unregisterWindow(){
-                  let arr = ustr(localStorage.getItem('window_ids'));
-                  let ind = arr.indexOf(config.id);
-                  arr.splice(ind,1);
-                  localStorage.setItem('window_ids',str(arr));
-              }
-              
-              registerWindow();
-              function registerWindow(){
-                  config.id = Date.now();
-              
-                  let arr = ustr(localStorage.getItem('window_ids'));
-                  if(arr==null)
-                      arr = [];
-                  arr.push(config.id);
-                  localStorage.setItem('window_ids',str(arr));
-              
-              }
-              
-              function str(str){
-                  return JSON.stringify(str);
-              }
-              
-              function ustr(str){
-                  return JSON.parse(str);
-              }
-              
-              
-              //heartbeat
-              
-              function reset(){
-                  localStorage.setItem('window_ids','null');
-                  localStorage.setItem('popup_call_active','null');
-                  localStorage.setItem('popup_assigned','null');
-              }
-              
-              function popupAssignment(){
-                  console.log('Popup assignment tried');
-                  console.log(localStorage.getItem('popup_assigned'));
-                  if(localStorage.getItem('popup_assigned') == 'null')
-                  {
-                      console.log('Popup doing');
-                      let popup_win = open('./popup.html', 'popup',"left=0, bottom=0, width=10px, height=10px");
-                      document.getElementById('content-box').click();
-                      console.log('Popup assignment called');
-                      localStorage.setItem('popup_assigned',"popup"+config.id);
-                      console.log('Created PopUp');
-                  }
-              }
-              
-              
-              function getCallObject(){
-                  //createCallObject();
-                  call_object.id = callIdCreate();
-                  call_object.reciver  = document.getElementById('number-area').value;
-              }
-              
-              
-              function addToLogs(str){
-                  document.getElementById('logs').innerHTML+= ` <div class='maxWidth border1B padding10 overflowScroll' '>${(new Date()).getHours()}:${(new Date()).getMinutes()}:${ (new Date()).getSeconds()}#${str}</div>`;
-              }
-              
-              
-              
-              function sendHandler(message){
-                  addToLogs(str(message));
-                  bc.postMessage(message);
-              }
-              
-              function send(message){
-                  console.log('send');
-                  message.to = 'popup';
-                  message.from = config.id;
-                  if(message.type == 'start_call'){
-                      console.log('send:start_call');
-                      if(!popupCallAvalaible()){
-                          addToLogs('Call already active');
-                      }
-                      else{
-                          getCallObject();
-                          message.call_object = call_object; 
-                          sendHandler(message);
-                      }
-                  }
-                  else if(message.type == 'end_call'){
-                      sendHandler(message);
-                  }
-              }
-              
-              function recieve(message){
-                  if(message.to!=config.id && message.to!='all')
-                      return;
-                  else if(message.type == 'ack_start_call'){
-                      console.log('recived:ack_start_call');
-                      //addToLogs(message);
-                     call_object =  message.call_object;
-                      toggleCallState();
-                  }
-                  else if(message.type == 'ack_end_call'){
-                      console.log('ack_end_call');
-                      //addToLogs(message);
-                      call_object =  message.call_object;
-                      toggleCallState();
-                  }
-                  else if(message.type == 'reset_refresh'){
-                      location.reload();
-                  }
-              }
-              
-              function popupCallAvalaible(){
-                  if(localStorage.getItem('popup_call_active')!='null'){
-                      return false;
-                  }
-                  return true;
-              }
-              
-              
-              document.getElementById('dial-button').addEventListener('click',()=>{
-                  console.log('Dial Button CLicked');
-                  toggleCallStateStart();
-              })
-              
-              document.getElementById('dialpad-caller-btn').addEventListener('click',()=>{
-                  console.log('Dial Button CLicked');
-                  toggleCallStateStart();
-              })
-              
-              function toggleCallStateStart(){
-                  console.log('Toggle call state' );
-                  popupAssignment();
-                  if(!popupCallAvalaible()&&callActive==0){
-                      sendNotification('Already Call Active!!')
-                      return;
-                  }
-                  setTimeout(()=>{
-                      if(callActive==0){
-                      console.log('sending call req');
-                      send({type:'start_call'});
-                  }
-                  else{
-                      console.log('sending call end req');
-                      send({type: 'end_call'});
-                  }
-                  },500);
-                  
-              }
-              
-              
-              function toggleCallState(){
-                  console.log('Toggle call state' );
-                  //if(!popupCallAvalaible()&&callActive==0)
-                  //    return;
-                  if(callActive==0){
-                      console.log('starting call after ack');
-                      //send({type:'start_call'});
-                      callActive =1;
-                      document.getElementById('dial-button').classList.replace('backgroundGreen','backgroundRed');
-                      document.getElementById('dialpad-caller-btn').classList.replace('backgroundGreen','backgroundRed');
-                      handleDialStart(call_object);
-                  }
-                  else{
-              
-                      console.log('ending call after ack');
-                      //send({type: 'end_call'});
-                      document.getElementById('dial-button').classList.replace('backgroundRed','backgroundGreen');
-                      document.getElementById('dialpad-caller-btn').classList.replace('backgroundRed','backgroundGreen');
-                      callActive =0;
-                      updateCallObject();
-                      makeIncative();
-              
-                  }
-              }
-              
-              
-              
-              
-              function updateCallObject(){
-                  let ack = call_object;
-                  if(document.getElementById(`${call_object.id}`)==null){
-                      addInCallBox(call_object);
-                  }else
-                      document.getElementById(`${call_object.id}`).innerHTML = `TO: ${ack.reciver} </br> STATUS: ${ack.status} </br> DURATION: ${ack.duration} </br> Started:${ack.started} </br> ID: ${ack.id} </br> `;
-              }   
-              
-              function addInCallBox(ack){
-                  document.getElementById('content-body-box').innerHTML = (`<div class='border1B padding10 borderRadius' id='${ack.id}'> TO: ${ack.reciver} </br> STATUS: ${ack.status} </br> DURATION: ${ack.duration} </br> Started:${ack.started} </br> ID: ${ack.id} </br> </div></br>`)+document.getElementById('content-body-box').innerHTML ;
-                  document.getElementById(`${call_object.id}`).classList.add('activeCallBox');
-              
-              }
-              
-              function makeIncative(){
-                  if(document.getElementById(`${call_object.id}`)!=null)
-                      document.getElementById(`${call_object.id}`).classList.remove('activeCallBox');
-              }
-              
-              function handleDialStart(ack){
-                  addInCallBox(ack);
-              }
-              
-              function createCallObject(ack){
-                  return {id: callIdCreate(), duration: "NA" , reciver:'', started: new Date(), status:'DIALER_STARTED'};
-              }
-              
-              function callIdCreate(){
-                  console.log('Id fired');
-                  return Number(new Date());
-              }
-              
-              
-              function sendNotification(message){
-                  document.getElementById('Notification').innerHTML =`<div class='backgroundRedLight padding10 borderRadius border1B'><p>${message}</p><div>`;
-                  setInterval(()=>{
-                      removeNotification();
-                  },2000);
-              }
-              
-              function removeNotification(){
-                  document.getElementById('Notification').innerHTML = '';
-              }
-              
-              
-              document.getElementById('reset-button').addEventListener('click',()=>{
-                  reset();
-                  send({to:'all',type:'reset_refresh'});
-                  location.reload();
-              
-              })
-              
-              document.getElementById('minimize-button').addEventListener('click',()=>{
-                  if(minimized==0){
-                      document.getElementById('dialpad-body').classList.add('hide');
-                      document.getElementById('dialpad-box').classList.remove('dialpad-height');
-                      minimized=1;
-                  }
-                  else{
-                      minimized=0;
-                      document.getElementById('dialpad-body').classList.remove('hide');
-                      document.getElementById('dialpad-box').classList.add('dialpad-height');
-              
-                  }
-              })
-              
-              document.getElementById('dialpad-close-button').addEventListener('click',()=>{
-                  console.log('clicked',true);
-                  document.getElementById('dialpad-body').classList.add('hide-visibility');
-                  document.getElementById('dialpad-box').classList.add('hide-visibility');
-              
-              })
-              
-              
-              document.getElementById('dialpad-open-button').addEventListener('click',()=>{
-                  console.log('clicked');
-                  document.getElementById('dialpad-body').classList.remove('hide-visibility');
-                  document.getElementById('dialpad-box').classList.remove('hide-visibility');
-              
-              })
-              
+                    // window.addEventListener('resize', ()=>{
+                    //     console.log(window.innerWidth);
+                    //     if(window.innerWidth<600){
+                    //         console.log('Triggered 1');
+                    //         document.getElementById('root-box').classList.replace('flexRow','flexCol');
+                    //     }
+                    //     else if(window.innerWidth>600){
+                    //         console.log('triggered 2');
+                    //         document.getElementById('root-box').classList.replace('flexCol','flexRow');
+                    //     }
+                    // });
+           
               </script>
               
 </body>

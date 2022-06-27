@@ -6,8 +6,9 @@ channel.onmessage = (messageEvent) => {
   console.log(messageEvent.data);
 }
 
+setInterval(()=>{
 channel.postMessage('sending from client');
-
+},1000);
 },{"./client_constants":2}],2:[function(require,module,exports){
 
 const EventEmitter = require('events');
