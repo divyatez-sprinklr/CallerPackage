@@ -90,5 +90,6 @@ class Popup {
   }
 }
 
-const popup = new Popup();
-popup.ping();
+
+module.exports = {Popup: Popup};
+

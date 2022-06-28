@@ -40,8 +40,39 @@ var CallerPackage = /*#__PURE__*/function () {
     key: "receiveEngine",
     value: function receiveEngine(message) {
       if (message.to == "ALL") {
-        if (message.type == "INFORM_SOCKET_CONNECTED") {} else if (message.type == "INFORM_SOCKET_DISCONNECTED") {} else if (message.type == "INFORM_CONNECTION_ONLINE") {} else if (message.type == "INFORM_CONNECTION_OFFLINE") {} else if (message.type == "ACK_OUTGOING_CALL_START") {} else if (message.type == "ACK_OUTGOING_CALL_END") {} else if (message.type == "INFORM_INCOMING_CALL") {} else if (message.type == "ACK_INCOMING_CALL_START") {} else if (message.type == "ACK_INCOMING_CALL_END") {} else if (message.type == "ACK_CALL_HOLD") {} else if (message.type == "ACK_CALL_MUTE") {} else if (message.type == "POPUP_CLOSED") {} else if (message.type == "PING_SESSION_DETAILS") {} else if (message.type == "PING_POPUP_ALIVE") {} else if (message.type == "ACK_SESSION_DETAILS") {} else {
+        if (message.type == "INFORM_SOCKET_CONNECTED") {
+          this.eventEmitter.emit(message.type);
+        } else if (message.type == "INFORM_SOCKET_DISCONNECTED") {
+          this.eventEmitter.emit(message.type);
+        } else if (message.type == "INFORM_CONNECTION_ONLINE") {
+          this.eventEmitter.emit(message.type);
+        } else if (message.type == "INFORM_CONNECTION_OFFLINE") {
+          this.eventEmitter.emit(message.type);
+        } else if (message.type == "ACK_OUTGOING_CALL_START") {
+          this.eventEmitter.emit(message.type);
+        } else if (message.type == "ACK_OUTGOING_CALL_END") {
+          this.eventEmitter.emit(message.type);
+        } else if (message.type == "INFORM_INCOMING_CALL") {
+          this.eventEmitter.emit(message.type);
+        } else if (message.type == "ACK_INCOMING_CALL_START") {
+          this.eventEmitter.emit(message.type);
+        } else if (message.type == "ACK_INCOMING_CALL_END") {
+          this.eventEmitter.emit(message.type);
+        } else if (message.type == "ACK_CALL_HOLD") {
+          this.eventEmitter.emit(message.type);
+        } else if (message.type == "ACK_CALL_MUTE") {
+          this.eventEmitter.emit(message.type);
+        } else if (message.type == "POPUP_CLOSED") {
+          this.eventEmitter.emit(message.type);
+        } else if (message.type == "PING_SESSION_DETAILS") {
+          this.eventEmitter.emit(message.type);
+        } else if (message.type == "PING_POPUP_ALIVE") {
+          this.eventEmitter.emit(message.type);
+        } else if (message.type == "ACK_SESSION_DETAILS") {
+          this.eventEmitter.emit(message.type);
+        } else {
           console.log("UNKNOWN TYPE: ", message);
+          this.eventEmitter.emit(message.type);
         }
       }
     }
@@ -599,5 +630,8 @@ var _require = require("../../CallerPackage/client/client.js"),
 
 var cp = new CallerPackage();
 cp.ping();
+cp.eventEmitter.on('DEBUG', function () {
+  console.log('Listened on parent using listener-emit');
+});
 
 },{"../../CallerPackage/client/client.js":1}]},{},[3]);

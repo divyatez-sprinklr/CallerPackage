@@ -5,10 +5,6 @@ cp.ping();
 
 
 
-document.getElementById('dialpad-caller-btn').addEventListener('click',()=>{
-
-});
-
-document.getElementById('dial-button').addEventListener('click',()=>{
-
-});
+cp.eventEmitter.on('DEBUG',()=>{
+    console.log('Listened on parent using listener-emit');
+})
