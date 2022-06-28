@@ -1,6 +1,20 @@
 const byId = function (id) {
   return document.getElementById(id);
 };
+
+var minimize = 0;
+document.getElementById('minimize-button').addEventListener('click',()=> {
+  if(minimize){
+    document.getElementById('dialpad-box').classList.add('dialpad-height');
+    document.getElementById('dialpad-body').classList.remove('hide');
+    minimize = 0;
+  }
+  else{
+    document.getElementById('dialpad-box').classList.remove('dialpad-height');
+    document.getElementById('dialpad-body').classList.add('hide');
+    minimize =1;
+   }
+})
 const dbc = byId("dialpad-btn-container");
 
 byId("dialpad-box").style.bottom = "0px";
@@ -63,7 +77,7 @@ dbc.innerHTML += `<div class="dialbtn-wrapper">
 
 dbc.innerHTML += `<div class="dialbtn-wrapper">
         <div class="dialpad-btn-caller backgroundGreen flexCol centerRow centerCol" id="dialpad-caller-btn">
-            <img class='dialpad-btn-caller-icon' src="./media/phone.png"/>
+            <img class='dialpad-btn-caller-icon' src="./resources/media/phone.png"/>
         </div>
     </div>`;
 
