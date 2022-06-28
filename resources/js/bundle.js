@@ -1,4 +1,98 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+"use strict";
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+//This is parent window
+// We need to add communication listeners and emittters for dialer window to listen
+// This all need to be done in an object, so that user can instantiate it.
+// Later remove constant also.
+var EventEmitter = require("events");
+
+var Message = /*#__PURE__*/_createClass(function Message(to, from, type, object) {
+  _classCallCheck(this, Message);
+
+  this.to = to;
+  this.from = from;
+  this.type = type;
+  this.object = object;
+});
+
+var CallerPackage = /*#__PURE__*/function () {
+  function CallerPackage() {
+    var _this = this;
+
+    _classCallCheck(this, CallerPackage);
+
+    this.eventEmitter = new EventEmitter();
+    this.channel = new BroadcastChannel("client_popup_channel");
+
+    this.channel.onmessage = function (messageEvent) {
+      _this.receiveEngine(messageEvent.data);
+    };
+  }
+
+  _createClass(CallerPackage, [{
+    key: "receiveEngine",
+    value: function receiveEngine(message) {
+      if (message.to == "ALL") {
+        if (message.type == "INFORM_SOCKET_CONNECTED") {} else if (message.type == "INFORM_SOCKET_DISCONNECTED") {} else if (message.type == "INFORM_CONNECTION_ONLINE") {} else if (message.type == "INFORM_CONNECTION_OFFLINE") {} else if (message.type == "ACK_OUTGOING_CALL_START") {} else if (message.type == "ACK_OUTGOING_CALL_END") {} else if (message.type == "INFORM_INCOMING_CALL") {} else if (message.type == "ACK_INCOMING_CALL_START") {} else if (message.type == "ACK_INCOMING_CALL_END") {} else if (message.type == "ACK_CALL_HOLD") {} else if (message.type == "ACK_CALL_MUTE") {} else if (message.type == "POPUP_CLOSED") {} else if (message.type == "PING_SESSION_DETAILS") {} else if (message.type == "PING_POPUP_ALIVE") {} else if (message.type == "ACK_SESSION_DETAILS") {} else {
+          console.log("UNKNOWN TYPE: ", message);
+        }
+      }
+    }
+  }, {
+    key: "sendEngine",
+    value: function sendEngine(message) {
+      console.log("Sending");
+      this.channel.postMessage("Posting from obj");
+
+      if (message.type == "REQUEST_OUTGOING_CALL_START") {
+        this.postHandler(message);
+      } else if (message.type == "REQUEST_OUTGOING_CALL_END") {
+        this.postHandler(message);
+      } else if (message.type == "REQUEST_INCOMING_CALL_START") {
+        this.postHandler(message);
+      } else if (message.type == "REQUEST_INCOMING_CALL_END") {
+        this.postHandler(message);
+      } else if (message.type == "REQUEST_CALL_HOLD") {
+        this.postHandler(message);
+      } else if (message.type == "REQUEST_CALL_MUTE") {
+        this.postHandler(message);
+      } else if (message.type == "REQUEST_SESSION_DETAILS") {
+        this.postHandler(message);
+      }
+    }
+  }, {
+    key: "postHandler",
+    value: function postHandler(message) {
+      this.channel.postMessage(message);
+    }
+  }, {
+    key: "ping",
+    value: function ping() {
+      var _this2 = this;
+
+      setInterval(function () {
+        console.log("client: pinging...");
+
+        _this2.channel.postMessage(new Message("ALL", "CLIENT", "DEBUG", "sending from client"));
+      }, 2500);
+    }
+  }]);
+
+  return CallerPackage;
+}();
+
+module.exports = {
+  CallerPackage: CallerPackage
+};
+
+},{"events":2}],2:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -497,58 +591,13 @@ function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
   }
 }
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 "use strict";
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _require = require("../../CallerPackage/client/client.js"),
+    CallerPackage = _require.CallerPackage;
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+var cp = new CallerPackage();
+cp.ping();
 
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-// const {eventEmitter,channel} = require('./client_constants');
-// setInterval(()=>{
-// channel.postMessage('sending from client');
-// },1000);
-//This is parent window 
-// We need to add communication listeners and emittters for dialer window to listen 
-// This all need to be done in an object, so that user can instantiate it.
-// Later remove constant also.
-var CallPackage = /*#__PURE__*/function () {
-  function CallPackage() {
-    _classCallCheck(this, CallPackage);
-
-    var EventEmitter = require('events');
-
-    this.eventEmitter = new EventEmitter();
-    this.channel = new BroadcastChannel('window_popup_channel');
-
-    this.channel.onmessage = function (messageEvent) {
-      console.log(messageEvent.data);
-    };
-  }
-
-  _createClass(CallPackage, [{
-    key: "recieveEngine",
-    value: function recieveEngine(message) {
-      console.log('Recieve Called' + message);
-
-      if (message.to == 'ALL') {} else if (message.type == '') {}
-    }
-  }, {
-    key: "sendEngine",
-    value: function sendEngine(message) {
-      console.log('Sending');
-      this.channel.postMessage('Posting from obj');
-    }
-  }]);
-
-  return CallPackage;
-}();
-
-var CP = new CallPackage();
-setInterval(function () {
-  CP.sendEngine("");
-}, 1000);
-
-},{"events":1}]},{},[2]);
+},{"../../CallerPackage/client/client.js":1}]},{},[3]);

@@ -1,4 +1,113 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+"use strict";
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/* Here we need to make logic for popup alongside of jsSip. 
+No need for making it object oriented . Just write it normally.
+We do can divide functions in modules for cleanliness. */
+// const {eventEmitter,channel} = require('./popup_constants');
+var EventEmitter = require("events");
+
+var Message = /*#__PURE__*/_createClass(function Message(to, from, type, object) {
+  _classCallCheck(this, Message);
+
+  this.to = to;
+  this.from = from;
+  this.type = type;
+  this.object = object;
+});
+
+var Popup = /*#__PURE__*/function () {
+  function Popup() {
+    var _this = this;
+
+    _classCallCheck(this, Popup);
+
+    this.eventEmitter = new EventEmitter();
+    this.channel = new BroadcastChannel("client_popup_channel");
+
+    this.channel.onmessage = function (messageEvent) {
+      _this.receiveEngine(messageEvent.data);
+    };
+  }
+
+  _createClass(Popup, [{
+    key: "receiveEngine",
+    value: function receiveEngine(message) {
+      if (message.to == "ALL" || message.to == "POPUP") {
+        if (message.type == "REQUEST_OUTGOING_CALL_START") {} else if (message.type == "REQUEST_OUTGOING_CALL_END") {} else if (message.type == "REQUEST_INCOMING_CALL_START") {} else if (message.type == "REQUEST_INCOMING_CALL_END") {} else if (message.type == "REQUEST_CALL_HOLD") {} else if (message.type == "REQUEST_CALL_MUTE") {} else if (message.type == "REQUEST_SESSION_DETAILS") {} else {
+          console.log("UNKNOWN TYPE: ", message);
+        }
+      }
+    }
+  }, {
+    key: "sendEngine",
+    value: function sendEngine(message) {
+      console.log("Sending from popup");
+      this.channel.postMessage("Posting from popup");
+
+      if (message.type == "INFORM_SOCKET_CONNECTED") {
+        this.postHandler(message);
+      } else if (message.type == "INFORM_SOCKET_DISCONNECTED") {
+        this.postHandler(message);
+      } else if (message.type == "INFORM_CONNECTION_ONLINE") {
+        this.postHandler(message);
+      } else if (message.type == "INFORM_CONNECTION_OFFLINE") {
+        this.postHandler(message);
+      } else if (message.type == "INFORM_INCOMING_CALL") {
+        this.postHandler(message);
+      } else if (message.type == "ACK_OUTGOING_CALL_START") {
+        this.postHandler(message);
+      } else if (message.type == "ACK_OUTGOING_CALL_END") {
+        this.postHandler(message);
+      } else if (message.type == "ACK_INCOMING_CALL_START") {
+        this.postHandler(message);
+      } else if (message.type == "ACK_INCOMING_CALL_END") {
+        this.postHandler(message);
+      } else if (message.type == "ACK_CALL_HOLD") {
+        this.postHandler(message);
+      } else if (message.type == "ACK_CALL_MUTE") {
+        this.postHandler(message);
+      } else if (message.type == "POPUP_CLOSED") {
+        this.postHandler(message);
+      } else if (message.type == "PING_SESSION_DETAILS") {
+        this.postHandler(message);
+      } else if (message.type == "PING_POPUP_ALIVE") {
+        this.postHandler(message);
+      } else if (message.type == "ACK_SESSION_DETAILS") {
+        this.postHandler(message);
+      }
+    }
+  }, {
+    key: "postHandler",
+    value: function postHandler(message) {
+      this.channel.postMessage(message);
+    }
+  }, {
+    key: "ping",
+    value: function ping() {
+      var _this2 = this;
+
+      setInterval(function () {
+        console.log("popup: pinging...");
+
+        _this2.channel.postMessage(new Message("ALL", "POPUP", "DEBUG", "sending from popup"));
+      }, 2500);
+    }
+  }]);
+
+  return Popup;
+}();
+
+var popup = new Popup();
+popup.ping();
+
+},{"events":2}],2:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -497,40 +606,4 @@ function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
   }
 }
 
-},{}],2:[function(require,module,exports){
-"use strict";
-
-// Here we need to make logic for popup alongside of jssip. 
-// No need for making it object oriented . Just write it normally.
-// We do can divide functions in modules for cleaniness.
-var _require = require('./popup_constants'),
-    eventEmitter = _require.eventEmitter,
-    channel = _require.channel;
-
-channel.onmessage = function (messageEvent) {
-  console.log(messageEvent.data);
-};
-
-setInterval(function () {
-  channel.postMessage('sending from popup');
-}, 1000);
-
-function sendEngine(message) {}
-
-function recieveEngine(message) {} // JsSiP Here
-
-},{"./popup_constants":3}],3:[function(require,module,exports){
-"use strict";
-
-// Here constants are important.
-// Also add later the creds we can do give options to reset them from parent window.
-var EventEmitter = require('events');
-
-var eventEmitter = new EventEmitter();
-var channel = new BroadcastChannel('window_popup_channel');
-module.exports = {
-  eventEmitter: eventEmitter,
-  channel: channel
-};
-
-},{"events":1}]},{},[2]);
+},{}]},{},[1]);

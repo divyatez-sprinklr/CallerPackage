@@ -1,28 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 ​
+
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="theme-color" content="#000000">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color"
+          content="#000000">
     <title>Test JSSIP</title>
-    <script type="text/javascript" src="https://jssip.net/download/releases/jssip-3.2.11.js"></script>
+    <script type="text/javascript"
+            src="https://jssip.net/download/releases/jssip-3.2.11.js"></script>
 </head>
+
 <body>
     <label for="username">Username</label>
-    <input type="text" name="username" id="username" value="1000">
+    <input type="text"
+           name="username"
+           id="username"
+           value="1000">
     <label for="password">Password</label>
-    <input type="text" name="password" id="password" value="1000_client">
+    <input type="text"
+           name="password"
+           id="password"
+           value="1000_client">
     <label for="domain">Domain</label>
-    <input type="text" name="domain" id="domain" value="18.212.171.223">
-    <button id="connect_button" >Connect</button>
+    <input type="text"
+           name="domain"
+           id="domain"
+           value="18.212.171.223">
+    <button id="connect_button">Connect</button>
     <br>
     <br>
-    <audio id="remoteView" autoplay controls></audio>
-    <button id="ans_button" onclick="answer()">Answer</button>
-    <button id="decline_button" onclick="decline()">End</button>
+    <audio id="remoteView"
+           autoplay
+           controls></audio>
+    <button id="ans_button"
+            onclick="answer()">Answer</button>
+    <button id="decline_button"
+            onclick="decline()">End</button>
+
+    <script src="./creds.js"></script>
     <script type="text/javascript">
-        document.getElementById('connect_button').addEventListener('click',()=>{
+        document.getElementById('connect_button').addEventListener('click', () => {
             connect();
         });
         var remoteView = document.getElementById("remoteView");
@@ -51,14 +71,14 @@
             }
         }
         function connect() {
-            let sip = "1000";
-            let password = "1000_client";
-            let server_address = "18.212.171.223";
-           // wss://18.212.171.223:7443/ws
-            
+            let sip = USER;
+            let password = PASSWORD;
+            let server_address = SERVER_ADDRESS;
+            let port = PORT;
+
             var configuration = {
                 sockets: [
-                    new JsSIP.WebSocketInterface("wss://" + server_address + ":7443/ws")
+                    new JsSIP.WebSocketInterface("wss://" + server_address + ":" + port)
                 ],
                 uri: "sip:" + sip + "@" + server_address,
                 authorization_user: sip,
@@ -129,4 +149,5 @@
         //document.addEventListener("DOMContentLoaded", connect);
     </script>
 </body>
+
 </html>
