@@ -5,7 +5,9 @@
   "description": "Caller Package",
   "main": "./src/app.js",
   "scripts": {
-    "build": "browserify ./src/app.js > ./dist/bundle.js -t babelify"
+    "command1": "browserify src/popup/popup.js -o src/child_bundle.js -t babelify",
+    "command2": "browserify src/client/client.js -o src/parent_bundle.js -t babelify",
+    "build": "npm run command1 & npm run command2"
   },
   "repository": {
     "type": "git",

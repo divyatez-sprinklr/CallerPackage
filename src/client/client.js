@@ -13,7 +13,7 @@
 // Later remove constant also.
 
 
-class   CallPackage{
+class CallPackage{
 
     constructor(){
         const EventEmitter = require('events');
@@ -23,20 +23,92 @@ class   CallPackage{
             console.log(messageEvent.data);
         }
     }
-    recieveEngine(message){
-        console.log('Recieve Called'+message);
+    receiveEngine(message){
+        console.log('Receive Called'+message);
         if(message.to == 'ALL'){
+            if(message.type == 'INFORM_SOCKET_CONNECTED'){
 
-        }
-        else if(message.type == ''){
+            }
+            else if(message.type == 'INFORM_SOCKET_DISCONNECTED'){
 
+            }
+            else if(message.type == 'INFORM_CONNECTION_ONLINE'){
+
+            }
+            else if(message.type == 'INFORM_CONNECTION_OFFLINE'){
+
+            }
+            else if(message.type == 'ACK_OUTGOING_CALL_START'){
+
+            }
+            else if(message.type == 'ACK_OUTGOING_CALL_END'){
+
+            }
+            else if(message.type == 'INFORM_INCOMING_CALL'){
+
+            }
+            else if(message.type == 'ACK_INCOMING_CALL_START'){
+
+            }
+            else if(message.type == 'ACK_INCOMING_CALL_END'){
+
+            }
+            else if(message.type == 'ACK_CALL_HOLD'){
+
+            }
+            else if(message.type == 'ACK_CALL_MUTE'){
+
+            }
+            else if(message.type == 'POPUP_CLOSED'){
+
+            }
+            else if(message.type == 'PING_SESSION_DETAILS'){
+
+            }
+            else if(message.type == 'PING_POPUP_ALIVE'){
+
+            }
+            else if(message.type == 'ACK_SESSION_DETAILS'){
+
+            }
+            else {
+                console.log('UNKNOWN TYPE: ', message);
+            }
+            
         }
         
     }
-
+        
     sendEngine(message){
         console.log('Sending');
         this.channel.postMessage('Posting from obj');
+        
+        if(message.type == 'REQUEST_OUTGOING_CALL_START'){
+            this.postHandler(message);
+        }
+        else if(message.type == 'REQUEST_OUTGOING_CALL_END'){
+            this.postHandler(message);
+        }
+        else if(message.type == 'REQUEST_INCOMING_CALL_START'){
+            this.postHandler(message);
+        }
+        else if(message.type == 'REQUEST_INCOMING_CALL_END'){
+            this.postHandler(message);
+        }
+        else if(message.type == 'REQUEST_CALL_HOLD'){
+            this.postHandler(message);
+        }
+        else if(message.type == 'REQUEST_CALL_MUTE'){
+            this.postHandler(message);
+        }
+        else if(message.type == 'REQUEST_SESSION_DETAILS'){
+            this.postHandler(message);
+        }
+
+    }
+
+    postHandler(message) {
+        this.channel.postMessage(message);
     }
 
 }

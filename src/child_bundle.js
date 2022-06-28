@@ -1,43 +1,4 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-// Here we need to make logic for popup alongside of jssip. 
-// No need for making it object oriented . Just write it normally.
-// We do can divide functions in modules for cleaniness.
-const {eventEmitter,channel} = require('./popup_constants');
-
-
-channel.onmessage = (messageEvent) => {
-  console.log(messageEvent.data);
-}
-
-setInterval(()=>{
-channel.postMessage('sending from popup');
-},1000);
-
-
-
-function sendEngine(message){
-
-}
-
-function recieveEngine(message){
-
-}
-
-// JsSiP Here
-},{"./popup_constants":2}],2:[function(require,module,exports){
-
-// Here constants are important.
-// Also add later the creds we can do give options to reset them from parent window.
-
-const EventEmitter = require('events');
-const eventEmitter = new EventEmitter();
-const channel = new BroadcastChannel('window_popup_channel');
-
-module.exports = {eventEmitter: eventEmitter, channel: channel};
-
-
-
-},{"events":3}],3:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -536,4 +497,40 @@ function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
   }
 }
 
-},{}]},{},[1]);
+},{}],2:[function(require,module,exports){
+"use strict";
+
+// Here we need to make logic for popup alongside of jssip. 
+// No need for making it object oriented . Just write it normally.
+// We do can divide functions in modules for cleaniness.
+var _require = require('./popup_constants'),
+    eventEmitter = _require.eventEmitter,
+    channel = _require.channel;
+
+channel.onmessage = function (messageEvent) {
+  console.log(messageEvent.data);
+};
+
+setInterval(function () {
+  channel.postMessage('sending from popup');
+}, 1000);
+
+function sendEngine(message) {}
+
+function recieveEngine(message) {} // JsSiP Here
+
+},{"./popup_constants":3}],3:[function(require,module,exports){
+"use strict";
+
+// Here constants are important.
+// Also add later the creds we can do give options to reset them from parent window.
+var EventEmitter = require('events');
+
+var eventEmitter = new EventEmitter();
+var channel = new BroadcastChannel('window_popup_channel');
+module.exports = {
+  eventEmitter: eventEmitter,
+  channel: channel
+};
+
+},{"events":1}]},{},[2]);
