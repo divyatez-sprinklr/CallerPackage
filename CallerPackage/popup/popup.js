@@ -109,10 +109,12 @@ class Popup {
 
   handleCallHoldToogle(){
     this.JsSIP_Wrapper.toggleHold();
+    this.sendEngine(new Message("ALL","POPUP","ACK_CALL_HOLD",{}));
   }
 
   handleCallMuteToogle(){
     this.JsSIP_Wrapper.toggleMute();
+    this.sendEngine(new Message("ALL","POPUP","ACK_CALL_MUTE",{}));
   }
 
   handleSessionDetails(){
@@ -148,10 +150,7 @@ class Popup {
     this.eventEmitter.on('ACK_INCOMING_CALL_END',()=>{
       this.sendEngine(new Message("ALL", "POPUP", "ACK_INCOMING_CALL_END", this.callObject));
     });
-    this.eventEmitter.on('all',()=>{
-      console.log('LAllaal worked');
-    })
-    
+
   }
 
   receiveEngine(message) {
@@ -323,6 +322,31 @@ toggleHold(){
     (this.getLocalIsOnHold())?this.session.unhold():this.session.hold();
   }
 }
+
+putOnHold(){
+  if(this.session){
+    this.session.hold();
+  }
+}
+
+putOnUnHold(){
+  if(this.session){
+    this.session.unhold();
+  }
+}
+
+putOnMute(){
+  if(this.session){
+    this.session.mute();
+  }
+}
+
+putOnUnmute(){
+  if(this.session){
+    this.session.unmute();
+  }
+}
+
 
 toggleMute(){
   if(this.session){

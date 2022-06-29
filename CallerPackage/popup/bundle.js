@@ -152,11 +152,13 @@ var Popup = /*#__PURE__*/function () {
     key: "handleCallHoldToogle",
     value: function handleCallHoldToogle() {
       this.JsSIP_Wrapper.toggleHold();
+      this.sendEngine(new Message("ALL", "POPUP", "ACK_CALL_HOLD", {}));
     }
   }, {
     key: "handleCallMuteToogle",
     value: function handleCallMuteToogle() {
       this.JsSIP_Wrapper.toggleMute();
+      this.sendEngine(new Message("ALL", "POPUP", "ACK_CALL_MUTE", {}));
     }
   }, {
     key: "handleSessionDetails",
@@ -196,9 +198,6 @@ var Popup = /*#__PURE__*/function () {
       });
       this.eventEmitter.on('ACK_INCOMING_CALL_END', function () {
         _this2.sendEngine(new Message("ALL", "POPUP", "ACK_INCOMING_CALL_END", _this2.callObject));
-      });
-      this.eventEmitter.on('all', function () {
-        console.log('LAllaal worked');
       });
     }
   }, {
@@ -399,6 +398,34 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
     value: function toggleHold() {
       if (this.session) {
         this.getLocalIsOnHold() ? this.session.unhold() : this.session.hold();
+      }
+    }
+  }, {
+    key: "putOnHold",
+    value: function putOnHold() {
+      if (this.session) {
+        this.session.hold();
+      }
+    }
+  }, {
+    key: "putOnUnHold",
+    value: function putOnUnHold() {
+      if (this.session) {
+        this.session.unhold();
+      }
+    }
+  }, {
+    key: "putOnMute",
+    value: function putOnMute() {
+      if (this.session) {
+        this.session.mute();
+      }
+    }
+  }, {
+    key: "putOnUnmute",
+    value: function putOnUnmute() {
+      if (this.session) {
+        this.session.unmute();
       }
     }
   }, {
