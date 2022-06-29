@@ -625,13 +625,13 @@ function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
 },{}],3:[function(require,module,exports){
 "use strict";
 
-var _require = require("../../CallerPackage/client/client.js"),
-    CallerPackage = _require.CallerPackage;
+var CallerPackage = require("../../CallerPackage/client/client.js").CallerPackage;
 
 var cp = new CallerPackage();
 cp.ping();
 cp.eventEmitter.on('DEBUG', function () {
   console.log('Listened on parent using listener-emit');
 });
+console.log('11');
 
 },{"../../CallerPackage/client/client.js":1}]},{},[3]);
