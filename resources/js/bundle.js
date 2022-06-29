@@ -40,6 +40,8 @@ var CallerPackage = /*#__PURE__*/function () {
     key: "receiveEngine",
     value: function receiveEngine(message) {
       if (message.to == "ALL") {
+        console.log(message);
+
         if (message.type == "INFORM_SOCKET_CONNECTED") {
           this.eventEmitter.emit(message.type);
         } else if (message.type == "INFORM_SOCKET_DISCONNECTED") {
@@ -112,7 +114,7 @@ var CallerPackage = /*#__PURE__*/function () {
         console.log("client: pinging...");
 
         _this2.channel.postMessage(new Message("ALL", "CLIENT", "DEBUG", "sending from client"));
-      }, 2500);
+      }, 1000);
     }
   }]);
 

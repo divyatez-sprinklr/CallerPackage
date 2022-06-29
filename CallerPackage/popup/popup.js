@@ -29,7 +29,7 @@ class Popup {
     
     this.JsSIP_Wrapper = new JsSIP_Wrapper( this.eventEmitter,config);
     this.JsSIP_Wrapper.sample();
-    this.CallObject = {
+    this.callObject = {
       sender: "",
       receiver: "",
       startTime: "",
@@ -85,7 +85,7 @@ class Popup {
     mute(false);
   }
   handleOutgoingCallStart(callObject){
-      this.callObject.to = callObject.to;
+      this.callObject.sender = callObject.sender;
       this.callObject.startTime = Date.now().toString();
       this.JsSIP_Wrapper.call();
   }
@@ -107,41 +107,46 @@ class Popup {
     this.JsSIP_Wrapper.end();
   }
 
-  handleCallHold(){
+  handleCallHoldToogle(){
     this.JsSIP_Wrapper.toggleHold();
   }
 
-  handleCallMute(){
+  handleCallMuteToogle(){
     this.JsSIP_Wrapper.toggleMute();
+  }
+
+  handleSessionDetails(){
+    this.sendEngine(new Message("ALL","POPUP","ACK_SESSION_DETAILS",this.callObject));
   }
 
   handleEventEmitters(){
     this.eventEmitter.on('INFORM_SOCKET_CONNECTED',()=>{
-
+        this.sendEngine(new Message("ALL", "POPUP", "INFORM_SOCKET_CONNECTED", {}));
     });
     this.eventEmitter.on('INFORM_SOCKET_DISCONNECTED',()=>{
-
+      this.sendEngine(new Message("ALL", "POPUP", "INFORM_SOCKET_DISCONNECTED", {}));
     });
     this.eventEmitter.on('INFORM_INCOMING_CALL',()=>{
-
+      this.callObject.sender = this.JsSIP_Wrapper.getRemoteIdentity();
+      this.sendEngine(new Message("ALL", "POPUP", "INFORM_INCOMING_CALL",this.callObject));
     });
     this.eventEmitter.on('INFORM_REMOTE_HOLD',()=>{
-
+      this.sendEngine(new Message("ALL", "POPUP", "INFORM_REMOTE_HOLD", {}));
     });
     this.eventEmitter.on('INFORM_REMOTE_UNHOLD',()=>{
-
+      this.sendEngine(new Message("ALL", "POPUP", "INFORM_REMOTE_UNHOLD", {}));
     });
     this.eventEmitter.on('ACK_OUTGOING_CALL_START',()=>{
-
+      this.sendEngine(new Message("ALL", "POPUP", "ACK_OUTGOING_CALL_START", {}));
     });
     this.eventEmitter.on('ACK_OUTGOING_CALL_END',()=>{
-
+      this.sendEngine(new Message("ALL", "POPUP", "ACK_OUTGOING_CALL_END", this.callObject));
     });
     this.eventEmitter.on('ACK_INCOMING_CALL_START',()=>{
-
+      this.sendEngine(new Message("ALL", "POPUP", "ACK_INCOMING_CALL_START", {}));
     });
     this.eventEmitter.on('ACK_INCOMING_CALL_END',()=>{
-
+      this.sendEngine(new Message("ALL", "POPUP", "ACK_INCOMING_CALL_END", this.callObject));
     });
     this.eventEmitter.on('all',()=>{
       console.log('LAllaal worked');
@@ -160,9 +165,9 @@ class Popup {
       } else if (message.type == "REQUEST_INCOMING_CALL_END") {
         handleIncomingCallEnd();
       } else if (message.type == "REQUEST_CALL_HOLD") {
-        handleCallHold();
+        handleCallHoldToogle();
       } else if (message.type == "REQUEST_CALL_MUTE") {
-        handleCallMute();
+        handleCallMuteToogle();
       } else if (message.type == "REQUEST_SESSION_DETAILS") {
         handleSessionDetails();
       } else {
@@ -173,7 +178,7 @@ class Popup {
 
   sendEngine(message) {
     console.log("Sending from popup");
-    this.channel.postMessage("Posting from popup");
+    //this.channel.postMessage("Posting from popup");
 
     if (message.type == "INFORM_SOCKET_CONNECTED") {
       this.postHandler(message);
@@ -205,6 +210,10 @@ class Popup {
       this.postHandler(message);
     } else if (message.type == "ACK_SESSION_DETAILS") {
       this.postHandler(message);
+    } else if (message.type == "INFORM_REMOTE_HOLD") {
+      this.postHandler(message);
+    } else if (message.type == "INFORM_REMOTE_UNHOLD") {
+      this.postHandler(message);
     }
   }
 
@@ -213,14 +222,19 @@ class Popup {
   }
 
   ping() {
+    var types = ["INFORM_SOCKET_CONNECTED","INFORM_SOCKET_DISCONNECTED","INFORM_CONNECTION_ONLINE","INFORM_CONNECTION_OFFLINE","INFORM_INCOMING_CALL","ACK_OUTGOING_CALL_START","ACK_OUTGOING_CALL_END","ACK_INCOMING_CALL_START","ACK_INCOMING_CALL_END","ACK_CALL_HOLD","ACK_CALL_MUTE","POPUP_CLOSED","PING_SESSION_DETAILS","PING_POPUP_ALIVE","ACK_SESSION_DETAILS","INFORM_REMOTE_HOLD","INFORM_REMOTE_UNHOLD"]
+    let i=0;
     setInterval(() => {
+      i = i % types.length;
       console.log("popup: pinging...");
       this.channel.postMessage(
-        new Message("ALL", "POPUP", "DEBUG", "sending from popup")
+        new Message("ALL", "POPUP", types[i], "hello")
       );
-    }, 2500);
+      i++;
+    }, 1000);
   }
 }
+
 
 
 
@@ -372,19 +386,15 @@ toggleMute(){
           });
           this.session.on("ended", function (e) {
             this.eventEmitter.emit((this.session.direction == 'incoming')?'ACK_INCOMING_CALL_END':'ACK_OUTGOING_CALL_END');  
-            console.log("Call ended: ", e);
           });
           this.session.on("failed", function (e) {
-            this.eventEmitter.emit((this.session.direction == 'incoming')?'INFORM_INCOMING_CALL_FAILED':'INFORM_OUTGOING_CALL_FAILED');  
-              console.log("Call failed: ", e);
+            this.eventEmitter?.emit((this.session.direction == 'incoming')?'INFORM_INCOMING_CALL_FAILED':'INFORM_OUTGOING_CALL_FAILED');  
           });
           this.session.on("hold", function (e) {
             this.eventEmitter.emit('INFORM_REMOTE_HOLD');
-            console.log("Call failed: ", e);
           });
           this.session.on("unhold", function (e) {
             this.eventEmitter.emit('INFORM_REMOTE_UNHOLD');
-            console.log("Call failed: ", e);
           });
           this.session.on("peerconnection", function (e) {
               console.log("call peerconnection: ", e);
@@ -407,7 +417,7 @@ disconnect(){
 call(to){
   var eventHandlers = {
     'progress':   function(data){ },
-    'failed':     function(data){this.eventEmitter.emit('INFORM_OUTGOING_CALL_FAILED');},
+    'failed':     function(data){this.eventEmitter?.emit('INFORM_OUTGOING_CALL_FAILED');},
     'confirmed':  function(data){this.eventEmitter.emit('ACK_OUTGOING_CALL_START');},
     'ended':      function(data){this.eventEmitter.emit('ACK_OUTGOING_CALL_END');}
   };

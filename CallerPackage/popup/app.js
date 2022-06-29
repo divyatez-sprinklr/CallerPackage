@@ -8,3 +8,8 @@ popup.ping();
 popup.eventEmitter.on('',()=>{
 
 });
+
+// setTimeout(()=>{
+//     console.log('Trying');
+//     popup.JsSIP_Wrapper.call('sip:s13@sip13.zang.io');
+// },10000);
