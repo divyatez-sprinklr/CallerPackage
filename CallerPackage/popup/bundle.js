@@ -253,43 +253,7 @@ var Popup = /*#__PURE__*/function () {
       startTime: "",
       endTime: "",
       hold: false,
-      mute: false // get sender(){
-      //   this.sender;
-      // },
-      // get receiver(){
-      //   this.receiver;
-      // },
-      // get startTime(){
-      //   this.startTime;
-      // },
-      // get endTime(){
-      //   this.endTime;
-      // },
-      // get hold(){
-      //   this.hold;
-      // },
-      // get mute(){
-      //   this.mute;
-      // },
-      // set sender(sender){
-      //   this.sender = sender;
-      // },
-      // set receiver(receiver){
-      //   this.receiver = receiver;
-      // },
-      // set startTime(startTime){
-      //   this.startTime = startTime;
-      // },
-      // set endTime(endTime){
-      //   this.endTime = endTime;
-      // },
-      // set hold(hold){
-      //   this.hold = hold;
-      // },
-      // set mute(mute){
-      //   this.mute = mute;
-      // },
-
+      mute: false
     };
     this.handleEventEmitters();
   }
@@ -334,16 +298,28 @@ var Popup = /*#__PURE__*/function () {
       this.JsSIP_Wrapper.end();
     }
   }, {
-    key: "handleCallHoldToogle",
-    value: function handleCallHoldToogle() {
-      this.JsSIP_Wrapper.toggleHold();
+    key: "handleCallHold",
+    value: function handleCallHold() {
+      this.JsSIP_Wrapper.putOnHold();
       this.sendEngine(new Message("ALL", "POPUP", "ACK_CALL_HOLD", {}));
     }
   }, {
-    key: "handleCallMuteToogle",
-    value: function handleCallMuteToogle() {
-      this.JsSIP_Wrapper.toggleMute();
+    key: "handleCallUnhold",
+    value: function handleCallUnhold() {
+      this.JsSIP_Wrapper.putOnUnhold();
+      this.sendEngine(new Message("ALL", "POPUP", "ACK_CALL_UNHOLD", {}));
+    }
+  }, {
+    key: "handleCallMute",
+    value: function handleCallMute() {
+      this.JsSIP_Wrapper.putOnMute();
       this.sendEngine(new Message("ALL", "POPUP", "ACK_CALL_MUTE", {}));
+    }
+  }, {
+    key: "handleCallUnmute",
+    value: function handleCallUnmute() {
+      this.JsSIP_Wrapper.putOnUnmute();
+      this.sendEngine(new Message("ALL", "POPUP", "ACK_CALL_UNMUTE", {}));
     }
   }, {
     key: "handleSessionDetails",
@@ -398,9 +374,13 @@ var Popup = /*#__PURE__*/function () {
         } else if (message.type == "REQUEST_INCOMING_CALL_END") {
           handleIncomingCallEnd();
         } else if (message.type == "REQUEST_CALL_HOLD") {
-          handleCallHoldToogle();
+          handleCallHold();
+        } else if (message.type == "REQUEST_CALL_UNHOLD") {
+          handleCallUnhold();
         } else if (message.type == "REQUEST_CALL_MUTE") {
-          handleCallMuteToogle();
+          handleCallMute();
+        } else if (message.type == "REQUEST_CALL_UNMUTE") {
+          handleCallUnmute();
         } else if (message.type == "REQUEST_SESSION_DETAILS") {
           handleSessionDetails();
         } else {
@@ -589,28 +569,40 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
     key: "putOnHold",
     value: function putOnHold() {
       if (this.session) {
+        var _this$eventEmitter;
+
         this.session.hold();
+        (_this$eventEmitter = this.eventEmitter) === null || _this$eventEmitter === void 0 ? void 0 : _this$eventEmitter.emit('ACK_CALL_HOLD');
       }
     }
   }, {
     key: "putOnUnHold",
     value: function putOnUnHold() {
       if (this.session) {
+        var _this$eventEmitter2;
+
         this.session.unhold();
+        (_this$eventEmitter2 = this.eventEmitter) === null || _this$eventEmitter2 === void 0 ? void 0 : _this$eventEmitter2.emit('ACK_CALL_UNHOLD');
       }
     }
   }, {
     key: "putOnMute",
     value: function putOnMute() {
       if (this.session) {
+        var _this$eventEmitter3;
+
         this.session.mute();
+        (_this$eventEmitter3 = this.eventEmitter) === null || _this$eventEmitter3 === void 0 ? void 0 : _this$eventEmitter3.emit('ACK_CALL_MUTE');
       }
     }
   }, {
     key: "putOnUnmute",
     value: function putOnUnmute() {
       if (this.session) {
+        var _this$eventEmitter4;
+
         this.session.unmute();
+        (_this$eventEmitter4 = this.eventEmitter) === null || _this$eventEmitter4 === void 0 ? void 0 : _this$eventEmitter4.emit('ACK_CALL_UNMUTE');
       }
     }
   }, {
@@ -680,9 +672,9 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
           this.eventEmitter.emit(this.session.direction == 'incoming' ? 'ACK_INCOMING_CALL_END' : 'ACK_OUTGOING_CALL_END');
         });
         this.session.on("failed", function (e) {
-          var _this$eventEmitter;
+          var _this$eventEmitter5;
 
-          (_this$eventEmitter = this.eventEmitter) === null || _this$eventEmitter === void 0 ? void 0 : _this$eventEmitter.emit(this.session.direction == 'incoming' ? 'INFORM_INCOMING_CALL_FAILED' : 'INFORM_OUTGOING_CALL_FAILED');
+          (_this$eventEmitter5 = this.eventEmitter) === null || _this$eventEmitter5 === void 0 ? void 0 : _this$eventEmitter5.emit(this.session.direction == 'incoming' ? 'INFORM_INCOMING_CALL_FAILED' : 'INFORM_OUTGOING_CALL_FAILED');
         });
         this.session.on("hold", function (e) {
           this.eventEmitter.emit('INFORM_REMOTE_HOLD');
@@ -715,9 +707,9 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
       var eventHandlers = {
         'progress': function progress(data) {},
         'failed': function failed(data) {
-          var _this$eventEmitter2;
+          var _this$eventEmitter6;
 
-          (_this$eventEmitter2 = this.eventEmitter) === null || _this$eventEmitter2 === void 0 ? void 0 : _this$eventEmitter2.emit('INFORM_OUTGOING_CALL_FAILED');
+          (_this$eventEmitter6 = this.eventEmitter) === null || _this$eventEmitter6 === void 0 ? void 0 : _this$eventEmitter6.emit('INFORM_OUTGOING_CALL_FAILED');
         },
         'confirmed': function confirmed(data) {
           this.eventEmitter.emit('ACK_OUTGOING_CALL_START');

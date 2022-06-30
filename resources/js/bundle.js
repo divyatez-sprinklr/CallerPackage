@@ -34,6 +34,15 @@ var CallerPackage = /*#__PURE__*/function () {
     this.channel.onmessage = function (messageEvent) {
       _this.receiveEngine(messageEvent.data);
     };
+
+    this.callObject = {
+      sender: "",
+      receiver: "",
+      startTime: "",
+      endTime: "",
+      hold: false,
+      mute: false
+    };
   }
 
   _createClass(CallerPackage, [{
@@ -94,7 +103,11 @@ var CallerPackage = /*#__PURE__*/function () {
         this.postHandler(message);
       } else if (message.type == "REQUEST_CALL_HOLD") {
         this.postHandler(message);
+      } else if (message.type == "REQUEST_CALL_UNHOLD") {
+        this.postHandler(message);
       } else if (message.type == "REQUEST_CALL_MUTE") {
+        this.postHandler(message);
+      } else if (message.type == "REQUEST_CALL_UNMUTE") {
         this.postHandler(message);
       } else if (message.type == "REQUEST_SESSION_DETAILS") {
         this.postHandler(message);
@@ -104,6 +117,47 @@ var CallerPackage = /*#__PURE__*/function () {
     key: "postHandler",
     value: function postHandler(message) {
       this.channel.postMessage(message);
+    }
+  }, {
+    key: "call",
+    value: function call(receiver) {
+      this.callObject.receiver = receiver;
+      this.sendEngine(new Message(to, '', "REQUEST_OUTGOING_CALL_START", {}));
+    }
+  }, {
+    key: "endOut",
+    value: function endOut() {
+      this.sendEngine(new Message(to, '', "REQUEST_OUTGOING_CALL_END", {}));
+    }
+  }, {
+    key: "endIn",
+    value: function endIn() {
+      this.sendEngine(new Message(to, '', "REQUEST_INCOMING_CALL_END", {}));
+    }
+  }, {
+    key: "hold",
+    value: function hold() {
+      this.sendEngine(new Message(to, '', "REQUEST_CALL_HOLD", {}));
+    }
+  }, {
+    key: "unhold",
+    value: function unhold() {
+      this.sendEngine(new Message(to, '', "REQUEST_CALL_UNHOLD", {}));
+    }
+  }, {
+    key: "mute",
+    value: function mute() {
+      this.sendEngine(new Message(to, '', "REQUEST_CALL_MUTE", {}));
+    }
+  }, {
+    key: "unmute",
+    value: function unmute() {
+      this.sendEngine(new Message(to, '', "REQUEST_CALL_UNMUTE", {}));
+    }
+  }, {
+    key: "accept",
+    value: function accept() {
+      this.sendEngine(new Message(to, '', "REQUEST_INCOMING_CALL_START", {}));
     }
   }, {
     key: "ping",

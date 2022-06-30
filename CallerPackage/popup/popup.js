@@ -36,42 +36,6 @@ class Popup {
       endTime: "",
       hold: false,
       mute: false,
-      // get sender(){
-      //   this.sender;
-      // },
-      // get receiver(){
-      //   this.receiver;
-      // },
-      // get startTime(){
-      //   this.startTime;
-      // },
-      // get endTime(){
-      //   this.endTime;
-      // },
-      // get hold(){
-      //   this.hold;
-      // },
-      // get mute(){
-      //   this.mute;
-      // },
-      // set sender(sender){
-      //   this.sender = sender;
-      // },
-      // set receiver(receiver){
-      //   this.receiver = receiver;
-      // },
-      // set startTime(startTime){
-      //   this.startTime = startTime;
-      // },
-      // set endTime(endTime){
-      //   this.endTime = endTime;
-      // },
-      // set hold(hold){
-      //   this.hold = hold;
-      // },
-      // set mute(mute){
-      //   this.mute = mute;
-      // },
     };
     this.handleEventEmitters();
   }
@@ -107,15 +71,27 @@ class Popup {
     this.JsSIP_Wrapper.end();
   }
 
-  handleCallHoldToogle(){
-    this.JsSIP_Wrapper.toggleHold();
+
+  handleCallHold(){
+    this.JsSIP_Wrapper.putOnHold();
     this.sendEngine(new Message("ALL","POPUP","ACK_CALL_HOLD",{}));
   }
 
-  handleCallMuteToogle(){
-    this.JsSIP_Wrapper.toggleMute();
+  handleCallUnhold(){
+    this.JsSIP_Wrapper.putOnUnhold();
+    this.sendEngine(new Message("ALL","POPUP","ACK_CALL_UNHOLD",{}));
+  }
+
+  handleCallMute(){
+    this.JsSIP_Wrapper.putOnMute();
     this.sendEngine(new Message("ALL","POPUP","ACK_CALL_MUTE",{}));
   }
+
+  handleCallUnmute(){
+    this.JsSIP_Wrapper.putOnUnmute();
+    this.sendEngine(new Message("ALL","POPUP","ACK_CALL_UNMUTE",{}));
+  }
+
 
   handleSessionDetails(){
     this.sendEngine(new Message("ALL","POPUP","ACK_SESSION_DETAILS",this.callObject));
@@ -164,9 +140,13 @@ class Popup {
       } else if (message.type == "REQUEST_INCOMING_CALL_END") {
         handleIncomingCallEnd();
       } else if (message.type == "REQUEST_CALL_HOLD") {
-        handleCallHoldToogle();
+        handleCallHold();
+      } else if (message.type == "REQUEST_CALL_UNHOLD") {
+        handleCallUnhold();
       } else if (message.type == "REQUEST_CALL_MUTE") {
-        handleCallMuteToogle();
+        handleCallMute();
+      } else if (message.type == "REQUEST_CALL_UNMUTE") {
+        handleCallUnmute();
       } else if (message.type == "REQUEST_SESSION_DETAILS") {
         handleSessionDetails();
       } else {
@@ -326,24 +306,29 @@ toggleHold(){
 putOnHold(){
   if(this.session){
     this.session.hold();
+    this.eventEmitter?.emit('ACK_CALL_HOLD');
   }
 }
 
 putOnUnHold(){
   if(this.session){
     this.session.unhold();
+    this.eventEmitter?.emit('ACK_CALL_UNHOLD');
   }
 }
 
 putOnMute(){
   if(this.session){
     this.session.mute();
+    this.eventEmitter?.emit('ACK_CALL_MUTE');
+
   }
 }
 
 putOnUnmute(){
   if(this.session){
     this.session.unmute();
+    this.eventEmitter?.emit('ACK_CALL_UNMUTE');
   }
 }
 

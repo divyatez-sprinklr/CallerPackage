@@ -21,6 +21,14 @@ class CallerPackage {
     this.channel.onmessage = (messageEvent) => {
       this.receiveEngine(messageEvent.data);
     };
+    this.callObject = {
+      sender: "",
+      receiver: "",
+      startTime: "",
+      endTime: "",
+      hold: false,
+      mute: false,  
+    }
   }
 
   receiveEngine(message) {
@@ -77,7 +85,11 @@ class CallerPackage {
       this.postHandler(message);
     } else if (message.type == "REQUEST_CALL_HOLD") {
       this.postHandler(message);
-    } else if (message.type == "REQUEST_CALL_MUTE") {
+    } else if (message.type == "REQUEST_CALL_UNHOLD") {
+      this.postHandler(message);
+    }  else if (message.type == "REQUEST_CALL_MUTE") {
+      this.postHandler(message);
+    }  else if (message.type == "REQUEST_CALL_UNMUTE") {
       this.postHandler(message);
     } else if (message.type == "REQUEST_SESSION_DETAILS") {
       this.postHandler(message);
@@ -87,6 +99,42 @@ class CallerPackage {
   postHandler(message) {
     this.channel.postMessage(message);
   }
+
+
+  call(receiver){
+      this.callObject.receiver = receiver;
+      this.sendEngine(new Message(to,'',"REQUEST_OUTGOING_CALL_START",{}));
+  }
+
+  endOut(){
+    this.sendEngine(new Message(to,'',"REQUEST_OUTGOING_CALL_END",{}));
+  }
+
+  endIn(){
+    this.sendEngine(new Message(to,'',"REQUEST_INCOMING_CALL_END",{}));
+  }
+
+  hold(){
+    this.sendEngine(new Message(to,'',"REQUEST_CALL_HOLD",{}));
+  }
+
+  unhold(){
+    this.sendEngine(new Message(to,'',"REQUEST_CALL_UNHOLD",{}));
+  }
+
+
+  mute(){
+    this.sendEngine(new Message(to,'',"REQUEST_CALL_MUTE",{}));
+  }
+
+  unmute(){
+    this.sendEngine(new Message(to,'',"REQUEST_CALL_UNMUTE",{}));
+  }
+
+  accept(){
+    this.sendEngine(new Message(to,'',"REQUEST_INCOMING_CALL_START",{}));
+  }
+
 
   ping() {
     setInterval(() => {
