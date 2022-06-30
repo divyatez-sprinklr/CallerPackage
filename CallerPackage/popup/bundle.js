@@ -1,6 +1,12 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
 var _require = require('./popup'),
     Popup = _require.Popup; //const popup = new Popup({sip:'1000',password:'1000',server_address:'18.212.171.223',port:'7443/ws'});
 
@@ -10,12 +16,191 @@ var popup = new Popup({
   password: '10075',
   server_address: 'blr-sbc1.ozonetel.com',
   port: '442'
-});
-popup.ping();
+}); // popup.ping();
+
 popup.eventEmitter.on('', function () {}); // setTimeout(()=>{
 //     console.log('Trying');
 //     popup.JsSIP_Wrapper.call('sip:s13@sip13.zang.io');
 // },10000);
+
+var ConnectionChannel = /*#__PURE__*/function () {
+  function ConnectionChannel(func) {
+    _classCallCheck(this, ConnectionChannel);
+
+    this.connection;
+    this.textChannelStream;
+    this.exchange = [];
+    this.offer = {
+      description: "",
+      candidate: ""
+    };
+    this.answer = {
+      description: "",
+      candidate: ""
+    };
+    this.state = 0;
+    this.startWebRTC(func);
+    this.startOfferCreation();
+    setTimeout(function () {
+      submitOffer_Answer();
+    }, 5000);
+  }
+
+  _createClass(ConnectionChannel, [{
+    key: "onSuccess",
+    value: function onSuccess() {}
+  }, {
+    key: "onError",
+    value: function onError(error) {
+      console.error(error);
+    }
+  }, {
+    key: "str",
+    value: function str(obj) {
+      return JSON.stringify(obj);
+    }
+  }, {
+    key: "ustr",
+    value: function ustr(obj) {
+      return JSON.parse(obj);
+    }
+  }, {
+    key: "startWebRTC",
+    value: function startWebRTC(func) {
+      this.connection = new RTCPeerConnection({
+        iceServers: [{
+          urls: 'stun:stun.l.google.com:19302'
+        }, {
+          urls: "turn:openrelay.metered.ca:80",
+          username: "openrelayproject",
+          credential: "openrelayproject"
+        }, {
+          urls: "turn:openrelay.metered.ca:443",
+          username: "openrelayproject",
+          credential: "openrelayproject"
+        }, {
+          urls: "turn:openrelay.metered.ca:443?transport=tcp",
+          username: "openrelayproject",
+          credential: "openrelayproject"
+        }, {
+          url: 'turn:numb.viagenie.ca',
+          credential: 'muazkh',
+          username: 'webrtc@live.com'
+        }, {
+          url: 'turn:192.158.29.39:3478?transport=udp',
+          credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+          username: '28224511:1379330808'
+        }, {
+          url: 'turn:192.158.29.39:3478?transport=tcp',
+          credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+          username: '28224511:1379330808'
+        }, {
+          url: 'turn:turn.bistri.com:80',
+          credential: 'homeo',
+          username: 'homeo'
+        }, {
+          url: 'turn:turn.anyfirewall.com:443?transport=tcp',
+          credential: 'webrtc',
+          username: 'webrtc'
+        }]
+      });
+      this.textChannelStream = connection.createDataChannel('dataChannel');
+
+      connection.ondatachannel = function (e) {
+        var receiveChannel = e.channel;
+
+        receiveChannel.onmessage = function (e) {
+          func();
+        };
+
+        receiveChannel.onopen = function (e) {
+          console.log('Established data channel');
+        };
+
+        receiveChannel.onclose = function (e) {
+          return console.log("Closed Text Channel.");
+        };
+      };
+
+      connection.onicecandidate = function (event) {
+        if (event.candidate) {
+          exchange.push(str(event.candidate));
+        }
+      };
+    }
+  }, {
+    key: "sentOverDataStream",
+    value: function sentOverDataStream(message) {
+      textChannelStream.send(message);
+    }
+  }, {
+    key: "addIce",
+    value: function addIce(candidates) {
+      var messege = ustr(candidates);
+      messege.forEach(function (item) {
+        var candidate = JSON.parse(item);
+        connection.addIceCandidate(new RTCIceCandidate(candidate), onSuccess, onError);
+      });
+    }
+  }, {
+    key: "createIceOffer",
+    value: function createIceOffer() {
+      offer.candidate = str(exchange);
+      localStorage.setItem('sdp-webrtc-offer', str(offer));
+      console.log('Created Ice Offer :' + str(offer));
+    }
+  }, {
+    key: "createIceAnswer",
+    value: function createIceAnswer() {
+      answer.candidate = str(exchange);
+      localStorage.setItem('sdp-webrtc-answer', str(answer));
+      console.log('Create Ice Answer:' + str(answer));
+    }
+  }, {
+    key: "handleLocalDescription",
+    value: function handleLocalDescription(description) {
+      connection.setLocalDescription(description);
+
+      if (description.type === 'offer') {
+        offer.description = str(description);
+      } else {
+        answer.description = str(description);
+      }
+    }
+  }, {
+    key: "submitOffer_Answer",
+    value: function submitOffer_Answer() {
+      console.log('clicked');
+      var message;
+      message = ustr(localStorage.getItem('sdp-webrtc-answer'));
+      localStorage.setItem('sdp-webrtc-answer', null);
+
+      if (ustr(message.description).type == 'answer' && state === 1) {
+        console.log('Got answer');
+        connection.setRemoteDescription(new RTCSessionDescription(ustr(message.description)), function () {
+          addIce(message.candidate);
+        });
+      }
+    }
+  }, {
+    key: "startOfferCreation",
+    value: function startOfferCreation() {
+      console.log('Creating offer');
+      state = 1;
+      connection.createOffer().then(handleLocalDescription)["catch"](onError);
+      setTimeout(createIceOffer, 1000);
+    }
+  }]);
+
+  return ConnectionChannel;
+}();
+
+function callFromParent(message) {
+  console.log("Received" + message);
+}
+
+var channel = new ConnectionChannel(callFromParent);
+channel.sentOverDataStream('Hahah From Popup');
 
 },{"./popup":2}],2:[function(require,module,exports){
 "use strict";
@@ -60,8 +245,8 @@ var Popup = /*#__PURE__*/function () {
       _this.receiveEngine(messageEvent.data);
     };
 
-    this.JsSIP_Wrapper = new JsSIP_Wrapper(this.eventEmitter, config);
-    this.JsSIP_Wrapper.sample();
+    this.JsSIP_Wrapper = new JsSIP_Wrapper(this.eventEmitter, config); // this.JsSIP_Wrapper.sample();
+
     this.callObject = {
       sender: "",
       receiver: "",
@@ -124,7 +309,7 @@ var Popup = /*#__PURE__*/function () {
     value: function handleOutgoingCallStart(callObject) {
       this.callObject.sender = callObject.sender;
       this.callObject.startTime = Date.now().toString();
-      this.JsSIP_Wrapper.call();
+      this.JsSIP_Wrapper.call(this.callObject.sender);
     }
   }, {
     key: "handleOutgoingCallEnd",

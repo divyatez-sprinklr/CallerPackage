@@ -28,7 +28,7 @@ class Popup {
     };
     
     this.JsSIP_Wrapper = new JsSIP_Wrapper( this.eventEmitter,config);
-    this.JsSIP_Wrapper.sample();
+    // this.JsSIP_Wrapper.sample();
     this.callObject = {
       sender: "",
       receiver: "",
@@ -87,7 +87,7 @@ class Popup {
   handleOutgoingCallStart(callObject){
       this.callObject.sender = callObject.sender;
       this.callObject.startTime = Date.now().toString();
-      this.JsSIP_Wrapper.call();
+      this.JsSIP_Wrapper.call(this.callObject.sender);
   }
   
   handleOutgoingCallEnd(){
@@ -355,7 +355,7 @@ toggleMute(){
 }
 
 
-  connect() {
+connect() {
       let sip = this.config.sip;
       let password = this.config.password;
       let server_address = this.config.server_address;
@@ -458,4 +458,6 @@ call(to){
 
 
 module.exports = {Popup: Popup};
+
+
 
