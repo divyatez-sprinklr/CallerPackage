@@ -5,6 +5,7 @@ We do can divide functions in modules for cleanliness. */
 // const {eventEmitter,channel} = require('./popup_constants');
 
 const { throws } = require("assert");
+const { Console } = require("console");
 const EventEmitter = require("events");
 const JsSIP = require('jssip');
 class Message {
@@ -130,6 +131,7 @@ class Popup {
   }
 
   receiveEngine(message) {
+    console.log('Recieved:',message);
     if (message.to == "ALL" || message.to == "POPUP") {
       if (message.type == "REQUEST_OUTGOING_CALL_START") {
         handleOutgoingCallStart(message.object);

@@ -103,36 +103,36 @@ class CallerPackage {
 
   call(receiver){
       this.callObject.receiver = receiver;
-      this.sendEngine(new Message(to,'',"REQUEST_OUTGOING_CALL_START",{}));
+      this.sendEngine(new Message(receiver,'',"REQUEST_OUTGOING_CALL_START",{}));
   }
 
   endOut(){
-    this.sendEngine(new Message(to,'',"REQUEST_OUTGOING_CALL_END",{}));
+    this.sendEngine(new Message('ALL','',"REQUEST_OUTGOING_CALL_END",{}));
   }
 
   endIn(){
-    this.sendEngine(new Message(to,'',"REQUEST_INCOMING_CALL_END",{}));
+    this.sendEngine(new Message('ALL','',"REQUEST_INCOMING_CALL_END",{}));
   }
 
   hold(){
-    this.sendEngine(new Message(to,'',"REQUEST_CALL_HOLD",{}));
+    this.sendEngine(new Message('ALL','',"REQUEST_CALL_HOLD",{}));
   }
 
   unhold(){
-    this.sendEngine(new Message(to,'',"REQUEST_CALL_UNHOLD",{}));
+    this.sendEngine(new Message('ALL','',"REQUEST_CALL_UNHOLD",{}));
   }
 
 
   mute(){
-    this.sendEngine(new Message(to,'',"REQUEST_CALL_MUTE",{}));
+    this.sendEngine(new Message('ALL','',"REQUEST_CALL_MUTE",{}));
   }
 
   unmute(){
-    this.sendEngine(new Message(to,'',"REQUEST_CALL_UNMUTE",{}));
+    this.sendEngine(new Message('ALL','',"REQUEST_CALL_UNMUTE",{}));
   }
 
   accept(){
-    this.sendEngine(new Message(to,'',"REQUEST_INCOMING_CALL_START",{}));
+    this.sendEngine(new Message('ALL','',"REQUEST_INCOMING_CALL_START",{}));
   }
 
 

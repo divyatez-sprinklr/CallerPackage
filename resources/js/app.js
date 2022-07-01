@@ -1,5 +1,19 @@
 var CallerPackage = require("../../CallerPackage/client/client.js").CallerPackage;
 var cp = new CallerPackage();
+
+
+document.getElementById('call').addEventListener('click',()=>{
+        console.log('Calling: '+(document.getElementById('phone-number').value));
+       cp.call(document.getElementById('phone-number').value); 
+       (document.getElementById('phone-number').value='');            
+})
+
+document.getElementById('hangup').addEventListener('click',()=>{
+    cp.endOut();
+})
+
+
+
 //cp.ping();
 // cp.eventEmitter.on('DEBUG', function () {
 //     console.log('Listened on parent using listener-emit');

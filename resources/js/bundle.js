@@ -122,42 +122,42 @@ var CallerPackage = /*#__PURE__*/function () {
     key: "call",
     value: function call(receiver) {
       this.callObject.receiver = receiver;
-      this.sendEngine(new Message(to, '', "REQUEST_OUTGOING_CALL_START", {}));
+      this.sendEngine(new Message(receiver, '', "REQUEST_OUTGOING_CALL_START", {}));
     }
   }, {
     key: "endOut",
     value: function endOut() {
-      this.sendEngine(new Message(to, '', "REQUEST_OUTGOING_CALL_END", {}));
+      this.sendEngine(new Message('ALL', '', "REQUEST_OUTGOING_CALL_END", {}));
     }
   }, {
     key: "endIn",
     value: function endIn() {
-      this.sendEngine(new Message(to, '', "REQUEST_INCOMING_CALL_END", {}));
+      this.sendEngine(new Message('ALL', '', "REQUEST_INCOMING_CALL_END", {}));
     }
   }, {
     key: "hold",
     value: function hold() {
-      this.sendEngine(new Message(to, '', "REQUEST_CALL_HOLD", {}));
+      this.sendEngine(new Message('ALL', '', "REQUEST_CALL_HOLD", {}));
     }
   }, {
     key: "unhold",
     value: function unhold() {
-      this.sendEngine(new Message(to, '', "REQUEST_CALL_UNHOLD", {}));
+      this.sendEngine(new Message('ALL', '', "REQUEST_CALL_UNHOLD", {}));
     }
   }, {
     key: "mute",
     value: function mute() {
-      this.sendEngine(new Message(to, '', "REQUEST_CALL_MUTE", {}));
+      this.sendEngine(new Message('ALL', '', "REQUEST_CALL_MUTE", {}));
     }
   }, {
     key: "unmute",
     value: function unmute() {
-      this.sendEngine(new Message(to, '', "REQUEST_CALL_UNMUTE", {}));
+      this.sendEngine(new Message('ALL', '', "REQUEST_CALL_UNMUTE", {}));
     }
   }, {
     key: "accept",
     value: function accept() {
-      this.sendEngine(new Message(to, '', "REQUEST_INCOMING_CALL_START", {}));
+      this.sendEngine(new Message('ALL', '', "REQUEST_INCOMING_CALL_START", {}));
     }
   }, {
     key: "ping",
@@ -683,7 +683,15 @@ function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
 
 var CallerPackage = require("../../CallerPackage/client/client.js").CallerPackage;
 
-var cp = new CallerPackage(); //cp.ping();
+var cp = new CallerPackage();
+document.getElementById('call').addEventListener('click', function () {
+  console.log('Calling: ' + document.getElementById('phone-number').value);
+  cp.call(document.getElementById('phone-number').value);
+  document.getElementById('phone-number').value = '';
+});
+document.getElementById('hangup').addEventListener('click', function () {
+  cp.endOut();
+}); //cp.ping();
 // cp.eventEmitter.on('DEBUG', function () {
 //     console.log('Listened on parent using listener-emit');
 // });
