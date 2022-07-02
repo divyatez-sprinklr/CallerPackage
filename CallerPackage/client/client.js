@@ -32,29 +32,23 @@ class CallerPackage {
   }
 
   receiveEngine(message) {
+    console.log(message);
     if (message.to == "ALL") {
-      console.log(message);
       if (message.type == "INFORM_SOCKET_CONNECTED") {
         this.eventEmitter.emit(message.type);
       } else if (message.type == "INFORM_SOCKET_DISCONNECTED") {
-        this.eventEmitter.emit(message.type);
-      } else if (message.type == "INFORM_CONNECTION_ONLINE") {
-        this.eventEmitter.emit(message.type);
-      } else if (message.type == "INFORM_CONNECTION_OFFLINE") {
         this.eventEmitter.emit(message.type);
       } else if (message.type == "ACK_OUTGOING_CALL_START") {
         this.eventEmitter.emit(message.type);
       } else if (message.type == "ACK_OUTGOING_CALL_END") {
         this.eventEmitter.emit(message.type);
-      } else if (message.type == "INFORM_INCOMING_CALL") {
-        this.eventEmitter.emit(message.type);
-      } else if (message.type == "ACK_INCOMING_CALL_START") {
-        this.eventEmitter.emit(message.type);
-      } else if (message.type == "ACK_INCOMING_CALL_END") {
-        this.eventEmitter.emit(message.type);
       } else if (message.type == "ACK_CALL_HOLD") {
         this.eventEmitter.emit(message.type);
+      } else if (message.type == "ACK_CALL_UNHOLD") {
+        this.eventEmitter.emit(message.type);
       } else if (message.type == "ACK_CALL_MUTE") {
+        this.eventEmitter.emit(message.type);
+      } else if (message.type == "ACK_CALL_UNMUTE") {
         this.eventEmitter.emit(message.type);
       } else if (message.type == "POPUP_CLOSED") {
         this.eventEmitter.emit(message.type);
@@ -76,10 +70,6 @@ class CallerPackage {
     if (message.type == "REQUEST_OUTGOING_CALL_START") {
       this.postHandler(message);
     } else if (message.type == "REQUEST_OUTGOING_CALL_END") {
-      this.postHandler(message);
-    } else if (message.type == "REQUEST_INCOMING_CALL_START") {
-      this.postHandler(message);
-    } else if (message.type == "REQUEST_INCOMING_CALL_END") {
       this.postHandler(message);
     } else if (message.type == "REQUEST_CALL_HOLD") {
       this.postHandler(message);

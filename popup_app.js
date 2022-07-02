@@ -6,7 +6,7 @@ const popup = new Popup({
   server_address: "18.212.171.223",
   port: "7443/ws",
 });
-popup.ping();
+//popup.ping();
 
 const call_button = document.getElementById("call-button");
 call_button.onclick = () => {
