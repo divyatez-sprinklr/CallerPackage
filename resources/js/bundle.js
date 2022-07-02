@@ -90,8 +90,7 @@ var CallerPackage = /*#__PURE__*/function () {
   }, {
     key: "sendEngine",
     value: function sendEngine(message) {
-      console.log("Sending");
-      this.channel.postMessage("Posting from obj");
+      console.log("Sending" + message.type);
 
       if (message.type == "REQUEST_OUTGOING_CALL_START") {
         this.postHandler(message);
@@ -122,7 +121,7 @@ var CallerPackage = /*#__PURE__*/function () {
     key: "call",
     value: function call(receiver) {
       this.callObject.receiver = receiver;
-      this.sendEngine(new Message(receiver, '', "REQUEST_OUTGOING_CALL_START", {}));
+      this.sendEngine(new Message('ALL', '', "REQUEST_OUTGOING_CALL_START", this.callObject));
     }
   }, {
     key: "endOut",
@@ -161,14 +160,9 @@ var CallerPackage = /*#__PURE__*/function () {
     }
   }, {
     key: "ping",
-    value: function ping() {
-      var _this2 = this;
-
-      setInterval(function () {
-        console.log("client: pinging...");
-
-        _this2.channel.postMessage(new Message("ALL", "CLIENT", "DEBUG", "sending from client"));
-      }, 1000);
+    value: function ping() {// setInterval(() => {
+      //   this.sendEngine(new Message('ALL','',"REQUEST_SESSION_DETAILS",this.callObject));
+      // }, 1000);
     }
   }]);
 
