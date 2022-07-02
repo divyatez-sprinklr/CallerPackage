@@ -7,5 +7,5 @@ document.getElementById("call-button").addEventListener("click", () => {
 });
 
 document.getElementById("end-button").addEventListener("click", () => {
-  callerPackage.endOut("4153260912");
+  callerPackage.endOut();
 });
