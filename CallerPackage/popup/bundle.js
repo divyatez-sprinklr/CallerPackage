@@ -1,19 +1,19 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 
-var _require = require('./popup'),
+var _require = require("./popup"),
     Popup = _require.Popup;
 
 var popup = new Popup({
-  sip: '1000',
-  password: '1000_client',
-  server_address: '18.212.171.223',
-  port: '7443/ws'
+  sip: "1000",
+  password: "1000_client",
+  server_address: "18.212.171.223",
+  port: "7443/ws"
 }); //const popup = new Popup({sip:'10075',password:'10075',server_address:'blr-sbc1.ozonetel.com',port:'442'});
 
 popup.ping();
-document.getElementById('call-btn').addEventListener('click', function () {
-  popup.JsSIP_Wrapper.callNumber('4153260912');
+document.getElementById("call-btn").addEventListener("click", function () {
+  popup.JsSIP_Wrapper.callNumber("4153260912");
 });
 
 },{"./popup":2}],2:[function(require,module,exports){
@@ -37,7 +37,7 @@ var _require2 = require("console"),
 
 var EventEmitter = require("events");
 
-var JsSIP = require('jssip');
+var JsSIP = require("jssip");
 
 var Message = /*#__PURE__*/_createClass(function Message(to, from, type, object) {
   _classCallCheck(this, Message);
@@ -54,7 +54,7 @@ var Popup = /*#__PURE__*/function () {
 
     _classCallCheck(this, Popup);
 
-    console.log('PopUp COnstructor');
+    console.log("PopUp COnstructor");
     this.eventEmitter = new EventEmitter();
     this.channel = new BroadcastChannel("client_popup_channel");
 
@@ -63,35 +63,35 @@ var Popup = /*#__PURE__*/function () {
     }; // this.handleEventEmitters();
 
 
-    this.eventEmitter.on('INFORM_SOCKET_CONNECTED', function () {
-      console.log('REcieved socket connected');
+    this.eventEmitter.on("INFORM_SOCKET_CONNECTED", function () {
+      console.log("REcieved socket connected");
 
       _this.sendEngine(new Message("ALL", "POPUP", "INFORM_SOCKET_CONNECTED", {}));
     });
-    this.eventEmitter.on('INFORM_SOCKET_DISCONNECTED', function () {
+    this.eventEmitter.on("INFORM_SOCKET_DISCONNECTED", function () {
       _this.sendEngine(new Message("ALL", "POPUP", "INFORM_SOCKET_DISCONNECTED", {}));
     });
-    this.eventEmitter.on('INFORM_INCOMING_CALL', function () {
+    this.eventEmitter.on("INFORM_INCOMING_CALL", function () {
       _this.callObject.sender = _this.JsSIP_Wrapper.getRemoteIdentity();
 
       _this.sendEngine(new Message("ALL", "POPUP", "INFORM_INCOMING_CALL", _this.callObject));
     });
-    this.eventEmitter.on('INFORM_REMOTE_HOLD', function () {
+    this.eventEmitter.on("INFORM_REMOTE_HOLD", function () {
       _this.sendEngine(new Message("ALL", "POPUP", "INFORM_REMOTE_HOLD", {}));
     });
-    this.eventEmitter.on('INFORM_REMOTE_UNHOLD', function () {
+    this.eventEmitter.on("INFORM_REMOTE_UNHOLD", function () {
       _this.sendEngine(new Message("ALL", "POPUP", "INFORM_REMOTE_UNHOLD", {}));
     });
-    this.eventEmitter.on('ACK_OUTGOING_CALL_START', function () {
+    this.eventEmitter.on("ACK_OUTGOING_CALL_START", function () {
       _this.sendEngine(new Message("ALL", "POPUP", "ACK_OUTGOING_CALL_START", {}));
     });
-    this.eventEmitter.on('ACK_OUTGOING_CALL_END', function () {
+    this.eventEmitter.on("ACK_OUTGOING_CALL_END", function () {
       _this.sendEngine(new Message("ALL", "POPUP", "ACK_OUTGOING_CALL_END", _this.callObject));
     });
-    this.eventEmitter.on('ACK_INCOMING_CALL_START', function () {
+    this.eventEmitter.on("ACK_INCOMING_CALL_START", function () {
       _this.sendEngine(new Message("ALL", "POPUP", "ACK_INCOMING_CALL_START", {}));
     });
-    this.eventEmitter.on('ACK_INCOMING_CALL_END', function () {
+    this.eventEmitter.on("ACK_INCOMING_CALL_END", function () {
       _this.sendEngine(new Message("ALL", "POPUP", "ACK_INCOMING_CALL_END", _this.callObject));
     });
     this.JsSIP_Wrapper = new JsSIP_Wrapper(this.eventEmitter, config); // this.JsSIP_Wrapper.sample();
@@ -109,17 +109,17 @@ var Popup = /*#__PURE__*/function () {
   _createClass(Popup, [{
     key: "resetCallObject",
     value: function resetCallObject() {
-      sender('');
-      receiver('');
-      startTime('');
-      endTime('');
+      sender("");
+      receiver("");
+      startTime("");
+      endTime("");
       hold(false);
       mute(false);
     }
   }, {
     key: "handleOutgoingCallStart",
     value: function handleOutgoingCallStart(callObject) {
-      console.log('HandleOutgoingCallStart');
+      console.log("HandleOutgoingCallStart");
       this.callObject.receiver = callObject.receiver;
       this.callObject.startTime = Date.now().toString();
       this.JsSIP_Wrapper.call(this.callObject.receiver);
@@ -129,7 +129,6 @@ var Popup = /*#__PURE__*/function () {
     value: function handleOutgoingCallEnd() {
       this.callObject.startTime = callObject.getStartTime();
       this.callObject.endTime = callObject.getEndTime();
-      ;
       this.JsSIP_Wrapper.end();
     }
   }, {
@@ -143,7 +142,6 @@ var Popup = /*#__PURE__*/function () {
     value: function handleIncomingCallEnd() {
       this.callObject.startTime = callObject.getStartTime();
       this.callObject.endTime = callObject.getEndTime();
-      ;
       this.JsSIP_Wrapper.end();
     }
   }, {
@@ -178,7 +176,7 @@ var Popup = /*#__PURE__*/function () {
   }, {
     key: "receiveEngine",
     value: function receiveEngine(message) {
-      console.log('Recieved:', message);
+      console.log("Recieved:", message);
 
       if (message.to == "ALL" || message.to == "POPUP") {
         if (message.type == "REQUEST_OUTGOING_CALL_START") {
@@ -293,8 +291,8 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
   _createClass(JsSIP_Wrapper, [{
     key: "sample",
     value: function sample() {
-      console.log('AAA');
-      document.getElementById('test').innerText = 'hahaha';
+      console.log("AAA");
+      document.getElementById("test").innerText = "hahaha";
     } ////////////////////
     // const JsSIP = require("JsSIP");
     // Debugging purpose :)
@@ -388,7 +386,7 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
     key: "addStreams",
     value: function addStreams() {
       this.call.connection.addEventListener("addstream", function (event) {
-        incomingCallAudio.pause();
+        this.incomingCallAudio.pause();
         this.remoteAudio.srcObject = event.stream;
         document.getElementById("localMedia").srcObject = session.connection.getLocalStreams()[0];
         document.getElementById("remoteMedia").srcObject = session.connection.getRemoteStreams()[0];
@@ -500,7 +498,7 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
             document.getElementById("remoteMedia").srcObject = session.connection.getRemoteStreams()[0];
           });
         } else {
-          console.log('Nahi lagaaaa..');
+          console.log("Nahi lagaaaa..");
         }
       });
     } // ________________________________________________________________
@@ -578,16 +576,16 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
     //     }
     // }
     // getLocalIdentity(){
-    //   return (this.session)?this.session.local_identity:''; 
+    //   return (this.session)?this.session.local_identity:'';
     // }
     // getRemoteIdentity(){
-    //   return (this.session)?this.session.remote_identity:''; 
+    //   return (this.session)?this.session.remote_identity:'';
     // }
     // getStartTime(){
-    //   return (this.session)?this.session.start_time:''; 
+    //   return (this.session)?this.session.start_time:'';
     // }
     // getEndTime(){
-    //   return (this.session)?this.session.end_time:''; 
+    //   return (this.session)?this.session.end_time:'';
     // }
     // sessionIsInProgress(){
     //     return this.session.isInProgress();
@@ -596,13 +594,13 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
     //   return this.session.isEstablished();
     // }
     // getLocalIsOnHold(){
-    //   return (this.session)?this.session.isOnHold()['local']:false; 
+    //   return (this.session)?this.session.isOnHold()['local']:false;
     // }
     // getRemoteIsOnHold(){
-    //   return (this.session)?this.session.isOnHold()['remote']:false; 
+    //   return (this.session)?this.session.isOnHold()['remote']:false;
     // }
     // getIsOnMute(){
-    //   return (this.session)?this.session.isMuted()['audio']:false; 
+    //   return (this.session)?this.session.isMuted()['audio']:false;
     // }
     // toggleHold(){
     //   if(this.session){
@@ -681,14 +679,14 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
     //               this.answer();
     //           });
     //           this.session.on("confirmed", function (e) {
-    //               this.eventEmitter.emit((this.session.direction == 'incoming')?'ACK_INCOMING_CALL_START':'ACK_OUTGOING_CALL_START');  
+    //               this.eventEmitter.emit((this.session.direction == 'incoming')?'ACK_INCOMING_CALL_START':'ACK_OUTGOING_CALL_START');
     //               console.log("call accepted/confirmed", e);
     //           });
     //           this.session.on("ended", function (e) {
-    //             this.eventEmitter.emit((this.session.direction == 'incoming')?'ACK_INCOMING_CALL_END':'ACK_OUTGOING_CALL_END');  
+    //             this.eventEmitter.emit((this.session.direction == 'incoming')?'ACK_INCOMING_CALL_END':'ACK_OUTGOING_CALL_END');
     //           });
     //           this.session.on("failed", function (e) {
-    //             this.eventEmitter?.emit((this.session.direction == 'incoming')?'INFORM_INCOMING_CALL_FAILED':'INFORM_OUTGOING_CALL_FAILED');  
+    //             this.eventEmitter?.emit((this.session.direction == 'incoming')?'INFORM_INCOMING_CALL_FAILED':'INFORM_OUTGOING_CALL_FAILED');
     //           });
     //           this.session.on("hold", function (e) {
     //             this.eventEmitter.emit('INFORM_REMOTE_HOLD');
