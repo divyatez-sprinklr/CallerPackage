@@ -389,8 +389,8 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
       this.call.connection.addEventListener("addstream", function (event) {
         this.incomingCallAudio.pause();
         this.remoteAudio.srcObject = event.stream;
-        document.getElementById("localMedia").srcObject = session.connection.getLocalStreams()[0];
-        document.getElementById("remoteMedia").srcObject = session.connection.getRemoteStreams()[0];
+        document.getElementById("localMedia").srcObject = this.call.connection.getLocalStreams()[0];
+        document.getElementById("remoteMedia").srcObject = this.call.connection.getRemoteStreams()[0];
       });
     }
   }, {
@@ -447,6 +447,8 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
         console.log(e);
       });
       this.phone.on("newRTCSession", function (event) {
+        var _this3 = this;
+
         console.log("newRTCSession", event);
         console.log("Direction: ", event.session.direction);
         this.call = event.session;
@@ -490,17 +492,20 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
         this.call.on("peerconnection", function (e) {
           console.log("call peerconnection: ", e);
         });
+        setTimeout(function () {
+          console.log("5sec has passed");
 
-        if (this.call) {
-          this.call.connection.addEventListener("addstream", function (event) {
-            this.incomingCallAudio.pause();
-            this.remoteAudio.srcObject = event.stream;
-            document.getElementById("localMedia").srcObject = session.connection.getLocalStreams()[0];
-            document.getElementById("remoteMedia").srcObject = session.connection.getRemoteStreams()[0];
-          });
-        } else {
-          console.log("Nahi lagaaaa..");
-        }
+          if (_this3.call) {
+            _this3.call.connection.addEventListener("addstream", function (event) {
+              this.incomingCallAudio.pause();
+              this.remoteAudio.srcObject = event.stream;
+              document.getElementById("localMedia").srcObject = this.call.connection.getLocalStreams()[0];
+              document.getElementById("remoteMedia").srcObject = this.call.connection.getRemoteStreams()[0];
+            });
+          } else {
+            console.log("Nahi lagaaaa..");
+          }
+        }, 5000);
       });
     } // ________________________________________________________________
 

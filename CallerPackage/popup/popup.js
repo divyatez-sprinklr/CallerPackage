@@ -363,9 +363,9 @@ class JsSIP_Wrapper {
       this.remoteAudio.srcObject = event.stream;
 
       document.getElementById("localMedia").srcObject =
-        session.connection.getLocalStreams()[0];
+        this.call.connection.getLocalStreams()[0];
       document.getElementById("remoteMedia").srcObject =
-        session.connection.getRemoteStreams()[0];
+        this.call.connection.getRemoteStreams()[0];
     });
   }
 
@@ -469,20 +469,25 @@ class JsSIP_Wrapper {
       this.call.on("peerconnection", function (e) {
         console.log("call peerconnection: ", e);
       });
-      if (this.call) {
-        this.call.connection.addEventListener("addstream", function (event) {
-          this.incomingCallAudio.pause();
 
-          this.remoteAudio.srcObject = event.stream;
+      setTimeout(() => {
+        console.log("5sec has passed");
 
-          document.getElementById("localMedia").srcObject =
-            session.connection.getLocalStreams()[0];
-          document.getElementById("remoteMedia").srcObject =
-            session.connection.getRemoteStreams()[0];
-        });
-      } else {
-        console.log("Nahi lagaaaa..");
-      }
+        if (this.call) {
+          this.call.connection.addEventListener("addstream", function (event) {
+            this.incomingCallAudio.pause();
+
+            this.remoteAudio.srcObject = event.stream;
+
+            document.getElementById("localMedia").srcObject =
+              this.call.connection.getLocalStreams()[0];
+            document.getElementById("remoteMedia").srcObject =
+              this.call.connection.getRemoteStreams()[0];
+          });
+        } else {
+          console.log("Nahi lagaaaa..");
+        }
+      }, 5000);
     });
   }
   // ________________________________________________________________
