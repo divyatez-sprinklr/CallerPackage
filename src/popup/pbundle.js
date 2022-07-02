@@ -32221,20 +32221,20 @@ module.exports = function whichTypedArray(value) {
 },{"available-typed-arrays":37,"call-bind/callBound":38,"es-abstract/helpers/getOwnPropertyDescriptor":43,"for-each":45,"has-tostringtag/shams":51,"is-typed-array":57}],100:[function(require,module,exports){
 "use strict";
 
-var _require = require('./PopupCaller/popup/popup'),
+var _require = require("./CallerPackage/popup/popup.js"),
     Popup = _require.Popup;
 
 var popup = new Popup({
-  sip: '1000',
-  password: '1000_client',
-  server_address: '18.212.171.223',
-  port: '7443/ws'
+  sip: "1000",
+  password: "1000_client",
+  server_address: "18.212.171.223",
+  port: "7443/ws"
 });
 popup.ping();
 var call_button = document.getElementById("call-button");
 
 call_button.onclick = function () {
-  popup.JsSIP_Wrapper.eventEmitter.emit('REQUEST_OUTGOING_CALL_START');
+  popup.JsSIP_Wrapper.eventEmitter.emit("REQUEST_OUTGOING_CALL_START");
 };
 
 var end_button = document.getElementById("end-button");
@@ -32243,4 +32243,4 @@ end_button.onclick = function () {
   popup.JsSIP_Wrapper.call_terminate();
 };
 
-},{"./PopupCaller/popup/popup":1}]},{},[100]);
+},{"./CallerPackage/popup/popup.js":1}]},{},[100]);

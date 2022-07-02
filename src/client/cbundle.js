@@ -176,18 +176,18 @@ module.exports = {
 },{"events":3}],2:[function(require,module,exports){
 "use strict";
 
-var _require = require('./PopupCaller/client/client'),
+var _require = require("./CallerPackage/client/client.js"),
     CallerPackage = _require.CallerPackage;
 
 var callerPackage = new CallerPackage();
-document.getElementById('call-button').addEventListener('click', function () {
-  callerPackage.call('4153260912');
+document.getElementById("call-button").addEventListener("click", function () {
+  callerPackage.call("4153260912");
 });
-document.getElementById('end-button').addEventListener('click', function () {
-  callerPackage.endOut('4153260912');
+document.getElementById("end-button").addEventListener("click", function () {
+  callerPackage.endOut("4153260912");
 });
 
-},{"./PopupCaller/client/client":1}],3:[function(require,module,exports){
+},{"./CallerPackage/client/client.js":1}],3:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
