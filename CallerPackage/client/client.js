@@ -1,6 +1,6 @@
 //This is parent window
 // We need to add communication listeners and emittters for dialer window to listen
-// This all need to be done in an object, so that user can instantiate it.
+// This PARENT need to be done in an object, so that user can instantiate it.
 // Later remove constant also.
 
 const EventEmitter = require("events");
@@ -33,7 +33,7 @@ class CallerPackage {
 
   receiveEngine(message) {
     console.log(message);
-    if (message.to == "ALL") {
+    if (message.to == "PARENT") {
       if (message.type == "INFORM_SOCKET_CONNECTED") {
         this.eventEmitter.emit(message.type);
       } else if (message.type == "INFORM_SOCKET_DISCONNECTED") {
@@ -66,7 +66,7 @@ class CallerPackage {
   }
 
   sendEngine(message) {
-    console.log("Sending"+message.type);
+    console.log("Sending : "+message.type);
     if (message.type == "REQUEST_OUTGOING_CALL_START") {
       this.postHandler(message);
     } else if (message.type == "REQUEST_OUTGOING_CALL_END") {
@@ -91,42 +91,42 @@ class CallerPackage {
 
   call(receiver){
       this.callObject.receiver = receiver;
-      this.sendEngine(new Message('ALL','',"REQUEST_OUTGOING_CALL_START",this.callObject));
+      this.sendEngine(new Message('POPUP','PARENT',"REQUEST_OUTGOING_CALL_START",this.callObject));
   }
 
   endOut(){
-    this.sendEngine(new Message('ALL','',"REQUEST_OUTGOING_CALL_END",{}));
+    this.sendEngine(new Message('POPUP','PARENT',"REQUEST_OUTGOING_CALL_END",{}));
   }
 
   endIn(){
-    this.sendEngine(new Message('ALL','',"REQUEST_INCOMING_CALL_END",{}));
+    this.sendEngine(new Message('POPUP','PARENT',"REQUEST_INCOMING_CALL_END",{}));
   }
 
   hold(){
-    this.sendEngine(new Message('ALL','',"REQUEST_CALL_HOLD",{}));
+    this.sendEngine(new Message('POPUP','PARENT',"REQUEST_CALL_HOLD",{}));
   }
 
   unhold(){
-    this.sendEngine(new Message('ALL','',"REQUEST_CALL_UNHOLD",{}));
+    this.sendEngine(new Message('POPUP','PARENT',"REQUEST_CALL_UNHOLD",{}));
   }
 
 
   mute(){
-    this.sendEngine(new Message('ALL','',"REQUEST_CALL_MUTE",{}));
+    this.sendEngine(new Message('POPUP','PARENT',"REQUEST_CALL_MUTE",{}));
   }
 
   unmute(){
-    this.sendEngine(new Message('ALL','',"REQUEST_CALL_UNMUTE",{}));
+    this.sendEngine(new Message('POPUP','PARENT',"REQUEST_CALL_UNMUTE",{}));
   }
 
   accept(){
-    this.sendEngine(new Message('ALL','',"REQUEST_INCOMING_CALL_START",{}));
+    this.sendEngine(new Message('POPUP','PARENT',"REQUEST_INCOMING_CALL_START",{}));
   }
 
 
   ping() {
     // setInterval(() => {
-    //   this.sendEngine(new Message('ALL','',"REQUEST_SESSION_DETAILS",this.callObject));
+    //   this.sendEngine(new Message('POPUP','PARENT',"REQUEST_SESSION_DETAILS",this.callObject));
     // }, 1000);
    }
 }

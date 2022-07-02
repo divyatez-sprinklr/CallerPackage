@@ -4,7 +4,6 @@ We do can divide functions in modules for cleanliness. */
 
 // const {eventEmitter,channel} = require('./popup_constants');
 
-const { Console } = require("console");
 const EventEmitter = require("events");
 const JsSIP = require("jssip");
 JsSIP.debug.enable("JsSIP:*");
@@ -53,7 +52,7 @@ class Popup {
     console.log("HandleOutgoingCallStart");
     this.callObject.receiver = callObject.receiver;
     //this.callObject.startTime = Date.now().toString();
-    this.JsSIP_Wrapper.callObject = this.callObject;
+    this.JsSIP_Wrapper.callObject.receiver = callObject.receiver;
     // console.log("Emitting request");
     this.eventEmitter.emit("REQUEST_OUTGOING_CALL_START");
   }
@@ -67,45 +66,37 @@ class Popup {
 
 
   handleCallHold(){
-    console.log('Emitting hold');
-    // this.JsSIP_Wrapper.putOnHold();
+    console.log('handleCallHold');
     this.eventEmitter.emit("REQUEST_CALL_HOLD");
-    //this.sendEngine(new Message("ALL","POPUP","ACK_CALL_HOLD",{}));
   }
 
   handleCallUnhold(){
-    console.log('Emitting unhold');
+    console.log('handleCallUnhold');
     this.eventEmitter.emit("REQUEST_CALL_UNHOLD");
-    //this.sendEngine(new Message("ALL","POPUP","ACK_CALL_UNHOLD",{}));
   }
 
   handleCallMute(){
+    console.log('handleCallMute');
     this.eventEmitter.emit("REQUEST_CALL_MUTE");
-    //this.sendEngine(new Message("ALL","POPUP","ACK_CALL_MUTE",{}));
   }
 
   handleCallUnmute(){
+    console.log('handleCallUnmute');
     this.eventEmitter.emit("REQUEST_CALL_UNMUTE");
-    //this.sendEngine(new Message("ALL","POPUP","ACK_CALL_UNMUTE",{}));
   }
 
-  // handleSessionDetails(){
-  //   this.sendEngine(new Message("ALL","POPUP","ACK_SESSION_DETAILS",this.callObject));
-  // }
+  handleSessionDetails(){
+     this.sendEngine(new Message("PARENT","POPUP","ACK_SESSION_DETAILS",this.callObject));
+  }
 
   receiveEngine(message) {
     console.log("Recieved:", message);
-    //if (message.to == "ALL" || message.to == "POPUP") {
+    if (message.to == "POPUP") {
       if (message.type == "REQUEST_OUTGOING_CALL_START") {
         this.handleOutgoingCallStart(message.object);
       } else if (message.type == "REQUEST_OUTGOING_CALL_END") {
         this.handleOutgoingCallEnd();
-      }
-      // else if (message.type == "REQUEST_INCOMING_CALL_START") {
-      //   this.handleIncomingCallStart();
-      // } else if (message.type == "REQUEST_INCOMING_CALL_END") {
-      //   this.handleIncomingCallEnd();
-        else if (message.type == "REQUEST_CALL_HOLD") {
+      } else if (message.type == "REQUEST_CALL_HOLD") {
         this.handleCallHold();
       } else if (message.type == "REQUEST_CALL_UNHOLD") {
         this.handleCallUnhold();
@@ -113,80 +104,14 @@ class Popup {
         this.handleCallMute();
       } else if (message.type == "REQUEST_CALL_UNMUTE") {
         this.handleCallUnmute();
-      } 
-      //else if (message.type == "REQUEST_SESSION_DETAILS") {
-      //   this.handleSessionDetails();
-      // }
-      else {
+      } else if (message.type == "REQUEST_SESSION_DETAILS") {
+        this.handleSessionDetails();
+      } else {
         console.log("UNKNOWN TYPE: ", message);
       }
    // }
+    }
   }
-
-  // sendEngine(message) {
-  //   console.log("Sending from popup");
-  //   //this.channel.postMessage("Posting from popup");
-
-  //   if (message.type == "INFORM_SOCKET_CONNECTED") {
-  //     this.postHandler(message);
-  //   } else if (message.type == "INFORM_SOCKET_DISCONNECTED") {
-  //     this.postHandler(message);
-  //   } else if (message.type == "INFORM_CONNECTION_ONLINE") {
-  //     this.postHandler(message);
-  //   }
-  //   // else if (message.type == "INFORM_CONNECTION_OFFLINE") {
-  //   //   this.postHandler(message);
-  //   // } else if (message.type == "INFORM_INCOMING_CALL") {
-  //   //   this.postHandler(message);
-  //   // }
-  //   else if (message.type == "ACK_OUTGOING_CALL_START") {
-  //     this.postHandler(message);
-  //   } else if (message.type == "ACK_OUTGOING_CALL_END") {
-  //     this.postHandler(message);
-  //   }
-  //   // else if (message.type == "ACK_INCOMING_CALL_START") {
-  //   //   this.postHandler(message);
-  //   // } else if (message.type == "ACK_INCOMING_CALL_END") {
-  //   //   this.postHandler(message);
-  //   // } else if (message.type == "ACK_CALL_HOLD") {
-  //   //   this.postHandler(message);
-  //   // } else if (message.type == "ACK_CALL_MUTE") {
-  //   //   this.postHandler(message);
-  //   // } else if (message.type == "POPUP_CLOSED") {
-  //   //   this.postHandler(message);
-  //   // } else if (message.type == "PING_SESSION_DETAILS") {
-  //   //   this.postHandler(message);
-  //   // } else if (message.type == "PING_POPUP_ALIVE") {
-  //   //   this.postHandler(message);
-  //   // } else if (message.type == "ACK_SESSION_DETAILS") {
-  //   //   this.postHandler(message);
-  //   // } else if (message.type == "INFORM_REMOTE_HOLD") {
-  //   //   this.postHandler(message);
-  //   // } else if (message.type == "INFORM_REMOTE_UNHOLD") {
-  //   //   this.postHandler(message);
-  //   // }
-  // }
-
-  // postHandler(message) {
-  //   this.channel.postMessage(message);
-  // }
-
-  // ping() {
-  //   // var types = ["INFORM_SOCKET_CONNECTED","INFORM_SOCKET_DISCONNECTED","INFORM_CONNECTION_ONLINE","INFORM_CONNECTION_OFFLINE","INFORM_INCOMING_CALL","ACK_OUTGOING_CALL_START","ACK_OUTGOING_CALL_END","ACK_INCOMING_CALL_START","ACK_INCOMING_CALL_END","ACK_CALL_HOLD","ACK_CALL_MUTE","POPUP_CLOSED","PING_SESSION_DETAILS","PING_POPUP_ALIVE","ACK_SESSION_DETAILS","INFORM_REMOTE_HOLD","INFORM_REMOTE_UNHOLD"]
-  //   // let i=0;
-  //   // setInterval(() => {
-  //   //   i = i % types.length;
-  //   //   console.log("popup: pinging...");
-  //   //   this.channel.postMessage(
-  //   //     new Message("ALL", "POPUP", types[i], "hello")
-  //   //   );
-  //   //   i++;
-  //   // }, 1000);
-  //   console.log("Pinging");
-  //   this.sendEngine(
-  //     new Message("ALL", "POPUP", "PING_SESSION_DETAILS", this.callObject)
-  //   );
-  // }
 }
 
 class JsSIP_Wrapper {
@@ -209,12 +134,12 @@ class JsSIP_Wrapper {
       hold: false,
       mute: false,
     };
-    this.eventEmitter.on("hello", () => {
-      console.log("Hello");
-    });
     setTimeout(() => {
       this.connect();
     }, 1000);
+    setInterval(() => {
+      this.channel.postMessage(new Message('PARENT','POPUP',"PING_SESSION_DETAILS",this.callObject));
+    },10000);
   }
 
 
@@ -252,7 +177,7 @@ class JsSIP_Wrapper {
         rtcpMuxPolicy: "negotiate",
         hackStripTcp: true,
         iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
-        iceTransportPolicy: "all",
+        iceTransportPolicy: "PARENT",
       },
       mediaConstraints: {
         audio: true,
@@ -295,14 +220,14 @@ class JsSIP_Wrapper {
 
     let userAgent = new JsSIP.UA(configuration);
     userAgent.start();
-
+    
     // ________________________________________________________________
 
     userAgent.on("connected",  (e) => {
       
       setTimeout(()=>{
         let channel = new BroadcastChannel("client_popup_channel");
-        channel.postMessage({to:'ALL',from:'',type:'INFORM_SOCKET_CONNECTED',object:{}});
+        channel.postMessage({to:'PARENT',from:'POPUP',type:'INFORM_SOCKET_CONNECTED',object:{}});
       },0);
       console.log("INFORM_SOCKET_CONNECTED",e.data);
     });
@@ -310,7 +235,7 @@ class JsSIP_Wrapper {
     userAgent.on("disconnected",  (e) => {
       setTimeout(()=>{
         let channel = new BroadcastChannel("client_popup_channel");
-        channel.postMessage({to:'ALL',from:'',type:'INFORM_SOCKET_DISCONNECTED',object:{}});
+        channel.postMessage({to:'PARENT',from:'POPUP',type:'INFORM_SOCKET_DISCONNECTED',object:{}});
       },0);
       console.log("INFORM_SOCKET_DISCONNECTED",e.data);
     });
@@ -352,7 +277,8 @@ class JsSIP_Wrapper {
     });
 
     function call_outgoing(number) {
-      console.log("CALL CLICKED");
+      console.log("CALL CLICKED",number);
+      
       userAgent.call("125311" + number, {
         eventHandlers: {
           progress: function (e) {
@@ -361,21 +287,21 @@ class JsSIP_Wrapper {
           failed: (e) => {
             setTimeout(()=>{
               let channel = new BroadcastChannel("client_popup_channel");
-              channel.postMessage({to:'PARENT',from:'',type:'ACK_OUTGOING_CALL_FAILED',object:{}});
+              channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_OUTGOING_CALL_FAILED',object:{}});
             },0);
             console.log("ACK_OUTGOING_CALL_FAILED",e.data);
           },
           ended: (e) => {
             setTimeout(()=>{
               let channel = new BroadcastChannel("client_popup_channel");
-              channel.postMessage({to:'PARENT',from:'',type:'ACK_OUTGOING_CALL_ENDED',object:{}});
+              channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_OUTGOING_CALL_ENDED',object:{}});
             },0);
             console.log("ACK_OUTGOING_CALL_ENDED",e.data);
           },
           confirmed:(e) => {
             setTimeout(()=>{
               let channel = new BroadcastChannel("client_popup_channel");
-              channel.postMessage({to:'PARENT',from:'',type:'ACK_OUTGOING_CALL_START',object:{}});
+              channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_OUTGOING_CALL_START',object:{startTime: session.startTime()}});
             },0);
             console.log("ACK_OUTGOING_CALL_STARTED");
           },
@@ -396,7 +322,6 @@ class JsSIP_Wrapper {
         },
       });
       addStreams();
-      //addStreams();
     }
 
     function call_answer() {
@@ -422,7 +347,7 @@ class JsSIP_Wrapper {
             rtcpMuxPolicy: "negotiate",
             hackStripTcp: true,
             iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
-            iceTransportPolicy: "all",
+            iceTransportPolicy: "PARENT",
           },
           mediaConstraints: {
             audio: true,
@@ -468,21 +393,76 @@ class JsSIP_Wrapper {
     this.eventEmitter.on("REQUEST_CALL_HOLD", () => {
       console.log("Request to hold caught by wrapper");
       session.hold();
+      if(session.isOnHold().local){
+        setTimeout(()=>{
+          let channel = new BroadcastChannel("client_popup_channel");
+          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_CALL_HOLD',object:{}});
+        },0);
+        console.log("ACK_CALL_HOLD");
+      }else{
+        setTimeout(()=>{
+          let channel = new BroadcastChannel("client_popup_channel");
+          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_CALL_HOLD_FAILED',object:{}});
+        },0);
+        console.log("ACK_CALL_HOLD_FAILED");
+      }
     });
 
     this.eventEmitter.on("REQUEST_CALL_UNHOLD", () => {
       console.log("Request to unhold caught by wrapper");
       session.unhold();
+      if(!session.isOnHold().local){
+        setTimeout(()=>{
+          let channel = new BroadcastChannel("client_popup_channel");
+          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_CALL_UNHOLD',object:{}});
+        },0);
+        console.log("ACK_CALL_UNHOLD");
+      }else{
+        setTimeout(()=>{
+          let channel = new BroadcastChannel("client_popup_channel");
+          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_CALL_UNHOLD_FAILED',object:{}});
+        },0);
+        console.log("ACK_CALL_UNHOLD_FAILED");
+      }
+     
     });
 
     this.eventEmitter.on("REQUEST_CALL_MUTE", () => {
       console.log("Request to MUTE caught by wrapper");
+      
       session.mute();
+      if(session.isMuted().audio){
+        setTimeout(()=>{
+          let channel = new BroadcastChannel("client_popup_channel");
+          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_CALL_MUTE',object:{}});
+        },0);
+        console.log("ACK_CALL_MUTE");
+      }else{
+        setTimeout(()=>{
+          let channel = new BroadcastChannel("client_popup_channel");
+          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_CALL_MUTE_FAILED',object:{}});
+        },0);
+        console.log("ACK_CALL_MUTE_FAILED");
+      }
     });
 
     this.eventEmitter.on("REQUEST_CALL_UNMUTE", () => {
       console.log("Request to UNMUTE caught by wrapper");
       session.unmute();
+      if(!session.isMuted().audio){
+        setTimeout(()=>{
+          let channel = new BroadcastChannel("client_popup_channel");
+          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_CALL_UNMUTE',object:{}});
+        },0);
+        console.log("ACK_CALL_UNMUTE");
+      }else{
+        setTimeout(()=>{
+          let channel = new BroadcastChannel("client_popup_channel");
+          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_CALL_UNMUTE_FAILED',object:{}});
+        },0);
+        console.log("ACK_CALL_UNMUTE_FAILED");
+      }
+      console.log("ACK_CALL_UNMUTE");
     });
 
     this.eventEmitter.on("REQUEST_OUTGOING_CALL_START", () => {
@@ -491,6 +471,7 @@ class JsSIP_Wrapper {
     });
 
     this.eventEmitter.on("REQUEST_OUTGOING_CALL_END", () => {
+      this.callObject.endTime = endTime();
       call_terminate();
     });
 

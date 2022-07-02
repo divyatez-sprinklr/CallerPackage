@@ -9,7 +9,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 //This is parent window
 // We need to add communication listeners and emittters for dialer window to listen
-// This all need to be done in an object, so that user can instantiate it.
+// This PARENT need to be done in an object, so that user can instantiate it.
 // Later remove constant also.
 var EventEmitter = require("events");
 
@@ -50,7 +50,7 @@ var CallerPackage = /*#__PURE__*/function () {
     value: function receiveEngine(message) {
       console.log(message);
 
-      if (message.to == "ALL") {
+      if (message.to == "PARENT") {
         if (message.type == "INFORM_SOCKET_CONNECTED") {
           this.eventEmitter.emit(message.type);
         } else if (message.type == "INFORM_SOCKET_DISCONNECTED") {
@@ -84,7 +84,7 @@ var CallerPackage = /*#__PURE__*/function () {
   }, {
     key: "sendEngine",
     value: function sendEngine(message) {
-      console.log("Sending" + message.type);
+      console.log("Sending : " + message.type);
 
       if (message.type == "REQUEST_OUTGOING_CALL_START") {
         this.postHandler(message);
@@ -111,47 +111,47 @@ var CallerPackage = /*#__PURE__*/function () {
     key: "call",
     value: function call(receiver) {
       this.callObject.receiver = receiver;
-      this.sendEngine(new Message('ALL', '', "REQUEST_OUTGOING_CALL_START", this.callObject));
+      this.sendEngine(new Message('POPUP', 'PARENT', "REQUEST_OUTGOING_CALL_START", this.callObject));
     }
   }, {
     key: "endOut",
     value: function endOut() {
-      this.sendEngine(new Message('ALL', '', "REQUEST_OUTGOING_CALL_END", {}));
+      this.sendEngine(new Message('POPUP', 'PARENT', "REQUEST_OUTGOING_CALL_END", {}));
     }
   }, {
     key: "endIn",
     value: function endIn() {
-      this.sendEngine(new Message('ALL', '', "REQUEST_INCOMING_CALL_END", {}));
+      this.sendEngine(new Message('POPUP', 'PARENT', "REQUEST_INCOMING_CALL_END", {}));
     }
   }, {
     key: "hold",
     value: function hold() {
-      this.sendEngine(new Message('ALL', '', "REQUEST_CALL_HOLD", {}));
+      this.sendEngine(new Message('POPUP', 'PARENT', "REQUEST_CALL_HOLD", {}));
     }
   }, {
     key: "unhold",
     value: function unhold() {
-      this.sendEngine(new Message('ALL', '', "REQUEST_CALL_UNHOLD", {}));
+      this.sendEngine(new Message('POPUP', 'PARENT', "REQUEST_CALL_UNHOLD", {}));
     }
   }, {
     key: "mute",
     value: function mute() {
-      this.sendEngine(new Message('ALL', '', "REQUEST_CALL_MUTE", {}));
+      this.sendEngine(new Message('POPUP', 'PARENT', "REQUEST_CALL_MUTE", {}));
     }
   }, {
     key: "unmute",
     value: function unmute() {
-      this.sendEngine(new Message('ALL', '', "REQUEST_CALL_UNMUTE", {}));
+      this.sendEngine(new Message('POPUP', 'PARENT', "REQUEST_CALL_UNMUTE", {}));
     }
   }, {
     key: "accept",
     value: function accept() {
-      this.sendEngine(new Message('ALL', '', "REQUEST_INCOMING_CALL_START", {}));
+      this.sendEngine(new Message('POPUP', 'PARENT', "REQUEST_INCOMING_CALL_START", {}));
     }
   }, {
     key: "ping",
     value: function ping() {// setInterval(() => {
-      //   this.sendEngine(new Message('ALL','',"REQUEST_SESSION_DETAILS",this.callObject));
+      //   this.sendEngine(new Message('POPUP','PARENT',"REQUEST_SESSION_DETAILS",this.callObject));
       // }, 1000);
     }
   }]);
@@ -177,7 +177,7 @@ document.getElementById('socket-info').innerText = socket;
 document.getElementById('mute-info').innerText = hold;
 document.getElementById('hold-info').innerText = mute;
 document.getElementById("call").addEventListener("click", function () {
-  callerPackage.call("4153260912");
+  callerPackage.call("6285004633");
 });
 document.getElementById("hangup").addEventListener("click", function () {
   callerPackage.endOut();
