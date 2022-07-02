@@ -5,8 +5,8 @@
   "description": "Caller Package",
   "main": "./src/app.js",
   "scripts": {
-    "command1": "browserify CallerPackage/popup/app.js -o CallerPackage/popup/bundle.js -t babelify",
-    "command2": "browserify resources/js/app.js -o resources/js/bundle.js -t babelify",
+    "command1": "browserify ./client_app.js > ./src/client/cbundle.js -t babelify",
+    "command2": "browserify ./popup_app.js > ./src/popup/pbundle.js -t babelify",
     "build": "npm run command1 & npm run command2"
   },
   "repository": {

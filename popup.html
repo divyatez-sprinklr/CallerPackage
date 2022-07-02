@@ -7,7 +7,7 @@
           content="IE=edge">
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
-    <title>Parent</title>
+    <title>testjssip</title>
     <style type="text/css">
         body {
             margin: 0;
@@ -47,26 +47,28 @@
 </head>
 
 <body>
-    <h1>Parent</h1>
+    <h1>TEST-JSSIP</h1>
 
     <input type="number"
            id="phone-number"
            placeholder="phone number"
-           value="4153260912">
-    <!-- value="6285004633"> -->
+
+    value="6285004633">
     <button id="call-button"
             >Call</button>
     <button id="end-button"
             >End</button>
 
-    <!-- <video id="localMedia"
+    <video id="localMedia"
            autoplay
+           muted
            playsinline></video>
     <video id="remoteMedia"
            autoplay
-           playsinline></video> -->
+           playsinline></video>
 
-        <script src="./src/client/cbundle.js"></script>
+    <script src="./src/popup/pbundle.js"
+            type="module"></script>
 </body>
 
 </html>

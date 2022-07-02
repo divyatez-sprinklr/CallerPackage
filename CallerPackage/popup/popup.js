@@ -4,10 +4,11 @@ We do can divide functions in modules for cleanliness. */
 
 // const {eventEmitter,channel} = require('./popup_constants');
 
-const { throws } = require("assert");
 const { Console } = require("console");
 const EventEmitter = require("events");
-const JsSIP = require("jssip");
+const JsSIP = require('jssip');
+JsSIP.debug.enable("JsSIP:*");
+
 class Message {
   constructor(to, from, type, object) {
     this.to = to;
@@ -17,60 +18,47 @@ class Message {
   }
 }
 
+
 class Popup {
   constructor(config) {
-    console.log("PopUp COnstructor");
+    console.log('PopUp COnstructor');
     this.eventEmitter = new EventEmitter();
     this.channel = new BroadcastChannel("client_popup_channel");
-
+    
     this.channel.onmessage = (messageEvent) => {
       this.receiveEngine(messageEvent.data);
     };
     // this.handleEventEmitters();
-    this.eventEmitter.on("INFORM_SOCKET_CONNECTED", () => {
-      console.log("REcieved socket connected");
-      this.sendEngine(
-        new Message("ALL", "POPUP", "INFORM_SOCKET_CONNECTED", {})
-      );
+    this.eventEmitter.on('INFORM_SOCKET_CONNECTED',()=>{
+      console.log('REcieved socket connected');
+      this.sendEngine(new Message("ALL", "POPUP", "INFORM_SOCKET_CONNECTED", {}));
     });
-    this.eventEmitter.on("INFORM_SOCKET_DISCONNECTED", () => {
-      this.sendEngine(
-        new Message("ALL", "POPUP", "INFORM_SOCKET_DISCONNECTED", {})
-      );
+    // this.eventEmitter.on('INFORM_SOCKET_DISCONNECTED',()=>{
+    //   this.sendEngine(new Message("ALL", "POPUP", "INFORM_SOCKET_DISCONNECTED", {}));
+    // });
+    // this.eventEmitter.on('INFORM_INCOMING_CALL',()=>{
+    //   this.callObject.sender = this.JsSIP_Wrapper.getRemoteIdentity();
+    //   this.sendEngine(new Message("ALL", "POPUP", "INFORM_INCOMING_CALL",this.callObject));
+    // });
+    // this.eventEmitter.on('INFORM_REMOTE_HOLD',()=>{
+    //   this.sendEngine(new Message("ALL", "POPUP", "INFORM_REMOTE_HOLD", {}));
+    // });
+    // this.eventEmitter.on('INFORM_REMOTE_UNHOLD',()=>{
+    //   this.sendEngine(new Message("ALL", "POPUP", "INFORM_REMOTE_UNHOLD", {}));
+    // });
+    this.eventEmitter.on('ACK_OUTGOING_CALL_START',()=>{
+      this.sendEngine(new Message("ALL", "POPUP", "ACK_OUTGOING_CALL_START", {}));
     });
-    this.eventEmitter.on("INFORM_INCOMING_CALL", () => {
-      this.callObject.sender = this.JsSIP_Wrapper.getRemoteIdentity();
-      this.sendEngine(
-        new Message("ALL", "POPUP", "INFORM_INCOMING_CALL", this.callObject)
-      );
+    this.eventEmitter.on('ACK_OUTGOING_CALL_END',()=>{
+      this.sendEngine(new Message("ALL", "POPUP", "ACK_OUTGOING_CALL_END", this.callObject));
     });
-    this.eventEmitter.on("INFORM_REMOTE_HOLD", () => {
-      this.sendEngine(new Message("ALL", "POPUP", "INFORM_REMOTE_HOLD", {}));
-    });
-    this.eventEmitter.on("INFORM_REMOTE_UNHOLD", () => {
-      this.sendEngine(new Message("ALL", "POPUP", "INFORM_REMOTE_UNHOLD", {}));
-    });
-    this.eventEmitter.on("ACK_OUTGOING_CALL_START", () => {
-      this.sendEngine(
-        new Message("ALL", "POPUP", "ACK_OUTGOING_CALL_START", {})
-      );
-    });
-    this.eventEmitter.on("ACK_OUTGOING_CALL_END", () => {
-      this.sendEngine(
-        new Message("ALL", "POPUP", "ACK_OUTGOING_CALL_END", this.callObject)
-      );
-    });
-    this.eventEmitter.on("ACK_INCOMING_CALL_START", () => {
-      this.sendEngine(
-        new Message("ALL", "POPUP", "ACK_INCOMING_CALL_START", {})
-      );
-    });
-    this.eventEmitter.on("ACK_INCOMING_CALL_END", () => {
-      this.sendEngine(
-        new Message("ALL", "POPUP", "ACK_INCOMING_CALL_END", this.callObject)
-      );
-    });
-    this.JsSIP_Wrapper = new JsSIP_Wrapper(this.eventEmitter, config);
+    // this.eventEmitter.on('ACK_INCOMING_CALL_START',()=>{
+    //   this.sendEngine(new Message("ALL", "POPUP", "ACK_INCOMING_CALL_START", {}));
+    // });
+    // this.eventEmitter.on('ACK_INCOMING_CALL_END',()=>{
+    //   this.sendEngine(new Message("ALL", "POPUP", "ACK_INCOMING_CALL_END", this.callObject));
+    // });
+    this.JsSIP_Wrapper = new JsSIP_Wrapper( this.eventEmitter,config);
     // this.JsSIP_Wrapper.sample();
     this.callObject = {
       sender: "",
@@ -80,88 +68,99 @@ class Popup {
       hold: false,
       mute: false,
     };
+    this.eventEmitter.emit('hello');
   }
 
-  resetCallObject() {
-    sender("");
-    receiver("");
-    startTime("");
-    endTime("");
+  resetCallObject(){
+    sender('');
+    receiver('');
+    startTime('');
+    endTime('');
     hold(false);
     mute(false);
   }
-  handleOutgoingCallStart(callObject) {
-    console.log("HandleOutgoingCallStart");
-    this.callObject.receiver = callObject.receiver;
-    this.callObject.startTime = Date.now().toString();
-    this.JsSIP_Wrapper.call(this.callObject.receiver);
+
+  handleOutgoingCallStart(callObject){
+      console.log('HandleOutgoingCallStart');
+      this.callObject.receiver = callObject.receiver;
+      this.callObject.startTime = Date.now().toString();
+      this.JsSIP_Wrapper.callObject = this.callObject;
+      console.log('Emitting request');
+      this.eventEmitter.emit('REQUEST_OUTGOING_CALL_START');
+  }
+  
+  handleOutgoingCallEnd(){
+    console.log('handleOutgoingCallEnd');
+    // this.callObject.startTime = callObject.getStartTime();
+    // this.callObject.endTime = callObject.getEndTime();;
+    this.eventEmitter.emit('REQUEST_OUTGOING_CALL_END');
   }
 
-  handleOutgoingCallEnd() {
-    this.callObject.startTime = callObject.getStartTime();
-    this.callObject.endTime = callObject.getEndTime();
-    this.JsSIP_Wrapper.end();
-  }
+  // handleIncomingCallStart(){
+  //   this.JsSIP_Wrapper.answer();
+  //   this.callObject.to = this.JsSIP_Wrapper.getRemoteIdentity();
+  // }
 
-  handleIncomingCallStart() {
-    this.JsSIP_Wrapper.answer();
-    this.callObject.to = this.JsSIP_Wrapper.getRemoteIdentity();
-  }
+  // handleIncomingCallEnd(){
+  //   this.callObject.startTime = callObject.getStartTime();
+  //   this.callObject.endTime = callObject.getEndTime();;
+  //   this.JsSIP_Wrapper.end();
+  // }
 
-  handleIncomingCallEnd() {
-    this.callObject.startTime = callObject.getStartTime();
-    this.callObject.endTime = callObject.getEndTime();
-    this.JsSIP_Wrapper.end();
-  }
 
-  handleCallHold() {
-    this.JsSIP_Wrapper.putOnHold();
-    this.sendEngine(new Message("ALL", "POPUP", "ACK_CALL_HOLD", {}));
-  }
+  // handleCallHold(){
+  //   this.JsSIP_Wrapper.putOnHold();
+  //   this.sendEngine(new Message("ALL","POPUP","ACK_CALL_HOLD",{}));
+  // }
 
-  handleCallUnhold() {
-    this.JsSIP_Wrapper.putOnUnhold();
-    this.sendEngine(new Message("ALL", "POPUP", "ACK_CALL_UNHOLD", {}));
-  }
+  // handleCallUnhold(){
+  //   this.JsSIP_Wrapper.putOnUnhold();
+  //   this.sendEngine(new Message("ALL","POPUP","ACK_CALL_UNHOLD",{}));
+  // }
 
-  handleCallMute() {
-    this.JsSIP_Wrapper.putOnMute();
-    this.sendEngine(new Message("ALL", "POPUP", "ACK_CALL_MUTE", {}));
-  }
+  // handleCallMute(){
+  //   this.JsSIP_Wrapper.putOnMute();
+  //   this.sendEngine(new Message("ALL","POPUP","ACK_CALL_MUTE",{}));
+  // }
 
-  handleCallUnmute() {
-    this.JsSIP_Wrapper.putOnUnmute();
-    this.sendEngine(new Message("ALL", "POPUP", "ACK_CALL_UNMUTE", {}));
-  }
+  // handleCallUnmute(){
+  //   this.JsSIP_Wrapper.putOnUnmute();
+  //   this.sendEngine(new Message("ALL","POPUP","ACK_CALL_UNMUTE",{}));
+  // }
 
-  handleSessionDetails() {
-    this.sendEngine(
-      new Message("ALL", "POPUP", "ACK_SESSION_DETAILS", this.callObject)
-    );
-  }
+
+  // handleSessionDetails(){
+  //   this.sendEngine(new Message("ALL","POPUP","ACK_SESSION_DETAILS",this.callObject));
+  // }
+
+    
+
+  
 
   receiveEngine(message) {
-    console.log("Recieved:", message);
+    console.log('Recieved:',message);
     if (message.to == "ALL" || message.to == "POPUP") {
       if (message.type == "REQUEST_OUTGOING_CALL_START") {
         this.handleOutgoingCallStart(message.object);
       } else if (message.type == "REQUEST_OUTGOING_CALL_END") {
         this.handleOutgoingCallEnd();
-      } else if (message.type == "REQUEST_INCOMING_CALL_START") {
-        this.handleIncomingCallStart();
-      } else if (message.type == "REQUEST_INCOMING_CALL_END") {
-        this.handleIncomingCallEnd();
-      } else if (message.type == "REQUEST_CALL_HOLD") {
-        this.handleCallHold();
-      } else if (message.type == "REQUEST_CALL_UNHOLD") {
-        this.handleCallUnhold();
-      } else if (message.type == "REQUEST_CALL_MUTE") {
-        this.handleCallMute();
-      } else if (message.type == "REQUEST_CALL_UNMUTE") {
-        this.handleCallUnmute();
-      } else if (message.type == "REQUEST_SESSION_DETAILS") {
-        this.handleSessionDetails();
-      } else {
+      } 
+      // else if (message.type == "REQUEST_INCOMING_CALL_START") {
+      //   this.handleIncomingCallStart();
+      // } else if (message.type == "REQUEST_INCOMING_CALL_END") {
+      //   this.handleIncomingCallEnd();
+      // } else if (message.type == "REQUEST_CALL_HOLD") {
+      //   this.handleCallHold();
+      // } else if (message.type == "REQUEST_CALL_UNHOLD") {
+      //   this.handleCallUnhold();
+      // } else if (message.type == "REQUEST_CALL_MUTE") {
+      //   this.handleCallMute();
+      // } else if (message.type == "REQUEST_CALL_UNMUTE") {
+      //   this.handleCallUnmute();
+      // } else if (message.type == "REQUEST_SESSION_DETAILS") {
+      //   this.handleSessionDetails();
+      // } 
+      else {
         console.log("UNKNOWN TYPE: ", message);
       }
     }
@@ -177,35 +176,38 @@ class Popup {
       this.postHandler(message);
     } else if (message.type == "INFORM_CONNECTION_ONLINE") {
       this.postHandler(message);
-    } else if (message.type == "INFORM_CONNECTION_OFFLINE") {
-      this.postHandler(message);
-    } else if (message.type == "INFORM_INCOMING_CALL") {
-      this.postHandler(message);
-    } else if (message.type == "ACK_OUTGOING_CALL_START") {
+    } 
+    // else if (message.type == "INFORM_CONNECTION_OFFLINE") {
+    //   this.postHandler(message);
+    // } else if (message.type == "INFORM_INCOMING_CALL") {
+    //   this.postHandler(message);
+    // } 
+    else if (message.type == "ACK_OUTGOING_CALL_START") {
       this.postHandler(message);
     } else if (message.type == "ACK_OUTGOING_CALL_END") {
       this.postHandler(message);
-    } else if (message.type == "ACK_INCOMING_CALL_START") {
-      this.postHandler(message);
-    } else if (message.type == "ACK_INCOMING_CALL_END") {
-      this.postHandler(message);
-    } else if (message.type == "ACK_CALL_HOLD") {
-      this.postHandler(message);
-    } else if (message.type == "ACK_CALL_MUTE") {
-      this.postHandler(message);
-    } else if (message.type == "POPUP_CLOSED") {
-      this.postHandler(message);
-    } else if (message.type == "PING_SESSION_DETAILS") {
-      this.postHandler(message);
-    } else if (message.type == "PING_POPUP_ALIVE") {
-      this.postHandler(message);
-    } else if (message.type == "ACK_SESSION_DETAILS") {
-      this.postHandler(message);
-    } else if (message.type == "INFORM_REMOTE_HOLD") {
-      this.postHandler(message);
-    } else if (message.type == "INFORM_REMOTE_UNHOLD") {
-      this.postHandler(message);
-    }
+    } 
+    // else if (message.type == "ACK_INCOMING_CALL_START") {
+    //   this.postHandler(message);
+    // } else if (message.type == "ACK_INCOMING_CALL_END") {
+    //   this.postHandler(message);
+    // } else if (message.type == "ACK_CALL_HOLD") {
+    //   this.postHandler(message);
+    // } else if (message.type == "ACK_CALL_MUTE") {
+    //   this.postHandler(message);
+    // } else if (message.type == "POPUP_CLOSED") {
+    //   this.postHandler(message);
+    // } else if (message.type == "PING_SESSION_DETAILS") {
+    //   this.postHandler(message);
+    // } else if (message.type == "PING_POPUP_ALIVE") {
+    //   this.postHandler(message);
+    // } else if (message.type == "ACK_SESSION_DETAILS") {
+    //   this.postHandler(message);
+    // } else if (message.type == "INFORM_REMOTE_HOLD") {
+    //   this.postHandler(message);
+    // } else if (message.type == "INFORM_REMOTE_UNHOLD") {
+    //   this.postHandler(message);
+    // }
   }
 
   postHandler(message) {
@@ -223,278 +225,234 @@ class Popup {
     //   );
     //   i++;
     // }, 1000);
-
-    this.sendEngine(
-      new Message("ALL", "POPUP", "PING_SESSION_DETAILS", this.callObject)
-    );
+    console.log('Pinging');
+    this.sendEngine(new Message("ALL", "POPUP", "PING_SESSION_DETAILS", this.callObject));
   }
 }
 
+
+
+
 class JsSIP_Wrapper {
-  constructor(eventEmitter, config) {
+  constructor(eventEmitter,config){
     this.eventEmitter = eventEmitter;
     this.session = 0;
-    this.phone = null;
+    this.userAgent = null;
+    this.session = null;
     this.config = config;
-    // this.addStreamElements();
-    setTimeout(() => {
+    this.incomingCallAudio = null;
+    this.remoteAudio = null;
+    this.remoteView = null;
+    this.localView = null;
+    this.callObject = {
+      sender: "",
+      receiver: "4153260912",
+      startTime: "",
+      endTime: "",
+      hold: false,
+      mute: false,
+    };
+    this.eventEmitter.on('hello',()=>{
+      console.log('Hello');
+    })
+    setTimeout(()=>{
       this.connect();
-    }, 1000);
+    },1000)
   }
 
-  // createAudioElement(){
-  //   console.log("called audio");
-  //   document.body.innerHTML+='<audio id="remoteView" autoplay controls></audio>';
-  // }
 
-  sample() {
-    console.log("AAA");
-    document.getElementById("test").innerText = "hahaha";
-  }
-  ////////////////////
-
-  // const JsSIP = require("JsSIP");
-
+  connect(){
+  const JsSIP = require("JsSIP");
+  JsSIP.debug.enable("JsSIP:*");
+  let session;
   // Debugging purpose :)
-  // const redAlert = () => {
-  //   document.querySelector("body").innerHTML = "";
-  //   document.querySelector("body").style.backgroundColor = "darkred";
-  // };
-
-  //let [phone, call] = [null, null];
-
-  // let [sip, password, server_address, port] = [
-  //   "1000",
-  //   "1000_client",
-  //   "18.212.171.223",
-  //   "7443/ws",
-  // ];
-
-  // const callOptions = {
-  //   eventHandlers: {
-  //     progress: function (e) {
-  //       console.log("call is in progress");
-  //     },
-  //     failed: function (e) {
-  //       console.log("call failed with cause: " + e.data);
-  //     },
-  //     ended: function (e) {
-  //       console.log("call ended with cause: " + e.data);
-  //     },
-  //     confirmed: function (e) {
-  //       console.log("call confirmed");
-  //     },
-  //   },
-  //   pcConfig: {
-  //     rtcpMuxPolicy: "negotiate",
-  //     hackStripTcp: true,
-  //     iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
-  //     iceTransportPolicy: "all",
-  //   },
-  //   mediaConstraints: {
-  //     audio: true,
-  //     video: false,
-  //   },
-  //   rtcOfferConstraints: {
-  //     offerToReceiveAudio: true,
-  //     offerToReceiveVideo: false,
-  //   },
-  // };
-
-  // addStreamElements(){
-  //   document.body.innerHTML += `
-  //     <video id="localMedia"
-  //            autoplay
-  //            playsinline></video>
-  //     <video id="remoteMedia"
-  //            autoplay
-  //            playsinline></video>
-  //            `;
-  // }
-
-  connect() {
-    let [sip, password, server_address, port] = [
-      this.config.sip,
-      this.config.password,
-      this.config.server_address,
-      this.config.port,
-    ];
-    const configuration = {
-      sockets: [
-        new JsSIP.WebSocketInterface("wss://" + server_address + ":" + port),
-      ],
-      uri: "sip:" + sip + "@" + server_address,
-      authorization_user: sip,
-      password: password,
-      registrar_server: "sip:" + server_address,
-      no_answer_timeout: 20,
-      session_timers: false,
-      register: true,
-      trace_sip: true,
-      connection_recovery_max_interval: 30,
-      connection_recovery_min_interval: 2,
-    };
-    // ________________________________________________________________
-
-    this.incomingCallAudio = new window.Audio(
-      "http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/bonus.wav"
-    );
-    this.incomingCallAudio.loop = true;
-
-    this.remoteAudio = new window.Audio();
-    this.remoteAudio.autoplay = true;
-
-    // const localView = document.getElementById("localMedia");
-    // const remoteView = document.getElementById("remoteMedia");
-
-    // ________________________________________________________________
-
-    // ________________________________________________________________
-
-    this.phone = new JsSIP.UA(configuration);
-    this.phone.start();
-    this.userAgentListeners();
-  }
-
-  addStreams() {
-    this.call.connection.addEventListener("addstream", function (event) {
-      this.incomingCallAudio.pause();
-
-      this.remoteAudio.srcObject = event.stream;
-
-      document.getElementById("localMedia").srcObject =
-        this.call.connection.getLocalStreams()[0];
-      document.getElementById("remoteMedia").srcObject =
-        this.call.connection.getRemoteStreams()[0];
-    });
-  }
-
-  callNumber(number) {
-    console.log("CALL CLICKED");
-    let callOptions = {
-      eventHandlers: {
-        progress: function (e) {
-          console.log("call is in progress");
-        },
-        failed: function (e) {
-          console.log("call failed with cause: " + e.data);
-        },
-        ended: function (e) {
-          console.log("call ended with cause: " + e.data);
-        },
-        confirmed: function (e) {
-          console.log("call confirmed");
-        },
+  let [phone, call] = [null, null];
+  
+  let [sip, password, server_address, port] = [
+    "1000",
+    "1000_client",
+    "18.212.171.223",
+    "7443/ws",
+  ];
+  
+  const callOptions = {
+    eventHandlers: {
+      progress: function (e) {
+        console.log("call is in progress");
       },
-      pcConfig: {
-        rtcpMuxPolicy: "negotiate",
-        hackStripTcp: true,
-        iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
-        iceTransportPolicy: "all",
+      failed: function (e) {
+        console.log("call failed with cause: " + e.data);
       },
-      mediaConstraints: {
-        audio: true,
-        video: false,
+      ended: function (e) {
+        console.log("call ended with cause: " + e.data);
       },
-      rtcOfferConstraints: {
-        offerToReceiveAudio: true,
-        offerToReceiveVideo: false,
+      confirmed: function (e) {
+        console.log("call confirmed");
       },
-    };
-    this.phone.call("125311" + number, callOptions);
-    // setTimeout(()=>{
-    // this.addStreams();
-    // },2000);
-  }
-
-  userAgentListeners() {
-    this.phone.on("connected", function (e) {
-      console.log("connected");
-    });
-
-    this.phone.on("disconnected", function (e) {
-      console.log("disconnected");
-    });
-
-    this.phone.on("newMessage", function (e) {
-      e.data.message.accept();
-      console.log(e);
-    });
-    this.phone.on("newRTCSession", function (event) {
-      console.log("newRTCSession", event);
-      console.log("Direction: ", event.session.direction);
-
-      this.call = event.session;
-      console.log(this.call);
-      this.call.on("sdp", function (e) {
-        console.log("call sdp: ", e.sdp);
-      });
-      this.call.on("accepted", function (e) {
-        console.log("call accepted: ", e);
-      });
-      this.call.on("progress", function (e) {
-        console.log("call is in progress: ", e);
-      });
-      this.call.on("confirmed", function (e) {
-        console.log("confirmed by", e.originator);
-
-        // const localStreams = call.connection.getLocalStreams();
-        // console.log(
-        //   "confirmed with a number of local streams",
-        //   localStreams.length
-        // );
-
-        // const remoteStreams = call.connection.getRemoteStreams();
-        // console.log(
-        //   "confirmed with a number of remote streams",
-        //   remoteStreams.length
-        // );
-
-        // let localStream = localStreams[0];
-        // let dtmfSender = call.connection.createDTMFSender(
-        //   localStream.getAudioTracks()[0]
-        // );
-        // call.sendDTMF = function (tone) {
-        //   dtmfSender.insertDTMF(tone);
-        // };
-      });
-      this.call.on("ended", function (e) {
-        console.log("Call ended: ", e);
-        this.terminate();
-      });
-      this.call.on("failed", function (e) {
-        console.log("Call failed: ", e);
-        this.terminate();
-      });
-      this.call.on("peerconnection", function (e) {
-        console.log("call peerconnection: ", e);
-      });
-
-      setTimeout(() => {
-        console.log("5sec has passed");
-
-        if (this.call) {
-          this.call.connection.addEventListener("addstream", function (event) {
-            this.incomingCallAudio.pause();
-
-            this.remoteAudio.srcObject = event.stream;
-
-            document.getElementById("localMedia").srcObject =
-              this.call.connection.getLocalStreams()[0];
-            document.getElementById("remoteMedia").srcObject =
-              this.call.connection.getRemoteStreams()[0];
-          });
-        } else {
-          console.log("Nahi lagaaaa..");
-        }
-      }, 5000);
-    });
-  }
+    },
+    pcConfig: {
+      rtcpMuxPolicy: "negotiate",
+      hackStripTcp: true,
+      iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
+      iceTransportPolicy: "all",
+    },
+    mediaConstraints: {
+      audio: true,
+      video: false,
+    },
+    rtcOfferConstraints: {
+      offerToReceiveAudio: true,
+      offerToReceiveVideo: false,
+    },
+  };
+  
+  const configuration = {
+    sockets: [
+      new JsSIP.WebSocketInterface("wss://" + server_address + ":" + port),
+    ],
+    uri: "sip:" + sip + "@" + server_address,
+    authorization_user: sip,
+    password: password,
+    registrar_server: "sip:" + server_address,
+    no_answer_timeout: 20,
+    session_timers: false,
+    register: true,
+    trace_sip: true,
+    connection_recovery_max_interval: 30,
+    connection_recovery_min_interval: 2,
+  };
+  
   // ________________________________________________________________
+  
+  let incomingCallAudio = new window.Audio(
+    "http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/bonus.wav"
+  );
+  incomingCallAudio.loop = true;
+  
+  let remoteAudio = new window.Audio();
+  remoteAudio.autoplay = true;
+  
+  let localView = document.getElementById("localMedia");
+  let remoteView = document.getElementById("remoteMedia");
+  
+  // ________________________________________________________________
+  
+  // function addStreams() {
+  //   session.connection.addEventListener("addstream", function (event) {
+  //     incomingCallAudio.pause();
+  
+  //     remoteAudio.srcObject = event.stream;
+  
+  //     localView.srcObject = session.connection.getLocalStreams()[0];
+  //     remoteView.srcObject = session.connection.getRemoteStreams()[0];
+  //   });
+  // }
+  
+  // ________________________________________________________________
+  
+  let userAgent = new JsSIP.UA(configuration);
+  userAgent.start();
+  
 
-  answer() {
-    if (this.call) {
-      let callOptions = {
+  
+  // ________________________________________________________________
+  
+  userAgent.on("connected", function (e) {
+   // this.eventEmitter.emit('INFORM_SOCKET_CONNECTED');
+    console.log("connected");
+    //call_button.disabled = false;
+  });
+  
+  userAgent.on("disconnected", function (e) {
+    //this.eventEmitter.emit('INFORM_SOCKET_DISCONNECTED');
+    console.log("disconnected");
+  });
+  
+  userAgent.on("newMessage", function (e) {
+    e.data.message.accept();
+    console.log(e);
+  });
+  
+  // ________________________________________________________________
+  
+ 
+  
+  // ________________________________________________________________
+  
+  userAgent.on("newRTCSession", function (event) {
+    console.log("newRTCSession", event);
+    console.log("Direction: ", event.session.direction);
+  
+    session = event.session;
+    session.on("sdp", function (e) {
+      console.log("call sdp: ", e.sdp);
+    });
+    session.on("accepted", function (e) {
+      console.log("call accepted: ", e);
+    });
+    session.on("progress", function (e) {
+      console.log("call is in progress: ", e);
+    });
+    session.on("confirmed", function (e) {
+      console.log("confirmed by", e.originator);
+    });
+    session.on("ended", function (e) {
+      console.log("Call ended: ", e);
+      call_terminate();
+    });
+    session.on("failed", function (e) {
+      console.log("Call failed: ", e);
+      call_terminate();
+    });
+    session.on("peerconnection", function (e) {
+      console.log("call peerconnection: ", e);
+    });
+  });
+
+  function call_outgoing(number) {
+    console.log("CALL CLICKED");
+    userAgent.call(
+      "125311" + number,
+      {
+        eventHandlers: {
+          progress: function (e) {
+            console.log("call is in progress");
+          },
+          failed: function (e) {
+            console.log("call failed with cause: " + e.data);
+          },
+          ended: function (e){
+            console.log("call ended with cause: " + e.data);
+            //this.eventEmitter.emit('ACK_OUTGOING_CALL_END');
+          },
+          confirmed: function (e) {
+           // this.eventEmitter.emit('ACK_OUTGOING_CALL_START');
+            console.log("call confirmed");
+          },
+        },
+        pcConfig: {
+          rtcpMuxPolicy: "negotiate",
+          hackStripTcp: true,
+          iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
+          iceTransportPolicy: "all",
+        },
+        mediaConstraints: {
+          audio: true,
+          video: false,
+        },
+        rtcOfferConstraints: {
+          offerToReceiveAudio: true,
+          offerToReceiveVideo: false,
+        },
+      }
+    );    
+    addStreams();
+   //addStreams();
+  }
+  
+  function call_answer() {
+    if (session) {
+      session.answer({
         eventHandlers: {
           progress: function (e) {
             console.log("call is in progress");
@@ -523,221 +481,52 @@ class JsSIP_Wrapper {
           offerToReceiveAudio: true,
           offerToReceiveVideo: false,
         },
-      };
-
-      this.call.answer(callOptions);
+      });
     }
   }
-
-  terminate() {
-    if (this.call) {
-      this.call.terminate();
+  
+  function call_terminate() {
+    if (session) {
+      session.terminate();
     }
-    this.call = null;
+    session = null;
+  }
+  
+  function addStreams() {
+    session.connection.addEventListener("addstream", function (event) {
+      incomingCallAudio.pause();
+  
+      remoteAudio.srcObject = event.stream;
+  
+      document.getElementById("localMedia").srcObject = session.connection.getLocalStreams()[0];
+      document.getElementById("remoteMedia").srcObject = session.connection.getRemoteStreams()[0];
+    });
   }
 
-  // ________________________________________________________________
+  this.eventEmitter.on('REQUEST_OUTGOING_CALL_START',()=>{
+    console.log('Request to call caught by wrapper');
+    call_outgoing(this.callObject.receiver);
+  })
 
-  /////////////////////
+  this.eventEmitter.on('REQUEST_OUTGOING_CALL_END',()=>{
+    call_terminate();
+  })
 
-  // answer() {
-  //       if (this.session) {
-  //           this.session.answer({
-  //               "extraHeaders": ["X-Foo: foo", "X-Bar: bar"],
-  //               "mediaConstraints": { "audio": true, "video": false },
-  //               "pcConfig": { rtcpMuxPolicy: "negotiate" },
-  //               "rtcOfferConstraints": {
-  //                   offerToReceiveAudio: 1,
-  //                   offerToReceiveVideo: 0
-  //               }
-  //           });
-  //       }
-  //   }
-  // decline() {
-  //     if (this.session) {
-  //           this.session.terminate();
-  //     }
-  // }
-  // end() {
-  //     if (this.session) {
-  //         this.session.terminate();
-  //     }
-  // }
+  // this.eventEmitter.on('REQUEST_INCOMING_CALL_START',()=>{
+  //   call_answer();
+  // })
 
-  // getLocalIdentity(){
-  //   return (this.session)?this.session.local_identity:'';
-  // }
+  // this.eventEmitter.on('REQUEST_INCOMING_CALL_END',()=>{
+  //   call_terminate();
+  // })
 
-  // getRemoteIdentity(){
-  //   return (this.session)?this.session.remote_identity:'';
-  // }
-
-  // getStartTime(){
-  //   return (this.session)?this.session.start_time:'';
-  // }
-
-  // getEndTime(){
-  //   return (this.session)?this.session.end_time:'';
-  // }
-
-  // sessionIsInProgress(){
-  //     return this.session.isInProgress();
-  // }
-
-  // sessionIsEstablished(){
-  //   return this.session.isEstablished();
-  // }
-
-  // getLocalIsOnHold(){
-  //   return (this.session)?this.session.isOnHold()['local']:false;
-  // }
-
-  // getRemoteIsOnHold(){
-  //   return (this.session)?this.session.isOnHold()['remote']:false;
-  // }
-
-  // getIsOnMute(){
-  //   return (this.session)?this.session.isMuted()['audio']:false;
-  // }
-
-  // toggleHold(){
-  //   if(this.session){
-  //     (this.getLocalIsOnHold())?this.session.unhold():this.session.hold();
-  //   }
-  // }
-
-  // putOnHold(){
-  //   if(this.session){
-  //     this.session.hold();
-  //     this.eventEmitter?.emit('ACK_CALL_HOLD');
-  //   }
-  // }
-
-  // putOnUnHold(){
-  //   if(this.session){
-  //     this.session.unhold();
-  //     this.eventEmitter?.emit('ACK_CALL_UNHOLD');
-  //   }
-  // }
-
-  // putOnMute(){
-  //   if(this.session){
-  //     this.session.mute();
-  //     this.eventEmitter?.emit('ACK_CALL_MUTE');
-
-  //   }
-  // }
-
-  // putOnUnmute(){
-  //   if(this.session){
-  //     this.session.unmute();
-  //     this.eventEmitter?.emit('ACK_CALL_UNMUTE');
-  //   }
-  // }
-
-  // toggleMute(){
-  //   if(this.session){
-  //     (this.getIsOnMute())?this.session.unmute():this.session.mute();
-  //   }
-  // }
-
-  // connect() {
-  //       let sip = this.config.sip;
-  //       let password = this.config.password;
-  //       let server_address = this.config.server_address;
-  //       let port = this.config.port;
-
-  //       var configuration = {
-  //           sockets: [
-  //               new JsSIP.WebSocketInterface("wss://" + server_address + ":" + port)
-  //           ],
-  //           uri: "sip:" + sip + "@" + server_address,
-  //           authorization_user: sip,
-  //           password: password,
-  //           registrar_server: "sip:" + server_address,
-  //           session_timers: false,
-  //           connection_recovery_max_interval: 60,
-  //           connection_recovery_min_interval: 4
-
-  //       };
-  //       this.UserAgent = new JsSIP.UA(configuration);
-  //       this.UserAgent.on("connected", (event) => {
-  //           console.log('emit socket connected');
-  //           (this.eventEmitter).emit('INFORM_SOCKET_CONNECTED');
-  //       });
-
-  //       this.UserAgent.on("disconnected", function (event) {
-  //         setTimeout(()=>{
-  //           this.eventEmitter?.emit('INFORM_SOCKET_DISCONNECTED');
-  //         },500);
-  //       });
-  //       this.UserAgent.on("newRTCSession", function (e) {
-  //           this.session = e.session;
-
-  //           if(this.session.direction == 'incoming'){
-  //             this.eventEmitter.emit('INFORM_INCOMING_CALL');
-
-  //           }else{
-
-  //           }
-  //           this.session.on("accepted", function (e) {
-  //             //this.eventEmitter.emit('');
-  //               console.log("call accepted", e);
-  //           });
-  //           this.session.on("progress", function (e) {
-  //               //(this.session.direction == 'incoming')
-  //               console.log("call is in progress", e);
-  //               this.answer();
-  //           });
-  //           this.session.on("confirmed", function (e) {
-  //               this.eventEmitter.emit((this.session.direction == 'incoming')?'ACK_INCOMING_CALL_START':'ACK_OUTGOING_CALL_START');
-  //               console.log("call accepted/confirmed", e);
-  //           });
-  //           this.session.on("ended", function (e) {
-  //             this.eventEmitter.emit((this.session.direction == 'incoming')?'ACK_INCOMING_CALL_END':'ACK_OUTGOING_CALL_END');
-  //           });
-  //           this.session.on("failed", function (e) {
-  //             this.eventEmitter?.emit((this.session.direction == 'incoming')?'INFORM_INCOMING_CALL_FAILED':'INFORM_OUTGOING_CALL_FAILED');
-  //           });
-  //           this.session.on("hold", function (e) {
-  //             this.eventEmitter.emit('INFORM_REMOTE_HOLD');
-  //           });
-  //           this.session.on("unhold", function (e) {
-  //             this.eventEmitter.emit('INFORM_REMOTE_UNHOLD');
-  //           });
-  //           this.session.on("peerconnection", function (e) {
-  //               console.log("call peerconnection: ", e);
-  //               e.peerconnection.onaddstream = function (e) {
-  //                   console.log("call peerconnection addstream:", e);
-  //                   remoteView = document.getElementById("remoteView");
-  //                   var remoteStream = e.stream;
-  //                   remoteView.srcObject = remoteStream;
-  //               };
-  //           });
-  //       });
-  //       this.UserAgent.start();
-  //     }
-  // disconnect(){
-  //   this.UserAgent.stop();
-  //   this.UserAgent = null;
-  // }
-
-  // call(to){
-  //   console.log('Call Request inside JsSIP');
-  //   var eventHandlers = {
-  //     'progress':   function(data){ },
-  //     'failed':     function(data){this.eventEmitter?.emit('INFORM_OUTGOING_CALL_FAILED');},
-  //     'confirmed':  function(data){this.eventEmitter.emit('ACK_OUTGOING_CALL_START');},
-  //     'ended':      function(data){this.eventEmitter.emit('ACK_OUTGOING_CALL_END');}
-  //   };
-
-  //   var options = {
-  //     'eventHandlers': eventHandlers,
-  //     'mediaConstraints': {'audio': true, 'video': false},
-  //   };
-
-  //   this.UserAgent.call(to, options);
-  // }
 }
 
-module.exports = { Popup: Popup };
+
+}
+
+
+module.exports = {Popup: Popup};
+
+
+
