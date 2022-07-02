@@ -228,7 +228,7 @@ class JsSIP_Wrapper {
     this.session = 0;
     this.phone = null;
     this.config = config;
-    this.addStreamElements();
+   // this.addStreamElements();
     setTimeout(()=>{
       this.connect();
     },1000)
@@ -294,16 +294,16 @@ class JsSIP_Wrapper {
   //   },
   // };
   
-addStreamElements(){
-  document.body.innerHTML += `
-    <video id="localMedia"
-           autoplay
-           playsinline></video>
-    <video id="remoteMedia"
-           autoplay
-           playsinline></video>
-           `;
-}
+// addStreamElements(){
+//   document.body.innerHTML += `
+//     <video id="localMedia"
+//            autoplay
+//            playsinline></video>
+//     <video id="remoteMedia"
+//            autoplay
+//            playsinline></video>
+//            `;
+// }
 
 connect(){
   let [sip, password, server_address, port] = [this.config.sip,this.config.password,this.config.server_address,this.config.port];
@@ -324,13 +324,13 @@ connect(){
   };
   // ________________________________________________________________
   
-  let incomingCallAudio = new window.Audio(
+  this.incomingCallAudio = new window.Audio(
     "http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/bonus.wav"
   );
-  incomingCallAudio.loop = true;
+  this.incomingCallAudio.loop = true;
   
-  let remoteAudio = new window.Audio();
-  remoteAudio.autoplay = true;
+  this.remoteAudio = new window.Audio();
+  this.remoteAudio.autoplay = true;
   
   // const localView = document.getElementById("localMedia");
   // const remoteView = document.getElementById("remoteMedia");
@@ -343,13 +343,14 @@ connect(){
   
   this.phone = new JsSIP.UA(configuration);
   this.phone.start();
+  this.userAgentListeners();
 }
 
 addStreams() {
-  call.connection.addEventListener("addstream", function (event) {
+  this.call.connection.addEventListener("addstream", function (event) {
     incomingCallAudio.pause();
 
-    remoteAudio.srcObject = event.stream;
+    this.remoteAudio.srcObject = event.stream;
 
     document.getElementById("localMedia").srcObject = session.connection.getLocalStreams()[0];
     document.getElementById("remoteMedia").srcObject = session.connection.getRemoteStreams()[0];
@@ -357,14 +358,45 @@ addStreams() {
 }
 
 
-call(number){
+callNumber(number){
   console.log("CALL CLICKED");
-  
+  let callOptions = {
+    eventHandlers: {
+      progress: function (e) {
+        console.log("call is in progress");
+      },
+      failed: function (e) {
+        console.log("call failed with cause: " + e.data);
+      },
+      ended: function (e) {
+        console.log("call ended with cause: " + e.data);
+      },
+      confirmed: function (e) {
+        console.log("call confirmed");
+      },
+    },
+    pcConfig: {
+      rtcpMuxPolicy: "negotiate",
+      hackStripTcp: true,
+      iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
+      iceTransportPolicy: "all",
+    },
+    mediaConstraints: {
+      audio: true,
+      video: false,
+    },
+    rtcOfferConstraints: {
+      offerToReceiveAudio: true,
+      offerToReceiveVideo: false,
+    },
+  };
   this.phone.call(
     "125311" + number,
     callOptions
   );
-  addStreams();
+  // setTimeout(()=>{
+  // this.addStreams();
+  // },2000);
 }
 
 userAgentListeners(){
@@ -386,6 +418,7 @@ userAgentListeners(){
       console.log("Direction: ", event.session.direction);
     
       this.call = event.session;
+      console.log(this.call);
       this.call.on("sdp", function (e) {
         console.log("call sdp: ", e.sdp);
       });
@@ -429,13 +462,26 @@ userAgentListeners(){
       this.call.on("peerconnection", function (e) {
         console.log("call peerconnection: ", e);
       });
+      if(this.call){
+        this.call.connection.addEventListener("addstream", function (event) {
+          this.incomingCallAudio.pause();
+      
+          this.remoteAudio.srcObject = event.stream;
+      
+          document.getElementById("localMedia").srcObject = session.connection.getLocalStreams()[0];
+          document.getElementById("remoteMedia").srcObject = session.connection.getRemoteStreams()[0];
+        });
+      }
+      else{
+        console.log('Nahi lagaaaa..');
+      }
     });
 }      
   // ________________________________________________________________
   
 answer() {
     if (this.call) {
-        const callOptions = {
+        let callOptions = {
         eventHandlers: {
           progress: function (e) {
             console.log("call is in progress");

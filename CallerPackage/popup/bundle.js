@@ -12,6 +12,9 @@ var popup = new Popup({
 }); //const popup = new Popup({sip:'10075',password:'10075',server_address:'blr-sbc1.ozonetel.com',port:'442'});
 
 popup.ping();
+document.getElementById('call-btn').addEventListener('click', function () {
+  popup.JsSIP_Wrapper.callNumber('4153260912');
+});
 
 },{"./popup":2}],2:[function(require,module,exports){
 "use strict";
@@ -276,8 +279,8 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
     this.eventEmitter = eventEmitter;
     this.session = 0;
     this.phone = null;
-    this.config = config;
-    this.addStreamElements();
+    this.config = config; // this.addStreamElements();
+
     setTimeout(function () {
       _this2.connect();
     }, 1000);
@@ -336,12 +339,17 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
     //     offerToReceiveVideo: false,
     //   },
     // };
+    // addStreamElements(){
+    //   document.body.innerHTML += `
+    //     <video id="localMedia"
+    //            autoplay
+    //            playsinline></video>
+    //     <video id="remoteMedia"
+    //            autoplay
+    //            playsinline></video>
+    //            `;
+    // }
 
-  }, {
-    key: "addStreamElements",
-    value: function addStreamElements() {
-      document.body.innerHTML += "\n    <video id=\"localMedia\"\n           autoplay\n           playsinline></video>\n    <video id=\"remoteMedia\"\n           autoplay\n           playsinline></video>\n           ";
-    }
   }, {
     key: "connect",
     value: function connect() {
@@ -364,33 +372,67 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
         connection_recovery_min_interval: 2
       }; // ________________________________________________________________
 
-      var incomingCallAudio = new window.Audio("http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/bonus.wav");
-      incomingCallAudio.loop = true;
-      var remoteAudio = new window.Audio();
-      remoteAudio.autoplay = true; // const localView = document.getElementById("localMedia");
+      this.incomingCallAudio = new window.Audio("http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/bonus.wav");
+      this.incomingCallAudio.loop = true;
+      this.remoteAudio = new window.Audio();
+      this.remoteAudio.autoplay = true; // const localView = document.getElementById("localMedia");
       // const remoteView = document.getElementById("remoteMedia");
       // ________________________________________________________________
       // ________________________________________________________________
 
       this.phone = new JsSIP.UA(configuration);
       this.phone.start();
+      this.userAgentListeners();
     }
   }, {
     key: "addStreams",
     value: function addStreams() {
-      call.connection.addEventListener("addstream", function (event) {
+      this.call.connection.addEventListener("addstream", function (event) {
         incomingCallAudio.pause();
-        remoteAudio.srcObject = event.stream;
+        this.remoteAudio.srcObject = event.stream;
         document.getElementById("localMedia").srcObject = session.connection.getLocalStreams()[0];
         document.getElementById("remoteMedia").srcObject = session.connection.getRemoteStreams()[0];
       });
     }
   }, {
-    key: "call",
-    value: function call(number) {
+    key: "callNumber",
+    value: function callNumber(number) {
       console.log("CALL CLICKED");
-      this.phone.call("125311" + number, callOptions);
-      addStreams();
+      var callOptions = {
+        eventHandlers: {
+          progress: function progress(e) {
+            console.log("call is in progress");
+          },
+          failed: function failed(e) {
+            console.log("call failed with cause: " + e.data);
+          },
+          ended: function ended(e) {
+            console.log("call ended with cause: " + e.data);
+          },
+          confirmed: function confirmed(e) {
+            console.log("call confirmed");
+          }
+        },
+        pcConfig: {
+          rtcpMuxPolicy: "negotiate",
+          hackStripTcp: true,
+          iceServers: [{
+            urls: ["stun:stun.l.google.com:19302"]
+          }],
+          iceTransportPolicy: "all"
+        },
+        mediaConstraints: {
+          audio: true,
+          video: false
+        },
+        rtcOfferConstraints: {
+          offerToReceiveAudio: true,
+          offerToReceiveVideo: false
+        }
+      };
+      this.phone.call("125311" + number, callOptions); // setTimeout(()=>{
+      // this.addStreams();
+      // },2000);
     }
   }, {
     key: "userAgentListeners",
@@ -409,6 +451,7 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
         console.log("newRTCSession", event);
         console.log("Direction: ", event.session.direction);
         this.call = event.session;
+        console.log(this.call);
         this.call.on("sdp", function (e) {
           console.log("call sdp: ", e.sdp);
         });
@@ -448,6 +491,17 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
         this.call.on("peerconnection", function (e) {
           console.log("call peerconnection: ", e);
         });
+
+        if (this.call) {
+          this.call.connection.addEventListener("addstream", function (event) {
+            this.incomingCallAudio.pause();
+            this.remoteAudio.srcObject = event.stream;
+            document.getElementById("localMedia").srcObject = session.connection.getLocalStreams()[0];
+            document.getElementById("remoteMedia").srcObject = session.connection.getRemoteStreams()[0];
+          });
+        } else {
+          console.log('Nahi lagaaaa..');
+        }
       });
     } // ________________________________________________________________
 
@@ -455,7 +509,7 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
     key: "answer",
     value: function answer() {
       if (this.call) {
-        var _callOptions = {
+        var callOptions = {
           eventHandlers: {
             progress: function progress(e) {
               console.log("call is in progress");
@@ -487,7 +541,7 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
             offerToReceiveVideo: false
           }
         };
-        this.call.answer(_callOptions);
+        this.call.answer(callOptions);
       }
     }
   }, {
