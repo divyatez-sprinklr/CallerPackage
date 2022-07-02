@@ -184,7 +184,7 @@ document.getElementById("call-button").addEventListener("click", function () {
   callerPackage.call("4153260912");
 });
 document.getElementById("end-button").addEventListener("click", function () {
-  callerPackage.endOut("4153260912");
+  callerPackage.endOut();
 });
 
 },{"./CallerPackage/client/client.js":1}],3:[function(require,module,exports){

@@ -16,7 +16,7 @@ var _require = require("console"),
 
 var EventEmitter = require("events");
 
-var JsSIP = require('jssip');
+var JsSIP = require("jssip");
 
 JsSIP.debug.enable("JsSIP:*");
 
@@ -35,7 +35,7 @@ var Popup = /*#__PURE__*/function () {
 
     _classCallCheck(this, Popup);
 
-    console.log('PopUp COnstructor');
+    console.log("PopUp COnstructor");
     this.eventEmitter = new EventEmitter();
     this.channel = new BroadcastChannel("client_popup_channel");
 
@@ -44,8 +44,8 @@ var Popup = /*#__PURE__*/function () {
     }; // this.handleEventEmitters();
 
 
-    this.eventEmitter.on('INFORM_SOCKET_CONNECTED', function () {
-      console.log('REcieved socket connected');
+    this.eventEmitter.on("INFORM_SOCKET_CONNECTED", function () {
+      console.log("REcieved socket connected");
 
       _this.sendEngine(new Message("ALL", "POPUP", "INFORM_SOCKET_CONNECTED", {}));
     }); // this.eventEmitter.on('INFORM_SOCKET_DISCONNECTED',()=>{
@@ -62,10 +62,10 @@ var Popup = /*#__PURE__*/function () {
     //   this.sendEngine(new Message("ALL", "POPUP", "INFORM_REMOTE_UNHOLD", {}));
     // });
 
-    this.eventEmitter.on('ACK_OUTGOING_CALL_START', function () {
+    this.eventEmitter.on("ACK_OUTGOING_CALL_START", function () {
       _this.sendEngine(new Message("ALL", "POPUP", "ACK_OUTGOING_CALL_START", {}));
     });
-    this.eventEmitter.on('ACK_OUTGOING_CALL_END', function () {
+    this.eventEmitter.on("ACK_OUTGOING_CALL_END", function () {
       _this.sendEngine(new Message("ALL", "POPUP", "ACK_OUTGOING_CALL_END", _this.callObject));
     }); // this.eventEmitter.on('ACK_INCOMING_CALL_START',()=>{
     //   this.sendEngine(new Message("ALL", "POPUP", "ACK_INCOMING_CALL_START", {}));
@@ -84,36 +84,36 @@ var Popup = /*#__PURE__*/function () {
       hold: false,
       mute: false
     };
-    this.eventEmitter.emit('hello');
+    this.eventEmitter.emit("hello");
   }
 
   _createClass(Popup, [{
     key: "resetCallObject",
     value: function resetCallObject() {
-      sender('');
-      receiver('');
-      startTime('');
-      endTime('');
+      sender("");
+      receiver("");
+      startTime("");
+      endTime("");
       hold(false);
       mute(false);
     }
   }, {
     key: "handleOutgoingCallStart",
     value: function handleOutgoingCallStart(callObject) {
-      console.log('HandleOutgoingCallStart');
+      console.log("HandleOutgoingCallStart");
       this.callObject.receiver = callObject.receiver;
       this.callObject.startTime = Date.now().toString();
       this.JsSIP_Wrapper.callObject = this.callObject;
-      console.log('Emitting request');
-      this.eventEmitter.emit('REQUEST_OUTGOING_CALL_START');
+      console.log("Emitting request");
+      this.eventEmitter.emit("REQUEST_OUTGOING_CALL_START");
     }
   }, {
     key: "handleOutgoingCallEnd",
     value: function handleOutgoingCallEnd() {
-      console.log('handleOutgoingCallEnd'); // this.callObject.startTime = callObject.getStartTime();
+      console.log("handleOutgoingCallEnd"); // this.callObject.startTime = callObject.getStartTime();
       // this.callObject.endTime = callObject.getEndTime();;
 
-      this.eventEmitter.emit('REQUEST_OUTGOING_CALL_END');
+      this.eventEmitter.emit("REQUEST_OUTGOING_CALL_END");
     } // handleIncomingCallStart(){
     //   this.JsSIP_Wrapper.answer();
     //   this.callObject.to = this.JsSIP_Wrapper.getRemoteIdentity();
@@ -146,7 +146,7 @@ var Popup = /*#__PURE__*/function () {
   }, {
     key: "receiveEngine",
     value: function receiveEngine(message) {
-      console.log('Recieved:', message);
+      console.log("Recieved:", message);
 
       if (message.to == "ALL" || message.to == "POPUP") {
         if (message.type == "REQUEST_OUTGOING_CALL_START") {
@@ -167,7 +167,7 @@ var Popup = /*#__PURE__*/function () {
         //   this.handleCallUnmute();
         // } else if (message.type == "REQUEST_SESSION_DETAILS") {
         //   this.handleSessionDetails();
-        // } 
+        // }
         else {
           console.log("UNKNOWN TYPE: ", message);
         }
@@ -188,7 +188,7 @@ var Popup = /*#__PURE__*/function () {
       //   this.postHandler(message);
       // } else if (message.type == "INFORM_INCOMING_CALL") {
       //   this.postHandler(message);
-      // } 
+      // }
       else if (message.type == "ACK_OUTGOING_CALL_START") {
         this.postHandler(message);
       } else if (message.type == "ACK_OUTGOING_CALL_END") {
@@ -234,7 +234,7 @@ var Popup = /*#__PURE__*/function () {
       //   );
       //   i++;
       // }, 1000);
-      console.log('Pinging');
+      console.log("Pinging");
       this.sendEngine(new Message("ALL", "POPUP", "PING_SESSION_DETAILS", this.callObject));
     }
   }]);
@@ -259,14 +259,14 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
     this.localView = null;
     this.callObject = {
       sender: "",
-      receiver: "4153260912",
+      receiver: "4157614983",
       startTime: "",
       endTime: "",
       hold: false,
       mute: false
     };
-    this.eventEmitter.on('hello', function () {
-      console.log('Hello');
+    this.eventEmitter.on("hello", function () {
+      console.log("Hello");
     });
     setTimeout(function () {
       _this2.connect();
@@ -489,11 +489,11 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
         });
       }
 
-      this.eventEmitter.on('REQUEST_OUTGOING_CALL_START', function () {
-        console.log('Request to call caught by wrapper');
+      this.eventEmitter.on("REQUEST_OUTGOING_CALL_START", function () {
+        console.log("Request to call caught by wrapper");
         call_outgoing(_this3.callObject.receiver);
       });
-      this.eventEmitter.on('REQUEST_OUTGOING_CALL_END', function () {
+      this.eventEmitter.on("REQUEST_OUTGOING_CALL_END", function () {
         call_terminate();
       }); // this.eventEmitter.on('REQUEST_INCOMING_CALL_START',()=>{
       //   call_answer();
