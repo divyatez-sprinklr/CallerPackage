@@ -1,6 +1,5 @@
 const JsSIP = require("jssip");
 JsSIP.debug.enable("JsSIP:*");
-
 const EventEmitter = require("events");
 
 class Message {
@@ -17,7 +16,7 @@ class Popup {
     console.log("PopUp Instance Created");
     this.eventEmitter = new EventEmitter();
     this.channel = new BroadcastChannel("client_popup_channel");
-
+    this.callActive;
     this.channel.onmessage = (messageEvent) => {
       this.receiveEngine(messageEvent.data);
     };
@@ -163,7 +162,7 @@ class JsSIP_Wrapper {
   connect(callback) {
     let [userAgent, session] = [null, null];
     let { sip, password, server_address, port } = this.config;
-
+    let callActive = false;
     let callObject = {
       sender: "",
       receiver: "",
@@ -182,8 +181,13 @@ class JsSIP_Wrapper {
       if (message.to == "WRAPPER") {
         console.log("Recieved in Wrapper:", message);
         if (message.type == "REQUEST_OUTGOING_CALL_START") {
-          callObject.receiver = message.object.receiver;
-          call_outgoing(callObject.receiver);
+          if(callActive == true){
+
+          }else{
+            callActive = true;
+            callObject.receiver = message.object.receiver;
+            call_outgoing(callObject.receiver);
+          }
         } else if (message.type == "REQUEST_OUTGOING_CALL_END") {
           call_terminate();
         } else if (message.type == "REQUEST_CALL_HOLD") {
@@ -195,7 +199,11 @@ class JsSIP_Wrapper {
         } else if (message.type == "REQUEST_CALL_UNMUTE") {
           call_unmute();
         } else if (message.type == "ACK_OUTGOING_CALL_START") {
+          ring.pause();
           callObject.startTime = session.start_time;
+          callObject.sender = session.local_identity;
+          callObject.receiver = session.remote_identity;
+
           channel.postMessage({
             to: "PARENT",
             from: "POPUP",
@@ -204,10 +212,28 @@ class JsSIP_Wrapper {
           });
         } else if (message.type == "ACK_OUTGOING_CALL_END") {
           callObject.endTime = session.end_time;
+          callActive = false;
           channel.postMessage({
             to: "PARENT",
             from: "POPUP",
             type: "ACK_OUTGOING_CALL_END",
+            object: callObject,
+          });
+          callObject = {
+            sender: "",
+            receiver: "4157614983",
+            startTime: "",
+            endTime: "",
+            hold: false,
+            mute: false,
+          };
+          session = null;
+        } else if (message.type == "ACK_OUTGOING_CALL_FAIL") {
+          callActive = false;
+          channel.postMessage({
+            to: "PARENT",
+            from: "POPUP",
+            type: "ACK_OUTGOING_CALL_FAIL",
             object: callObject,
           });
           callObject = {
@@ -279,6 +305,11 @@ class JsSIP_Wrapper {
       "http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/bonus.wav"
     );
     incomingCallAudio.loop = true;
+    
+    let ring =  new window.Audio('./abc.wav');
+    ring.loop = true;
+
+
 
     let remoteAudio = new window.Audio();
     remoteAudio.autoplay = true;
@@ -358,7 +389,7 @@ class JsSIP_Wrapper {
 
     function call_outgoing(number) {
       console.log("CALL CLICKED", number);
-
+      ring.play();
       userAgent.call("125311" + number, {
         eventHandlers: {
           progress: function (e) {
@@ -368,8 +399,8 @@ class JsSIP_Wrapper {
             setTimeout(() => {
               let channel = new BroadcastChannel("client_popup_channel");
               channel.postMessage({
-                to: "PARENT",
-                from: "POPUP",
+                to: "WRAPPER",
+                from: "WRAPPER",
                 type: "ACK_OUTGOING_CALL_FAIL",
                 object: { object: e.data },
               });

@@ -6,9 +6,18 @@ let mute = "Mute State : Unmute";
 let hold = "Hold State : Unhold";
 let socket = "Socket : Disconnected";
 let callActive = "CallActve : Inative";
+let callObject = {
+  sender: "",
+  receiver: "",
+  startTime: "",
+  endTime: "",
+  hold: false,
+  mute: false,
+};
 document.getElementById("socket-info").innerText = socket;
 document.getElementById("mute-info").innerText = hold;
 document.getElementById("hold-info").innerText = mute;
+displayCallObject();
 
 const connect_button = document.getElementById("connect");
 const call_button = document.getElementById("call");
@@ -34,6 +43,7 @@ connect_button.addEventListener("click", () => {
 });
 
 call_button.addEventListener("click", () => {
+  //resetState();
   callerPackage.call("6285004633");
 });
 
@@ -68,31 +78,95 @@ callerPackage.eventEmitter.on("INFORM_SOCKET_DISCONNECTED", () => {
 });
 
 callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_START", () => {
+  resetState();
   callActive = "CallActve : Active";
-  document.getElementById("call-actve-info").innerText = callActive;
+  callObject= callerPackage.getCallObject(); 
+  displayCallObject();
+  document.getElementById("call-active-info").innerText = callActive;
 });
 
 callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_END", () => {
+  resetState();
   callActive = "CallActve : Inative";
-  document.getElementById("call-actve-info").innerText = callActive;
+  callObject= callerPackage.getCallObject(); 
+  displayCallObject();
+  resetHold();
+  resetMute();
+  document.getElementById("call-active-info").innerText = callActive;
+});
+
+callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_FAIL", () => {
+  resetState();
+  callActive = "CallActve : FAIL";
+  callObject= callerPackage.getCallObject(); 
+  displayCallObject();
+  resetHold();
+  resetMute();
+  document.getElementById("call-active-info").innerText = callActive;
 });
 
 callerPackage.eventEmitter.on("ACK_CALL_HOLD", () => {
   hold = "Hold State : Hold";
-  document.getElementById("hold-info").innerText = callActive;
+  callObject= callerPackage.getCallObject(); 
+  displayCallObject();
+  document.getElementById("hold-info").innerText = hold;
 });
 
 callerPackage.eventEmitter.on("ACK_CALL_UNHOLD", () => {
   hold = "Hold State : Unhold";
-  document.getElementById("hold-info").innerText = callActive;
+  callObject= callerPackage.getCallObject();
+  displayCallObject(); 
+  document.getElementById("hold-info").innerText = hold;
 });
 
 callerPackage.eventEmitter.on("ACK_CALL_MUTE", () => {
   mute = "Mute State : Mute";
-  document.getElementById("mute-info").innerText = callActive;
+  callObject= callerPackage.getCallObject();
+  displayCallObject(); 
+  document.getElementById("mute-info").innerText = mute;
 });
 
 callerPackage.eventEmitter.on("ACK_CALL_UNMUTE", () => {
   mute = "Mute State : Unmute";
-  document.getElementById("mute-info").innerText = callActive;
+  callObject= callerPackage.getCallObject(); 
+  displayCallObject(); 
+  document.getElementById("mute-info").innerText = mute;
 });
+
+function displayCallObject(){
+  document.getElementById("call-object-info").innerText = "Call Details: " +JSON.stringify(callObject);
+}
+
+function resetHold(){
+  hold = "Hold State : Unhold";
+  document.getElementById("hold-info").innerText = hold;
+}
+
+function resetMute(){
+  mute = "Mute State : Unmute";
+  document.getElementById("mute-info").innerText = mute;
+}
+
+function resetcallActive(){
+  callActive = "CallActve : Inative";
+  document.getElementById("call-active-info").innerText = callActive;
+}
+
+
+function resetState(){
+
+  callObject = {
+    sender: "",
+    receiver: "",
+    startTime: "",
+    endTime: "",
+    hold: false,
+    mute: false,
+  };
+  displayCallObject();
+
+  resetHold();
+  resetMute();
+  resetcallActive();
+
+}

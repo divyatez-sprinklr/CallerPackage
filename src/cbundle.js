@@ -24,6 +24,7 @@ var CallerPackage = /*#__PURE__*/function () {
 
     _classCallCheck(this, CallerPackage);
 
+    this.callActive = false;
     this.eventEmitter = new EventEmitter();
     this.channel = new BroadcastChannel("client_popup_channel");
 
@@ -42,6 +43,23 @@ var CallerPackage = /*#__PURE__*/function () {
   }
 
   _createClass(CallerPackage, [{
+    key: "resetCallObject",
+    value: function resetCallObject() {
+      this.callObject = {
+        sender: "",
+        receiver: "",
+        startTime: "",
+        endTime: "",
+        hold: false,
+        mute: false
+      };
+    }
+  }, {
+    key: "getCallObject",
+    value: function getCallObject() {
+      return this.callObject;
+    }
+  }, {
     key: "receiveEngine",
     value: function receiveEngine(message) {
       if (message.to == "PARENT") {
@@ -52,18 +70,34 @@ var CallerPackage = /*#__PURE__*/function () {
         } else if (message.type == "INFORM_SOCKET_DISCONNECTED") {
           this.eventEmitter.emit(message.type);
         } else if (message.type == "ACK_OUTGOING_CALL_START") {
+          this.callObject.startTime = message.object.startTime;
+          this.callObject.sender = message.object.sender;
+          this.callObject.receiver = message.object.receiver;
           this.eventEmitter.emit(message.type);
         } else if (message.type == "ACK_OUTGOING_CALL_END") {
+          this.callObject.hold = false;
+          this.callObject.mute = false;
+          this.callObject.endTime = message.object.endTime;
+          this.callActive = false;
           this.eventEmitter.emit(message.type);
         } else if (message.type == "ACK_OUTGOING_CALL_FAIL") {
+          this.callObject.hold = false;
+          this.callObject.mute = false;
+          this.callObject.startTime = '-|-';
+          this.callObject.endTime = '-|-';
+          this.callActive = false;
           this.eventEmitter.emit(message.type);
         } else if (message.type == "ACK_CALL_HOLD") {
+          this.callObject.hold = true;
           this.eventEmitter.emit(message.type);
         } else if (message.type == "ACK_CALL_UNHOLD") {
+          this.callObject.hold = false;
           this.eventEmitter.emit(message.type);
         } else if (message.type == "ACK_CALL_MUTE") {
+          this.callObject.mute = true;
           this.eventEmitter.emit(message.type);
         } else if (message.type == "ACK_CALL_UNMUTE") {
+          this.callObject.mute = false;
           this.eventEmitter.emit(message.type);
         } else if (message.type == "POPUP_CLOSED") {
           this.eventEmitter.emit(message.type);
@@ -85,7 +119,12 @@ var CallerPackage = /*#__PURE__*/function () {
       console.log("Sending : " + message.type);
 
       if (message.type == "REQUEST_OUTGOING_CALL_START") {
-        this.postHandler(message);
+        if (this.callActive == true) {
+          console.log('Call Already Active');
+        } else {
+          this.callActive = true;
+          this.postHandler(message);
+        }
       } else if (message.type == "REQUEST_OUTGOING_CALL_END") {
         this.postHandler(message);
       } else if (message.type == "REQUEST_CALL_HOLD") {
@@ -117,6 +156,7 @@ var CallerPackage = /*#__PURE__*/function () {
   }, {
     key: "call",
     value: function call(receiver) {
+      this.resetCallObject();
       this.callObject.receiver = receiver;
       this.sendEngine(new Message("POPUP", "PARENT", "REQUEST_OUTGOING_CALL_START", this.callObject));
     }
@@ -181,9 +221,18 @@ var mute = "Mute State : Unmute";
 var hold = "Hold State : Unhold";
 var socket = "Socket : Disconnected";
 var callActive = "CallActve : Inative";
+var callObject = {
+  sender: "",
+  receiver: "",
+  startTime: "",
+  endTime: "",
+  hold: false,
+  mute: false
+};
 document.getElementById("socket-info").innerText = socket;
 document.getElementById("mute-info").innerText = hold;
 document.getElementById("hold-info").innerText = mute;
+displayCallObject();
 var connect_button = document.getElementById("connect");
 var call_button = document.getElementById("call");
 var hangup_button = document.getElementById("hangup");
@@ -207,6 +256,7 @@ connect_button.addEventListener("click", function () {
   });
 });
 call_button.addEventListener("click", function () {
+  //resetState();
   callerPackage.call("6285004633");
 });
 hangup_button.addEventListener("click", function () {
@@ -233,29 +283,88 @@ callerPackage.eventEmitter.on("INFORM_SOCKET_DISCONNECTED", function () {
   document.getElementById("socket-info").innerText = socket;
 });
 callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_START", function () {
+  resetState();
   callActive = "CallActve : Active";
-  document.getElementById("call-actve-info").innerText = callActive;
+  callObject = callerPackage.getCallObject();
+  displayCallObject();
+  document.getElementById("call-active-info").innerText = callActive;
 });
 callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_END", function () {
+  resetState();
   callActive = "CallActve : Inative";
-  document.getElementById("call-actve-info").innerText = callActive;
+  callObject = callerPackage.getCallObject();
+  displayCallObject();
+  resetHold();
+  resetMute();
+  document.getElementById("call-active-info").innerText = callActive;
+});
+callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_FAIL", function () {
+  resetState();
+  callActive = "CallActve : FAIL";
+  callObject = callerPackage.getCallObject();
+  displayCallObject();
+  resetHold();
+  resetMute();
+  document.getElementById("call-active-info").innerText = callActive;
 });
 callerPackage.eventEmitter.on("ACK_CALL_HOLD", function () {
   hold = "Hold State : Hold";
-  document.getElementById("hold-info").innerText = callActive;
+  callObject = callerPackage.getCallObject();
+  displayCallObject();
+  document.getElementById("hold-info").innerText = hold;
 });
 callerPackage.eventEmitter.on("ACK_CALL_UNHOLD", function () {
   hold = "Hold State : Unhold";
-  document.getElementById("hold-info").innerText = callActive;
+  callObject = callerPackage.getCallObject();
+  displayCallObject();
+  document.getElementById("hold-info").innerText = hold;
 });
 callerPackage.eventEmitter.on("ACK_CALL_MUTE", function () {
   mute = "Mute State : Mute";
-  document.getElementById("mute-info").innerText = callActive;
+  callObject = callerPackage.getCallObject();
+  displayCallObject();
+  document.getElementById("mute-info").innerText = mute;
 });
 callerPackage.eventEmitter.on("ACK_CALL_UNMUTE", function () {
   mute = "Mute State : Unmute";
-  document.getElementById("mute-info").innerText = callActive;
+  callObject = callerPackage.getCallObject();
+  displayCallObject();
+  document.getElementById("mute-info").innerText = mute;
 });
+
+function displayCallObject() {
+  document.getElementById("call-object-info").innerText = "Call Details: " + JSON.stringify(callObject);
+}
+
+function resetHold() {
+  hold = "Hold State : Unhold";
+  document.getElementById("hold-info").innerText = hold;
+}
+
+function resetMute() {
+  mute = "Mute State : Unmute";
+  document.getElementById("mute-info").innerText = mute;
+}
+
+function resetcallActive() {
+  callActive = "CallActve : Inative";
+  document.getElementById("call-active-info").innerText = callActive;
+}
+
+function resetState() {
+  callObject = {
+    sender: "",
+    receiver: "",
+    startTime: "",
+    endTime: "",
+    hold: false,
+    mute: false
+  };
+  displayCallObject();
+  resetHold();
+  resetMute();
+  resetcallActive();
+}
 
 },{"./CallerPackage/client/client.js":1}],3:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.

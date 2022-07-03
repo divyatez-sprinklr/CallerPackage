@@ -11,6 +11,7 @@ class Message {
 
 class CallerPackage {
   constructor() {
+    this.callActive = false;
     this.eventEmitter = new EventEmitter();
     this.channel = new BroadcastChannel("client_popup_channel");
     this.channel.onmessage = (messageEvent) => {
@@ -26,6 +27,22 @@ class CallerPackage {
     };
   }
 
+
+  resetCallObject(){
+    this.callObject = {
+      sender: "",
+      receiver: "",
+      startTime: "",
+      endTime: "",
+      hold: false,
+      mute: false,
+    };
+  }
+
+  getCallObject(){
+    return this.callObject;
+  }
+
   receiveEngine(message) {
     if (message.to == "PARENT") {
       console.log(message);
@@ -34,18 +51,34 @@ class CallerPackage {
       } else if (message.type == "INFORM_SOCKET_DISCONNECTED") {
         this.eventEmitter.emit(message.type);
       } else if (message.type == "ACK_OUTGOING_CALL_START") {
+        this.callObject.startTime = message.object.startTime;
+        this.callObject.sender = message.object.sender;
+        this.callObject.receiver = message.object.receiver;
         this.eventEmitter.emit(message.type);
       } else if (message.type == "ACK_OUTGOING_CALL_END") {
+        this.callObject.hold = false;
+        this.callObject.mute = false;
+        this.callObject.endTime = message.object.endTime;
+        this.callActive = false;
         this.eventEmitter.emit(message.type);
       } else if (message.type == "ACK_OUTGOING_CALL_FAIL") {
+        this.callObject.hold = false;
+        this.callObject.mute = false;
+        this.callObject.startTime = '-|-';
+        this.callObject.endTime = '-|-';
+        this.callActive = false;
         this.eventEmitter.emit(message.type);
       } else if (message.type == "ACK_CALL_HOLD") {
+        this.callObject.hold = true;
         this.eventEmitter.emit(message.type);
       } else if (message.type == "ACK_CALL_UNHOLD") {
+        this.callObject.hold = false;
         this.eventEmitter.emit(message.type);
       } else if (message.type == "ACK_CALL_MUTE") {
+        this.callObject.mute = true;
         this.eventEmitter.emit(message.type);
       } else if (message.type == "ACK_CALL_UNMUTE") {
+        this.callObject.mute = false;
         this.eventEmitter.emit(message.type);
       } else if (message.type == "POPUP_CLOSED") {
         this.eventEmitter.emit(message.type);
@@ -65,7 +98,14 @@ class CallerPackage {
   sendEngine(message) {
     console.log("Sending : " + message.type);
     if (message.type == "REQUEST_OUTGOING_CALL_START") {
-      this.postHandler(message);
+      if(this.callActive == true)
+      {
+        console.log('Call Already Active');
+      }
+      else{
+        this.callActive = true;
+        this.postHandler(message);
+      }
     } else if (message.type == "REQUEST_OUTGOING_CALL_END") {
       this.postHandler(message);
     } else if (message.type == "REQUEST_CALL_HOLD") {
@@ -97,6 +137,7 @@ class CallerPackage {
   }
 
   call(receiver) {
+    this.resetCallObject();
     this.callObject.receiver = receiver;
     this.sendEngine(
       new Message(
