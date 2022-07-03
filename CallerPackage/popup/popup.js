@@ -126,7 +126,7 @@ class JsSIP_Wrapper {
     setInterval(() => {
       let channel = new BroadcastChannel("client_popup_channel");
       channel.postMessage(new Message('PARENT','POPUP',"PING_POPUP_ALIVE",{}));
-    },10000);
+    },100000);
   }
 
   
