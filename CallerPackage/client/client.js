@@ -1,4 +1,5 @@
 const EventEmitter = require("events");
+const { MESSAGE } = require("jssip/lib/Constants");
 
 class Message {
   constructor(to, from, type, object) {
@@ -87,6 +88,13 @@ class CallerPackage {
       } else if (message.type == "PING_POPUP_ALIVE") {
         this.eventEmitter.emit(message.type);
       } else if (message.type == "ACK_SESSION_DETAILS") {
+        this.callObject = message.object;
+        if(this.callObject.startTime==""){
+          this.callActive = 0;
+        }
+        else if(this.callObject.endTime==""){
+          this.callActive = 1;
+        }
         this.eventEmitter.emit(message.type);
       } else {
         console.log("UNKNOWN TYPE: ", message);
@@ -131,6 +139,12 @@ class CallerPackage {
         "./CallerPackage/popup.html",
         "connection",
         "left=0, top=0, width=200, height=200"
+      );
+    }
+    else{
+      console.log('Session details request');
+      this.sendEngine(
+        new Message("WRAPPER", "PARENT", "REQUEST_SESSION_DETAILS", {})
       );
     }
     callback();

@@ -9,6 +9,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var EventEmitter = require("events");
 
+var _require = require("jssip/lib/Constants"),
+    MESSAGE = _require.MESSAGE;
+
 var Message = /*#__PURE__*/_createClass(function Message(to, from, type, object) {
   _classCallCheck(this, Message);
 
@@ -106,6 +109,14 @@ var CallerPackage = /*#__PURE__*/function () {
         } else if (message.type == "PING_POPUP_ALIVE") {
           this.eventEmitter.emit(message.type);
         } else if (message.type == "ACK_SESSION_DETAILS") {
+          this.callObject = message.object;
+
+          if (this.callObject.startTime == "") {
+            this.callActive = 0;
+          } else if (this.callObject.endTime == "") {
+            this.callActive = 1;
+          }
+
           this.eventEmitter.emit(message.type);
         } else {
           console.log("UNKNOWN TYPE: ", message);
@@ -149,6 +160,9 @@ var CallerPackage = /*#__PURE__*/function () {
     value: function connectToServer(callback) {
       if (localStorage.getItem("is_popup_active") === null) {
         window.open("./CallerPackage/popup.html", "connection", "left=0, top=0, width=200, height=200");
+      } else {
+        console.log('Session details request');
+        this.sendEngine(new Message("WRAPPER", "PARENT", "REQUEST_SESSION_DETAILS", {}));
       }
 
       callback();
@@ -210,7 +224,7 @@ module.exports = {
   CallerPackage: CallerPackage
 };
 
-},{"events":3}],2:[function(require,module,exports){
+},{"events":3,"jssip/lib/Constants":4}],2:[function(require,module,exports){
 "use strict";
 
 var _require = require("./CallerPackage/client/client.js"),
@@ -257,7 +271,7 @@ connect_button.addEventListener("click", function () {
 });
 call_button.addEventListener("click", function () {
   //resetState();
-  callerPackage.call("4153260912");
+  callerPackage.call(document.getElementById('phone-number').value);
 });
 hangup_button.addEventListener("click", function () {
   callerPackage.endOut();
@@ -284,14 +298,14 @@ callerPackage.eventEmitter.on("INFORM_SOCKET_DISCONNECTED", function () {
 });
 callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_START", function () {
   resetState();
-  callActive = "CallActve : Active";
+  callActive = "CallActive : Active";
   callObject = callerPackage.getCallObject();
   displayCallObject();
   document.getElementById("call-active-info").innerText = callActive;
 });
 callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_END", function () {
   resetState();
-  callActive = "CallActve : Inative";
+  callActive = "CallActive : Inactive";
   callObject = callerPackage.getCallObject();
   displayCallObject();
   resetHold();
@@ -300,7 +314,7 @@ callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_END", function () {
 });
 callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_FAIL", function () {
   resetState();
-  callActive = "CallActve : FAIL";
+  callActive = "CallActive : FAIL";
   callObject = callerPackage.getCallObject();
   displayCallObject();
   resetHold();
@@ -331,8 +345,24 @@ callerPackage.eventEmitter.on("ACK_CALL_UNMUTE", function () {
   displayCallObject();
   document.getElementById("mute-info").innerText = mute;
 });
+callerPackage.eventEmitter.on("ACK_SESSION_DETAILS", function () {
+  console.log('Caught session details');
+  callObject = callerPackage.getCallObject();
+  displayCallObject();
+
+  if (callObject.mute == true) {
+    mute = "Mute State : Mute";
+    document.getElementById("mute-info").innerText = mute;
+  }
+
+  if (callObject.hold == true) {
+    hold = "Hold State : Hold";
+    document.getElementById("hold-info").innerText = hold;
+  }
+});
 
 function displayCallObject() {
+  console.log('Displaying call obj');
   document.getElementById("call-object-info").innerText = "Call Details: " + JSON.stringify(callObject);
 }
 
@@ -862,6 +892,230 @@ function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
     });
   } else {
     throw new TypeError('The "emitter" argument must be of type EventEmitter. Received type ' + typeof emitter);
+  }
+}
+
+},{}],4:[function(require,module,exports){
+const pkg = require('../package.json');
+
+module.exports = {
+  USER_AGENT : `${pkg.title} ${pkg.version}`,
+
+  // SIP scheme.
+  SIP  : 'sip',
+  SIPS : 'sips',
+
+  // End and Failure causes.
+  causes : {
+    // Generic error causes.
+    CONNECTION_ERROR : 'Connection Error',
+    REQUEST_TIMEOUT  : 'Request Timeout',
+    SIP_FAILURE_CODE : 'SIP Failure Code',
+    INTERNAL_ERROR   : 'Internal Error',
+
+    // SIP error causes.
+    BUSY                 : 'Busy',
+    REJECTED             : 'Rejected',
+    REDIRECTED           : 'Redirected',
+    UNAVAILABLE          : 'Unavailable',
+    NOT_FOUND            : 'Not Found',
+    ADDRESS_INCOMPLETE   : 'Address Incomplete',
+    INCOMPATIBLE_SDP     : 'Incompatible SDP',
+    MISSING_SDP          : 'Missing SDP',
+    AUTHENTICATION_ERROR : 'Authentication Error',
+
+    // Session error causes.
+    BYE                      : 'Terminated',
+    WEBRTC_ERROR             : 'WebRTC Error',
+    CANCELED                 : 'Canceled',
+    NO_ANSWER                : 'No Answer',
+    EXPIRES                  : 'Expires',
+    NO_ACK                   : 'No ACK',
+    DIALOG_ERROR             : 'Dialog Error',
+    USER_DENIED_MEDIA_ACCESS : 'User Denied Media Access',
+    BAD_MEDIA_DESCRIPTION    : 'Bad Media Description',
+    RTP_TIMEOUT              : 'RTP Timeout'
+  },
+
+  SIP_ERROR_CAUSES : {
+    REDIRECTED           : [ 300, 301, 302, 305, 380 ],
+    BUSY                 : [ 486, 600 ],
+    REJECTED             : [ 403, 603 ],
+    NOT_FOUND            : [ 404, 604 ],
+    UNAVAILABLE          : [ 480, 410, 408, 430 ],
+    ADDRESS_INCOMPLETE   : [ 484, 424 ],
+    INCOMPATIBLE_SDP     : [ 488, 606 ],
+    AUTHENTICATION_ERROR : [ 401, 407 ]
+  },
+
+  // SIP Methods.
+  ACK       : 'ACK',
+  BYE       : 'BYE',
+  CANCEL    : 'CANCEL',
+  INFO      : 'INFO',
+  INVITE    : 'INVITE',
+  MESSAGE   : 'MESSAGE',
+  NOTIFY    : 'NOTIFY',
+  OPTIONS   : 'OPTIONS',
+  REGISTER  : 'REGISTER',
+  REFER     : 'REFER',
+  UPDATE    : 'UPDATE',
+  SUBSCRIBE : 'SUBSCRIBE',
+
+  // DTMF transport methods.
+  DTMF_TRANSPORT : {
+    INFO    : 'INFO',
+    RFC2833 : 'RFC2833'
+  },
+
+  /* SIP Response Reasons
+   * DOC: https://www.iana.org/assignments/sip-parameters
+   * Copied from https://github.com/versatica/OverSIP/blob/master/lib/oversip/sip/constants.rb#L7
+   */
+  REASON_PHRASE : {
+    100 : 'Trying',
+    180 : 'Ringing',
+    181 : 'Call Is Being Forwarded',
+    182 : 'Queued',
+    183 : 'Session Progress',
+    199 : 'Early Dialog Terminated', // draft-ietf-sipcore-199
+    200 : 'OK',
+    202 : 'Accepted', // RFC 3265
+    204 : 'No Notification', // RFC 5839
+    300 : 'Multiple Choices',
+    301 : 'Moved Permanently',
+    302 : 'Moved Temporarily',
+    305 : 'Use Proxy',
+    380 : 'Alternative Service',
+    400 : 'Bad Request',
+    401 : 'Unauthorized',
+    402 : 'Payment Required',
+    403 : 'Forbidden',
+    404 : 'Not Found',
+    405 : 'Method Not Allowed',
+    406 : 'Not Acceptable',
+    407 : 'Proxy Authentication Required',
+    408 : 'Request Timeout',
+    410 : 'Gone',
+    412 : 'Conditional Request Failed', // RFC 3903
+    413 : 'Request Entity Too Large',
+    414 : 'Request-URI Too Long',
+    415 : 'Unsupported Media Type',
+    416 : 'Unsupported URI Scheme',
+    417 : 'Unknown Resource-Priority', // RFC 4412
+    420 : 'Bad Extension',
+    421 : 'Extension Required',
+    422 : 'Session Interval Too Small', // RFC 4028
+    423 : 'Interval Too Brief',
+    424 : 'Bad Location Information', // RFC 6442
+    428 : 'Use Identity Header', // RFC 4474
+    429 : 'Provide Referrer Identity', // RFC 3892
+    430 : 'Flow Failed', // RFC 5626
+    433 : 'Anonymity Disallowed', // RFC 5079
+    436 : 'Bad Identity-Info', // RFC 4474
+    437 : 'Unsupported Certificate', // RFC 4744
+    438 : 'Invalid Identity Header', // RFC 4744
+    439 : 'First Hop Lacks Outbound Support', // RFC 5626
+    440 : 'Max-Breadth Exceeded', // RFC 5393
+    469 : 'Bad Info Package', // draft-ietf-sipcore-info-events
+    470 : 'Consent Needed', // RFC 5360
+    478 : 'Unresolvable Destination', // Custom code copied from Kamailio.
+    480 : 'Temporarily Unavailable',
+    481 : 'Call/Transaction Does Not Exist',
+    482 : 'Loop Detected',
+    483 : 'Too Many Hops',
+    484 : 'Address Incomplete',
+    485 : 'Ambiguous',
+    486 : 'Busy Here',
+    487 : 'Request Terminated',
+    488 : 'Not Acceptable Here',
+    489 : 'Bad Event', // RFC 3265
+    491 : 'Request Pending',
+    493 : 'Undecipherable',
+    494 : 'Security Agreement Required', // RFC 3329
+    500 : 'JsSIP Internal Error',
+    501 : 'Not Implemented',
+    502 : 'Bad Gateway',
+    503 : 'Service Unavailable',
+    504 : 'Server Time-out',
+    505 : 'Version Not Supported',
+    513 : 'Message Too Large',
+    580 : 'Precondition Failure', // RFC 3312
+    600 : 'Busy Everywhere',
+    603 : 'Decline',
+    604 : 'Does Not Exist Anywhere',
+    606 : 'Not Acceptable'
+  },
+
+  ALLOWED_METHODS                  : 'INVITE,ACK,CANCEL,BYE,UPDATE,MESSAGE,OPTIONS,REFER,INFO,NOTIFY',
+  ACCEPTED_BODY_TYPES              : 'application/sdp, application/dtmf-relay',
+  MAX_FORWARDS                     : 69,
+  SESSION_EXPIRES                  : 90,
+  MIN_SESSION_EXPIRES              : 60,
+  CONNECTION_RECOVERY_MAX_INTERVAL : 30,
+  CONNECTION_RECOVERY_MIN_INTERVAL : 2
+};
+
+},{"../package.json":5}],5:[function(require,module,exports){
+module.exports={
+  "name": "jssip",
+  "title": "JsSIP",
+  "description": "the Javascript SIP library",
+  "version": "3.9.0",
+  "homepage": "https://jssip.net",
+  "contributors": [
+    "José Luis Millán <jmillan@aliax.net> (https://github.com/jmillan)",
+    "Iñaki Baz Castillo <ibc@aliax.net> (https://inakibaz.me)"
+  ],
+  "types": "lib/JsSIP.d.ts",
+  "main": "lib-es5/JsSIP.js",
+  "keywords": [
+    "sip",
+    "websocket",
+    "webrtc",
+    "node",
+    "browser",
+    "library"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/versatica/JsSIP.git"
+  },
+  "bugs": {
+    "url": "https://github.com/versatica/JsSIP/issues"
+  },
+  "dependencies": {
+    "@types/debug": "^4.1.5",
+    "@types/node": "^14.14.34",
+    "debug": "^4.3.1",
+    "events": "^3.3.0",
+    "sdp-transform": "^2.14.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.13.10",
+    "@babel/preset-env": "^7.13.10",
+    "ansi-colors": "^3.2.4",
+    "browserify": "^16.5.1",
+    "eslint": "^5.16.0",
+    "fancy-log": "^1.3.3",
+    "gulp": "^4.0.2",
+    "gulp-babel": "^8.0.0",
+    "gulp-eslint": "^5.0.0",
+    "gulp-expect-file": "^1.0.2",
+    "gulp-header": "^2.0.9",
+    "gulp-nodeunit-runner": "^0.2.2",
+    "gulp-plumber": "^1.2.1",
+    "gulp-rename": "^1.4.0",
+    "gulp-uglify-es": "^1.0.4",
+    "pegjs": "^0.7.0",
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0"
+  },
+  "scripts": {
+    "lint": "gulp lint",
+    "test": "gulp test",
+    "prepublishOnly": "gulp babel"
   }
 }
 

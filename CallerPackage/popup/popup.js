@@ -192,7 +192,13 @@ class JsSIP_Wrapper {
           call_unhold();
         } else if (message.type == "REQUEST_CALL_MUTE") {
           call_mute();
-        } else if (message.type == "REQUEST_CALL_UNMUTE") {
+        } else if (message.type == "REQUEST_SESSION_DETAILS") {
+          channel.postMessage({
+            to: "PARENT",
+            from: "POPUP",
+            type: "ACK_SESSION_DETAILS",
+            object: callObject,
+          });        } else if (message.type == "REQUEST_CALL_UNMUTE") {
           call_unmute();
         } else if (message.type == "ACK_OUTGOING_CALL_START") {
           //ring.pause();
@@ -217,7 +223,7 @@ class JsSIP_Wrapper {
           });
           callObject = {
             sender: "",
-            receiver: "4157614983",
+            receiver: "",
             startTime: "",
             endTime: "",
             hold: false,
@@ -234,7 +240,7 @@ class JsSIP_Wrapper {
           });
           callObject = {
             sender: "",
-            receiver: "4157614983",
+            receiver: "",
             startTime: "",
             endTime: "",
             hold: false,

@@ -44,7 +44,7 @@ connect_button.addEventListener("click", () => {
 
 call_button.addEventListener("click", () => {
   //resetState();
-  callerPackage.call("4153260912");
+  callerPackage.call(document.getElementById('phone-number').value);
 });
 
 hangup_button.addEventListener("click", () => {
@@ -79,7 +79,7 @@ callerPackage.eventEmitter.on("INFORM_SOCKET_DISCONNECTED", () => {
 
 callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_START", () => {
   resetState();
-  callActive = "CallActve : Active";
+  callActive = "CallActive : Active";
   callObject= callerPackage.getCallObject(); 
   displayCallObject();
   document.getElementById("call-active-info").innerText = callActive;
@@ -87,7 +87,7 @@ callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_START", () => {
 
 callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_END", () => {
   resetState();
-  callActive = "CallActve : Inative";
+  callActive = "CallActive : Inactive";
   callObject= callerPackage.getCallObject(); 
   displayCallObject();
   resetHold();
@@ -97,7 +97,7 @@ callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_END", () => {
 
 callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_FAIL", () => {
   resetState();
-  callActive = "CallActve : FAIL";
+  callActive = "CallActive : FAIL";
   callObject= callerPackage.getCallObject(); 
   displayCallObject();
   resetHold();
@@ -133,7 +133,25 @@ callerPackage.eventEmitter.on("ACK_CALL_UNMUTE", () => {
   document.getElementById("mute-info").innerText = mute;
 });
 
+
+callerPackage.eventEmitter.on("ACK_SESSION_DETAILS", () => {
+  console.log('Caught session details');
+  callObject= callerPackage.getCallObject(); 
+  displayCallObject();
+  if(callObject.mute==true){
+    mute = "Mute State : Mute";
+    document.getElementById("mute-info").innerText = mute;
+  }
+  if(callObject.hold==true){
+    hold = "Hold State : Hold";
+    document.getElementById("hold-info").innerText = hold;
+  }
+
+});
+
+
 function displayCallObject(){
+  console.log('Displaying call obj');
   document.getElementById("call-object-info").innerText = "Call Details: " +JSON.stringify(callObject);
 }
 
