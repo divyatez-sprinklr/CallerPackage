@@ -48,9 +48,9 @@ var CallerPackage = /*#__PURE__*/function () {
   _createClass(CallerPackage, [{
     key: "receiveEngine",
     value: function receiveEngine(message) {
-      console.log(message);
-
       if (message.to == "PARENT") {
+        console.log(message);
+
         if (message.type == "INFORM_SOCKET_CONNECTED") {
           this.eventEmitter.emit(message.type);
         } else if (message.type == "INFORM_SOCKET_DISCONNECTED") {
@@ -58,6 +58,8 @@ var CallerPackage = /*#__PURE__*/function () {
         } else if (message.type == "ACK_OUTGOING_CALL_START") {
           this.eventEmitter.emit(message.type);
         } else if (message.type == "ACK_OUTGOING_CALL_END") {
+          this.eventEmitter.emit(message.type);
+        } else if (message.type == "ACK_OUTGOING_CALL_FAIL") {
           this.eventEmitter.emit(message.type);
         } else if (message.type == "ACK_CALL_HOLD") {
           this.eventEmitter.emit(message.type);

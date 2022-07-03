@@ -50,48 +50,43 @@ class Popup {
 
   handleOutgoingCallStart(callObject) {
     console.log("HandleOutgoingCallStart");
-    this.callObject.receiver = callObject.receiver;
-    //this.callObject.startTime = Date.now().toString();
-    this.JsSIP_Wrapper.callObject.receiver = callObject.receiver;
-    // console.log("Emitting request");
-    this.eventEmitter.emit("REQUEST_OUTGOING_CALL_START");
+    this.channel.postMessage({to:'WRAPPER',from:'POPUP',type:'REQUEST_OUTGOING_CALL_START',object:{receiver: callObject.receiver}});
   }
 
   handleOutgoingCallEnd() {
     console.log("handleOutgoingCallEnd");
-    //this.callObject.startTime = this.JsSIP_Wrapper.endTime();
-    // this.callObject.endTime = callObject.getEndTime();;
-    this.eventEmitter.emit("REQUEST_OUTGOING_CALL_END");
+    this.channel.postMessage({to:'WRAPPER',from:'POPUP',type:'REQUEST_OUTGOING_CALL_END',object:{}});
   }
 
 
   handleCallHold(){
     console.log('handleCallHold');
-    this.eventEmitter.emit("REQUEST_CALL_HOLD");
+    this.channel.postMessage({to:'WRAPPER',from:'POPUP',type:'REQUEST_CALL_HOLD',object:{}});
   }
 
   handleCallUnhold(){
     console.log('handleCallUnhold');
-    this.eventEmitter.emit("REQUEST_CALL_UNHOLD");
+    this.channel.postMessage({to:'WRAPPER',from:'POPUP',type:'REQUEST_CALL_UNHOLD',object:{}});
   }
 
   handleCallMute(){
     console.log('handleCallMute');
-    this.eventEmitter.emit("REQUEST_CALL_MUTE");
+    this.channel.postMessage({to:'WRAPPER',from:'POPUP',type:'REQUEST_CALL_MUTE',object:{}});
   }
 
   handleCallUnmute(){
     console.log('handleCallUnmute');
-    this.eventEmitter.emit("REQUEST_CALL_UNMUTE");
+    this.channel.postMessage({to:'WRAPPER',from:'POPUP',type:'REQUEST_CALL_UNMUTE',object:{}});
   }
 
   handleSessionDetails(){
-     this.sendEngine(new Message("PARENT","POPUP","ACK_SESSION_DETAILS",this.callObject));
+    console.log('handleSessionDetails');
+    this.sendEngine(new Message("PARENT","POPUP","ACK_SESSION_DETAILS",this.callObject));
   }
 
   receiveEngine(message) {
-    console.log("Recieved:", message);
     if (message.to == "POPUP") {
+      console.log("Recieved:", message);
       if (message.type == "REQUEST_OUTGOING_CALL_START") {
         this.handleOutgoingCallStart(message.object);
       } else if (message.type == "REQUEST_OUTGOING_CALL_END") {
@@ -125,38 +120,82 @@ class JsSIP_Wrapper {
     this.remoteAudio = null;
     this.remoteView = null;
     this.localView = null;
-    this.channel = new BroadcastChannel("client_popup_channel");
-    this.callObject = {
-      sender: "",
-      receiver: "4157614983",
-      startTime: "",
-      endTime: "",
-      hold: false,
-      mute: false,
-    };
     setTimeout(() => {
       this.connect();
     }, 1000);
     setInterval(() => {
-      this.channel.postMessage(new Message('PARENT','POPUP',"PING_SESSION_DETAILS",this.callObject));
+      let channel = new BroadcastChannel("client_popup_channel");
+      channel.postMessage(new Message('PARENT','POPUP',"PING_POPUP_ALIVE",{}));
     },10000);
   }
 
+  
 
 
   connect() {
     const JsSIP = require("JsSIP");
     JsSIP.debug.enable("JsSIP:*");
     let session;
-    // Debugging purpose :)
     let [phone, call] = [null, null];
-
     let [sip, password, server_address, port] = [
       "1000",
       "1000_client",
       "18.212.171.223",
       "7443/ws",
     ];
+
+    let callObject = {
+        sender: "",
+        receiver: "4157614983",
+        startTime: "",
+        endTime: "",
+        hold: false,
+        mute: false,
+    };
+
+    let channel = new BroadcastChannel("client_popup_channel");
+    channel.onmessage = (messageEvent) => {
+      receiveEngine(messageEvent.data);
+    };
+
+    function receiveEngine(message) {
+      if (message.to == "WRAPPER") {
+        console.log("Recieved in Wrapper:", message);
+        if(message.type == "REQUEST_OUTGOING_CALL_START"){
+          callObject.receiver = message.object.receiver;
+          call_outgoing(callObject.receiver);
+        }else if(message.type == "REQUEST_OUTGOING_CALL_END"){
+          call_terminate();
+        }else if(message.type == "REQUEST_CALL_HOLD"){
+          call_hold();
+        }else if(message.type == "REQUEST_CALL_UNHOLD"){
+          call_unhold();
+        }else if(message.type == "REQUEST_CALL_MUTE"){
+          call_mute();
+        }else if(message.type == "REQUEST_CALL_UNMUTE"){
+          call_unmute();
+        }else if (message.type == "ACK_OUTGOING_CALL_START") {
+          callObject.startTime = session.start_time;
+          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_OUTGOING_CALL_START',object:callObject});
+        } else if (message.type == "ACK_OUTGOING_CALL_END") {
+          callObject.endTime = session.end_time;
+          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_OUTGOING_CALL_END',object:callObject});
+          callObject = {
+            sender: "",
+            receiver: "4157614983",
+            startTime: "",
+            endTime: "",
+            hold: false,
+            mute: false,
+          };
+          session = null;
+        } else {
+          console.log("UNKNOWN TYPE: ", message);
+        }
+     // }
+      }
+    }
+
 
     const callOptions = {
       eventHandlers: {
@@ -221,7 +260,6 @@ class JsSIP_Wrapper {
     let userAgent = new JsSIP.UA(configuration);
     userAgent.start();
     
-    // ________________________________________________________________
 
     userAgent.on("connected",  (e) => {
       
@@ -287,21 +325,21 @@ class JsSIP_Wrapper {
           failed: (e) => {
             setTimeout(()=>{
               let channel = new BroadcastChannel("client_popup_channel");
-              channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_OUTGOING_CALL_FAILED',object:{}});
+              channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_OUTGOING_CALL_FAIL',object:{object: e.data}});
             },0);
             console.log("ACK_OUTGOING_CALL_FAILED",e.data);
           },
           ended: (e) => {
             setTimeout(()=>{
               let channel = new BroadcastChannel("client_popup_channel");
-              channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_OUTGOING_CALL_ENDED',object:{}});
+              channel.postMessage({to:'WRAPPER',from:'WRAPPER',type:'ACK_OUTGOING_CALL_END',object:{}});
             },0);
             console.log("ACK_OUTGOING_CALL_ENDED",e.data);
           },
           confirmed:(e) => {
             setTimeout(()=>{
               let channel = new BroadcastChannel("client_popup_channel");
-              channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_OUTGOING_CALL_START',object:{startTime: session.startTime()}});
+              channel.postMessage({to:'WRAPPER',from:'WRAPPER',type:'ACK_OUTGOING_CALL_START',object:{}});
             },0);
             console.log("ACK_OUTGOING_CALL_STARTED");
           },
@@ -383,14 +421,14 @@ class JsSIP_Wrapper {
 
 
     function endTime(){
-      return session.endTime();
+      return session.end_Time;
     }
 
     function startTime(){
       return session.startTime();
     }
 
-    this.eventEmitter.on("REQUEST_CALL_HOLD", () => {
+    function call_hold(){
       console.log("Request to hold caught by wrapper");
       session.hold();
       if(session.isOnHold().local){
@@ -406,9 +444,9 @@ class JsSIP_Wrapper {
         },0);
         console.log("ACK_CALL_HOLD_FAILED");
       }
-    });
+    }
 
-    this.eventEmitter.on("REQUEST_CALL_UNHOLD", () => {
+    function call_unhold(){
       console.log("Request to unhold caught by wrapper");
       session.unhold();
       if(!session.isOnHold().local){
@@ -424,10 +462,9 @@ class JsSIP_Wrapper {
         },0);
         console.log("ACK_CALL_UNHOLD_FAILED");
       }
-     
-    });
+    }
 
-    this.eventEmitter.on("REQUEST_CALL_MUTE", () => {
+    function call_mute(){
       console.log("Request to MUTE caught by wrapper");
       
       session.mute();
@@ -444,9 +481,9 @@ class JsSIP_Wrapper {
         },0);
         console.log("ACK_CALL_MUTE_FAILED");
       }
-    });
+    }
 
-    this.eventEmitter.on("REQUEST_CALL_UNMUTE", () => {
+    function call_unmute(){
       console.log("Request to UNMUTE caught by wrapper");
       session.unmute();
       if(!session.isMuted().audio){
@@ -463,17 +500,25 @@ class JsSIP_Wrapper {
         console.log("ACK_CALL_UNMUTE_FAILED");
       }
       console.log("ACK_CALL_UNMUTE");
-    });
+    } 
 
-    this.eventEmitter.on("REQUEST_OUTGOING_CALL_START", () => {
-      console.log("Request to call caught by wrapper");
-      call_outgoing(this.callObject.receiver);
-    });
+  
+    // this.eventEmitter.on("REQUEST_CALL_MUTE", () => {
+      
+    // });
 
-    this.eventEmitter.on("REQUEST_OUTGOING_CALL_END", () => {
-      this.callObject.endTime = endTime();
-      call_terminate();
-    });
+    // this.eventEmitter.on("REQUEST_CALL_UNMUTE", () => {
+      
+    // });
+
+    // this.eventEmitter.on("REQUEST_OUTGOING_CALL_START", () => {
+    //   console.log("Request to call caught by wrapper");
+    //   call_outgoing(callObject.receiver);
+    // });
+
+    // this.eventEmitter.on("REQUEST_OUTGOING_CALL_END", () => {
+    //   call_terminate();
+    // });
 
     // this.eventEmitter.on('REQUEST_INCOMING_CALL_START',()=>{
     //   call_answer();
