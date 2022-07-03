@@ -58,6 +58,17 @@ var Popup = /*#__PURE__*/function () {
       }, 1000);
     }
   }, {
+    key: "informUnload",
+    value: function informUnload() {
+      this.JsSIP_Wrapper.call_terminate();
+      this.channel.postMessage({
+        to: "PARENT",
+        from: "POPUP",
+        type: "POPUP_CLOSED",
+        object: {}
+      });
+    }
+  }, {
     key: "resetCallObject",
     value: function resetCallObject() {
       sender("");
@@ -679,9 +690,13 @@ var _require = require("./popup.js"),
 window.addEventListener("DOMContentLoaded", function () {
   localStorage.setItem("is_popup_active", "true");
 });
-window.addEventListener("beforeunload", function () {
-  localStorage.clear();
-});
+
+window.onbeforeunload = function (event) {
+  localStorage.clear(); //popup.informUnload();
+
+  return '';
+};
+
 var popup = new Popup({
   sip: "1000",
   password: "1000_client",

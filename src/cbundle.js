@@ -125,6 +125,13 @@ var CallerPackage = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "on",
+    value: function on(header, callback) {
+      this.eventEmitter.on(header, function () {
+        callback();
+      });
+    }
+  }, {
     key: "sendEngine",
     value: function sendEngine(message) {
       console.log("Sending : " + message.type);
@@ -288,22 +295,22 @@ mute_button.addEventListener("click", function () {
 unmute_button.addEventListener("click", function () {
   callerPackage.unmute();
 });
-callerPackage.eventEmitter.on("INFORM_SOCKET_CONNECTED", function () {
+callerPackage.on("INFORM_SOCKET_CONNECTED", function () {
   socket = "Socket : Connected";
   document.getElementById("socket-info").innerText = socket;
 });
-callerPackage.eventEmitter.on("INFORM_SOCKET_DISCONNECTED", function () {
+callerPackage.on("INFORM_SOCKET_DISCONNECTED", function () {
   socket = "Socket : Disconnected";
   document.getElementById("socket-info").innerText = socket;
 });
-callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_START", function () {
+callerPackage.on("ACK_OUTGOING_CALL_START", function () {
   resetState();
   callActive = "CallActive : Active";
   callObject = callerPackage.getCallObject();
   displayCallObject();
   document.getElementById("call-active-info").innerText = callActive;
 });
-callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_END", function () {
+callerPackage.on("ACK_OUTGOING_CALL_END", function () {
   resetState();
   callActive = "CallActive : Inactive";
   callObject = callerPackage.getCallObject();
@@ -312,7 +319,7 @@ callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_END", function () {
   resetMute();
   document.getElementById("call-active-info").innerText = callActive;
 });
-callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_FAIL", function () {
+callerPackage.on("ACK_OUTGOING_CALL_FAIL", function () {
   resetState();
   callActive = "CallActive : FAIL";
   callObject = callerPackage.getCallObject();
@@ -321,31 +328,31 @@ callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_FAIL", function () {
   resetMute();
   document.getElementById("call-active-info").innerText = callActive;
 });
-callerPackage.eventEmitter.on("ACK_CALL_HOLD", function () {
+callerPackage.on("ACK_CALL_HOLD", function () {
   hold = "Hold State : Hold";
   callObject = callerPackage.getCallObject();
   displayCallObject();
   document.getElementById("hold-info").innerText = hold;
 });
-callerPackage.eventEmitter.on("ACK_CALL_UNHOLD", function () {
+callerPackage.on("ACK_CALL_UNHOLD", function () {
   hold = "Hold State : Unhold";
   callObject = callerPackage.getCallObject();
   displayCallObject();
   document.getElementById("hold-info").innerText = hold;
 });
-callerPackage.eventEmitter.on("ACK_CALL_MUTE", function () {
+callerPackage.on("ACK_CALL_MUTE", function () {
   mute = "Mute State : Mute";
   callObject = callerPackage.getCallObject();
   displayCallObject();
   document.getElementById("mute-info").innerText = mute;
 });
-callerPackage.eventEmitter.on("ACK_CALL_UNMUTE", function () {
+callerPackage.on("ACK_CALL_UNMUTE", function () {
   mute = "Mute State : Unmute";
   callObject = callerPackage.getCallObject();
   displayCallObject();
   document.getElementById("mute-info").innerText = mute;
 });
-callerPackage.eventEmitter.on("ACK_SESSION_DETAILS", function () {
+callerPackage.on("ACK_SESSION_DETAILS", function () {
   console.log('Caught session details');
   callObject = callerPackage.getCallObject();
   displayCallObject();
@@ -359,6 +366,10 @@ callerPackage.eventEmitter.on("ACK_SESSION_DETAILS", function () {
     hold = "Hold State : Hold";
     document.getElementById("hold-info").innerText = hold;
   }
+});
+callerPackage.on("POPUP_CLOSED", function () {
+  socket = "Socket : Disconnected";
+  document.getElementById("socket-info").innerText = socket;
 });
 
 function displayCallObject() {

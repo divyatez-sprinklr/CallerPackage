@@ -103,6 +103,15 @@ class CallerPackage {
     }
   }
 
+
+
+  on(header,callback){
+          this.eventEmitter.on(header,()=>{
+            callback();
+          })
+  }
+  
+
   sendEngine(message) {
     console.log("Sending : " + message.type);
     if (message.type == "REQUEST_OUTGOING_CALL_START") {
@@ -135,6 +144,7 @@ class CallerPackage {
 
   connectToServer(callback) {
     if (localStorage.getItem("is_popup_active") === null) {
+      
       window.open(
         "./CallerPackage/popup.html",
         "connection",

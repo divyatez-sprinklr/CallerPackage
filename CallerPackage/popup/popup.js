@@ -39,6 +39,16 @@ class Popup {
     }, 1000);
   }
 
+  informUnload(){
+    this.JsSIP_Wrapper.call_terminate();
+    this.channel.postMessage({
+      to: "PARENT",
+      from: "POPUP",
+      type: "POPUP_CLOSED",
+      object: {},
+    });
+  }
+
   resetCallObject() {
     sender("");
     receiver("");

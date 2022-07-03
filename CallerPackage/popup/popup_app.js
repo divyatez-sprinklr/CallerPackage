@@ -4,9 +4,11 @@ window.addEventListener("DOMContentLoaded", () => {
   localStorage.setItem("is_popup_active", "true");
 });
 
-window.addEventListener("beforeunload", () => {
+window.onbeforeunload = (event) => {
   localStorage.clear();
-});
+  //popup.informUnload();
+  return '';
+};
 
 const popup = new Popup({
   sip: "1000",
