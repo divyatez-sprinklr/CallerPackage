@@ -5,9 +5,10 @@
   "description": "Caller Package",
   "main": "./src/app.js",
   "scripts": {
-    "command1": "browserify ./client_app.js > ./src/client/cbundle.js -t babelify",
-    "command2": "browserify ./popup_app.js > ./src/popup/pbundle.js -t babelify",
-    "build": "npm run command1 & npm run command2"
+    "dev-command1": "browserify ./CallerPackage/popup/popup_app.js > ./CallerPackage/popup/popup_bundle.js -t babelify",
+    "command1": "browserify ./client_app.js > ./src/cbundle.js -t babelify",
+
+    "build": "npm run dev-command1 & npm run command1"
   },
   "repository": {
     "type": "git",

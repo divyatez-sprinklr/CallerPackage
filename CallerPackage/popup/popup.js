@@ -1,12 +1,7 @@
-/* Here we need to make logic for popup alongside of jsSip. 
-No need for making it object oriented . Just write it normally.
-We do can divide functions in modules for cleanliness. */
-
-// const {eventEmitter,channel} = require('./popup_constants');
-
-const EventEmitter = require("events");
 const JsSIP = require("jssip");
 JsSIP.debug.enable("JsSIP:*");
+
+const EventEmitter = require("events");
 
 class Message {
   constructor(to, from, type, object) {
@@ -28,7 +23,7 @@ class Popup {
     };
 
     this.JsSIP_Wrapper = new JsSIP_Wrapper(this.eventEmitter, config);
-    // this.JsSIP_Wrapper.sample();
+
     this.callObject = {
       sender: "",
       receiver: "",
@@ -37,6 +32,12 @@ class Popup {
       hold: false,
       mute: false,
     };
+  }
+
+  connect(callback) {
+    setTimeout(() => {
+      this.JsSIP_Wrapper.connect(callback);
+    }, 1000);
   }
 
   resetCallObject() {
@@ -50,38 +51,69 @@ class Popup {
 
   handleOutgoingCallStart(callObject) {
     console.log("HandleOutgoingCallStart");
-    this.channel.postMessage({to:'WRAPPER',from:'POPUP',type:'REQUEST_OUTGOING_CALL_START',object:{receiver: callObject.receiver}});
+    this.channel.postMessage({
+      to: "WRAPPER",
+      from: "POPUP",
+      type: "REQUEST_OUTGOING_CALL_START",
+      object: { receiver: callObject.receiver },
+    });
   }
 
   handleOutgoingCallEnd() {
     console.log("handleOutgoingCallEnd");
-    this.channel.postMessage({to:'WRAPPER',from:'POPUP',type:'REQUEST_OUTGOING_CALL_END',object:{}});
+    this.channel.postMessage({
+      to: "WRAPPER",
+      from: "POPUP",
+      type: "REQUEST_OUTGOING_CALL_END",
+      object: {},
+    });
   }
 
-
-  handleCallHold(){
-    console.log('handleCallHold');
-    this.channel.postMessage({to:'WRAPPER',from:'POPUP',type:'REQUEST_CALL_HOLD',object:{}});
+  handleCallHold() {
+    console.log("handleCallHold");
+    this.channel.postMessage({
+      to: "WRAPPER",
+      from: "POPUP",
+      type: "REQUEST_CALL_HOLD",
+      object: {},
+    });
   }
 
-  handleCallUnhold(){
-    console.log('handleCallUnhold');
-    this.channel.postMessage({to:'WRAPPER',from:'POPUP',type:'REQUEST_CALL_UNHOLD',object:{}});
+  handleCallUnhold() {
+    console.log("handleCallUnhold");
+    this.channel.postMessage({
+      to: "WRAPPER",
+      from: "POPUP",
+      type: "REQUEST_CALL_UNHOLD",
+      object: {},
+    });
   }
 
-  handleCallMute(){
-    console.log('handleCallMute');
-    this.channel.postMessage({to:'WRAPPER',from:'POPUP',type:'REQUEST_CALL_MUTE',object:{}});
+  handleCallMute() {
+    console.log("handleCallMute");
+    this.channel.postMessage({
+      to: "WRAPPER",
+      from: "POPUP",
+      type: "REQUEST_CALL_MUTE",
+      object: {},
+    });
   }
 
-  handleCallUnmute(){
-    console.log('handleCallUnmute');
-    this.channel.postMessage({to:'WRAPPER',from:'POPUP',type:'REQUEST_CALL_UNMUTE',object:{}});
+  handleCallUnmute() {
+    console.log("handleCallUnmute");
+    this.channel.postMessage({
+      to: "WRAPPER",
+      from: "POPUP",
+      type: "REQUEST_CALL_UNMUTE",
+      object: {},
+    });
   }
 
-  handleSessionDetails(){
-    console.log('handleSessionDetails');
-    this.sendEngine(new Message("PARENT","POPUP","ACK_SESSION_DETAILS",this.callObject));
+  handleSessionDetails() {
+    console.log("handleSessionDetails");
+    this.sendEngine(
+      new Message("PARENT", "POPUP", "ACK_SESSION_DETAILS", this.callObject)
+    );
   }
 
   receiveEngine(message) {
@@ -104,7 +136,7 @@ class Popup {
       } else {
         console.log("UNKNOWN TYPE: ", message);
       }
-   // }
+      // }
     }
   }
 }
@@ -112,7 +144,6 @@ class Popup {
 class JsSIP_Wrapper {
   constructor(eventEmitter, config) {
     this.eventEmitter = eventEmitter;
-    this.session = 0;
     this.userAgent = null;
     this.session = null;
     this.config = config;
@@ -120,37 +151,26 @@ class JsSIP_Wrapper {
     this.remoteAudio = null;
     this.remoteView = null;
     this.localView = null;
-    setTimeout(() => {
-      this.connect();
-    }, 1000);
+
     setInterval(() => {
       let channel = new BroadcastChannel("client_popup_channel");
-      channel.postMessage(new Message('PARENT','POPUP',"PING_POPUP_ALIVE",{}));
-    },100000);
+      channel.postMessage(
+        new Message("PARENT", "POPUP", "PING_POPUP_ALIVE", {})
+      );
+    }, 10000);
   }
 
-  
-
-
-  connect() {
-    const JsSIP = require("JsSIP");
-    JsSIP.debug.enable("JsSIP:*");
-    let session;
-    let [phone, call] = [null, null];
-    let [sip, password, server_address, port] = [
-      "1000",
-      "1000_client",
-      "18.212.171.223",
-      "7443/ws",
-    ];
+  connect(callback) {
+    let [userAgent, session] = [null, null];
+    let { sip, password, server_address, port } = this.config;
 
     let callObject = {
-        sender: "",
-        receiver: "4157614983",
-        startTime: "",
-        endTime: "",
-        hold: false,
-        mute: false,
+      sender: "",
+      receiver: "",
+      startTime: "",
+      endTime: "",
+      hold: false,
+      mute: false,
     };
 
     let channel = new BroadcastChannel("client_popup_channel");
@@ -161,25 +181,35 @@ class JsSIP_Wrapper {
     function receiveEngine(message) {
       if (message.to == "WRAPPER") {
         console.log("Recieved in Wrapper:", message);
-        if(message.type == "REQUEST_OUTGOING_CALL_START"){
+        if (message.type == "REQUEST_OUTGOING_CALL_START") {
           callObject.receiver = message.object.receiver;
           call_outgoing(callObject.receiver);
-        }else if(message.type == "REQUEST_OUTGOING_CALL_END"){
+        } else if (message.type == "REQUEST_OUTGOING_CALL_END") {
           call_terminate();
-        }else if(message.type == "REQUEST_CALL_HOLD"){
+        } else if (message.type == "REQUEST_CALL_HOLD") {
           call_hold();
-        }else if(message.type == "REQUEST_CALL_UNHOLD"){
+        } else if (message.type == "REQUEST_CALL_UNHOLD") {
           call_unhold();
-        }else if(message.type == "REQUEST_CALL_MUTE"){
+        } else if (message.type == "REQUEST_CALL_MUTE") {
           call_mute();
-        }else if(message.type == "REQUEST_CALL_UNMUTE"){
+        } else if (message.type == "REQUEST_CALL_UNMUTE") {
           call_unmute();
-        }else if (message.type == "ACK_OUTGOING_CALL_START") {
+        } else if (message.type == "ACK_OUTGOING_CALL_START") {
           callObject.startTime = session.start_time;
-          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_OUTGOING_CALL_START',object:callObject});
+          channel.postMessage({
+            to: "PARENT",
+            from: "POPUP",
+            type: "ACK_OUTGOING_CALL_START",
+            object: callObject,
+          });
         } else if (message.type == "ACK_OUTGOING_CALL_END") {
           callObject.endTime = session.end_time;
-          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_OUTGOING_CALL_END',object:callObject});
+          channel.postMessage({
+            to: "PARENT",
+            from: "POPUP",
+            type: "ACK_OUTGOING_CALL_END",
+            object: callObject,
+          });
           callObject = {
             sender: "",
             receiver: "4157614983",
@@ -192,10 +222,9 @@ class JsSIP_Wrapper {
         } else {
           console.log("UNKNOWN TYPE: ", message);
         }
-     // }
+        // }
       }
     }
-
 
     const callOptions = {
       eventHandlers: {
@@ -257,25 +286,69 @@ class JsSIP_Wrapper {
     let localView = document.getElementById("localMedia");
     let remoteView = document.getElementById("remoteMedia");
 
-    let userAgent = new JsSIP.UA(configuration);
+    userAgent = new JsSIP.UA(configuration);
     userAgent.start();
-    
 
-    userAgent.on("connected",  (e) => {
-      
-      setTimeout(()=>{
+    const addEventListeners = () => {
+      userAgent.on("newRTCSession", function (event) {
+        console.log("newRTCSession", event);
+
+        session = event.session;
+        console.log("Direction: ", session.direction);
+
+        session.on("sdp", function (e) {
+          console.log("call sdp: ", e.sdp);
+        });
+        session.on("accepted", function (e) {
+          console.log("call accepted: ", e);
+        });
+        session.on("progress", function (e) {
+          console.log("call is in progress: ", e);
+        });
+        session.on("confirmed", function (e) {
+          console.log("confirmed by", e.originator);
+        });
+        session.on("ended", function (e) {
+          console.log("Call ended: ", e);
+          call_terminate();
+        });
+        session.on("failed", function (e) {
+          console.log("Call failed: ", e);
+          call_terminate();
+        });
+        session.on("peerconnection", function (e) {
+          console.log("call peerconnection: ", e);
+        });
+      });
+    };
+
+    userAgent.on("connected", (e) => {
+      setTimeout(() => {
         let channel = new BroadcastChannel("client_popup_channel");
-        channel.postMessage({to:'PARENT',from:'POPUP',type:'INFORM_SOCKET_CONNECTED',object:{}});
-      },0);
-      console.log("INFORM_SOCKET_CONNECTED",e.data);
+        channel.postMessage({
+          to: "PARENT",
+          from: "POPUP",
+          type: "INFORM_SOCKET_CONNECTED",
+          object: {},
+        });
+      }, 0);
+
+      addEventListeners();
+      callback();
+      console.log("INFORM_SOCKET_CONNECTED", e.data);
     });
 
-    userAgent.on("disconnected",  (e) => {
-      setTimeout(()=>{
+    userAgent.on("disconnected", (e) => {
+      setTimeout(() => {
         let channel = new BroadcastChannel("client_popup_channel");
-        channel.postMessage({to:'PARENT',from:'POPUP',type:'INFORM_SOCKET_DISCONNECTED',object:{}});
-      },0);
-      console.log("INFORM_SOCKET_DISCONNECTED",e.data);
+        channel.postMessage({
+          to: "PARENT",
+          from: "POPUP",
+          type: "INFORM_SOCKET_DISCONNECTED",
+          object: {},
+        });
+      }, 0);
+      console.log("INFORM_SOCKET_DISCONNECTED", e.data);
     });
 
     userAgent.on("newMessage", function (e) {
@@ -283,64 +356,48 @@ class JsSIP_Wrapper {
       console.log(e);
     });
 
-
-    userAgent.on("newRTCSession", function (event) {
-      console.log("newRTCSession", event);
-      console.log("Direction: ", event.session.direction);
-
-      session = event.session;
-      session.on("sdp", function (e) {
-        console.log("call sdp: ", e.sdp);
-      });
-      session.on("accepted", function (e) {
-        console.log("call accepted: ", e);
-      });
-      session.on("progress", function (e) {
-        console.log("call is in progress: ", e);
-      });
-      session.on("confirmed", function (e) {
-        console.log("confirmed by", e.originator);
-      });
-      session.on("ended", function (e) {
-        console.log("Call ended: ", e);
-        call_terminate();
-      });
-      session.on("failed", function (e) {
-        console.log("Call failed: ", e);
-        call_terminate();
-      });
-      session.on("peerconnection", function (e) {
-        console.log("call peerconnection: ", e);
-      });
-    });
-
     function call_outgoing(number) {
-      console.log("CALL CLICKED",number);
-      
+      console.log("CALL CLICKED", number);
+
       userAgent.call("125311" + number, {
         eventHandlers: {
           progress: function (e) {
             console.log("call is in progress");
           },
           failed: (e) => {
-            setTimeout(()=>{
+            setTimeout(() => {
               let channel = new BroadcastChannel("client_popup_channel");
-              channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_OUTGOING_CALL_FAIL',object:{object: e.data}});
-            },0);
-            console.log("ACK_OUTGOING_CALL_FAILED",e.data);
+              channel.postMessage({
+                to: "PARENT",
+                from: "POPUP",
+                type: "ACK_OUTGOING_CALL_FAIL",
+                object: { object: e.data },
+              });
+            }, 0);
+            console.log("ACK_OUTGOING_CALL_FAILED", e.data);
           },
           ended: (e) => {
-            setTimeout(()=>{
+            setTimeout(() => {
               let channel = new BroadcastChannel("client_popup_channel");
-              channel.postMessage({to:'WRAPPER',from:'WRAPPER',type:'ACK_OUTGOING_CALL_END',object:{}});
-            },0);
-            console.log("ACK_OUTGOING_CALL_ENDED",e.data);
+              channel.postMessage({
+                to: "WRAPPER",
+                from: "WRAPPER",
+                type: "ACK_OUTGOING_CALL_END",
+                object: {},
+              });
+            }, 0);
+            console.log("ACK_OUTGOING_CALL_ENDED", e.data);
           },
-          confirmed:(e) => {
-            setTimeout(()=>{
+          confirmed: (e) => {
+            setTimeout(() => {
               let channel = new BroadcastChannel("client_popup_channel");
-              channel.postMessage({to:'WRAPPER',from:'WRAPPER',type:'ACK_OUTGOING_CALL_START',object:{}});
-            },0);
+              channel.postMessage({
+                to: "WRAPPER",
+                from: "WRAPPER",
+                type: "ACK_OUTGOING_CALL_START",
+                object: {},
+              });
+            }, 0);
             console.log("ACK_OUTGOING_CALL_STARTED");
           },
         },
@@ -418,90 +475,127 @@ class JsSIP_Wrapper {
       });
     }
 
-
-    function endTime(){
+    function endTime() {
       return session.end_Time;
     }
 
-    function startTime(){
+    function startTime() {
       return session.startTime();
     }
 
-    function call_hold(){
+    function call_hold() {
       console.log("Request to hold caught by wrapper");
       session.hold();
-      if(session.isOnHold().local){
-        setTimeout(()=>{
+      if (session.isOnHold().local) {
+        setTimeout(() => {
           let channel = new BroadcastChannel("client_popup_channel");
-          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_CALL_HOLD',object:{}});
-        },0);
+          channel.postMessage({
+            to: "PARENT",
+            from: "POPUP",
+            type: "ACK_CALL_HOLD",
+            object: {},
+          });
+        }, 0);
         console.log("ACK_CALL_HOLD");
-      }else{
-        setTimeout(()=>{
+      } else {
+        setTimeout(() => {
           let channel = new BroadcastChannel("client_popup_channel");
-          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_CALL_HOLD_FAILED',object:{}});
-        },0);
+          channel.postMessage({
+            to: "PARENT",
+            from: "POPUP",
+            type: "ACK_CALL_HOLD_FAILED",
+            object: {},
+          });
+        }, 0);
         console.log("ACK_CALL_HOLD_FAILED");
       }
     }
 
-    function call_unhold(){
+    function call_unhold() {
       console.log("Request to unhold caught by wrapper");
       session.unhold();
-      if(!session.isOnHold().local){
-        setTimeout(()=>{
+      if (!session.isOnHold().local) {
+        setTimeout(() => {
           let channel = new BroadcastChannel("client_popup_channel");
-          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_CALL_UNHOLD',object:{}});
-        },0);
+          channel.postMessage({
+            to: "PARENT",
+            from: "POPUP",
+            type: "ACK_CALL_UNHOLD",
+            object: {},
+          });
+        }, 0);
         console.log("ACK_CALL_UNHOLD");
-      }else{
-        setTimeout(()=>{
+      } else {
+        setTimeout(() => {
           let channel = new BroadcastChannel("client_popup_channel");
-          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_CALL_UNHOLD_FAILED',object:{}});
-        },0);
+          channel.postMessage({
+            to: "PARENT",
+            from: "POPUP",
+            type: "ACK_CALL_UNHOLD_FAILED",
+            object: {},
+          });
+        }, 0);
         console.log("ACK_CALL_UNHOLD_FAILED");
       }
     }
 
-    function call_mute(){
+    function call_mute() {
       console.log("Request to MUTE caught by wrapper");
-      
+
       session.mute();
-      if(session.isMuted().audio){
-        setTimeout(()=>{
+      if (session.isMuted().audio) {
+        setTimeout(() => {
           let channel = new BroadcastChannel("client_popup_channel");
-          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_CALL_MUTE',object:{}});
-        },0);
+          channel.postMessage({
+            to: "PARENT",
+            from: "POPUP",
+            type: "ACK_CALL_MUTE",
+            object: {},
+          });
+        }, 0);
         console.log("ACK_CALL_MUTE");
-      }else{
-        setTimeout(()=>{
+      } else {
+        setTimeout(() => {
           let channel = new BroadcastChannel("client_popup_channel");
-          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_CALL_MUTE_FAILED',object:{}});
-        },0);
+          channel.postMessage({
+            to: "PARENT",
+            from: "POPUP",
+            type: "ACK_CALL_MUTE_FAILED",
+            object: {},
+          });
+        }, 0);
         console.log("ACK_CALL_MUTE_FAILED");
       }
     }
 
-    function call_unmute(){
+    function call_unmute() {
       console.log("Request to UNMUTE caught by wrapper");
       session.unmute();
-      if(!session.isMuted().audio){
-        setTimeout(()=>{
+      if (!session.isMuted().audio) {
+        setTimeout(() => {
           let channel = new BroadcastChannel("client_popup_channel");
-          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_CALL_UNMUTE',object:{}});
-        },0);
+          channel.postMessage({
+            to: "PARENT",
+            from: "POPUP",
+            type: "ACK_CALL_UNMUTE",
+            object: {},
+          });
+        }, 0);
         console.log("ACK_CALL_UNMUTE");
-      }else{
-        setTimeout(()=>{
+      } else {
+        setTimeout(() => {
           let channel = new BroadcastChannel("client_popup_channel");
-          channel.postMessage({to:'PARENT',from:'POPUP',type:'ACK_CALL_UNMUTE_FAILED',object:{}});
-        },0);
+          channel.postMessage({
+            to: "PARENT",
+            from: "POPUP",
+            type: "ACK_CALL_UNMUTE_FAILED",
+            object: {},
+          });
+        }, 0);
         console.log("ACK_CALL_UNMUTE_FAILED");
       }
       console.log("ACK_CALL_UNMUTE");
-    } 
-
-  
+    }
   }
 }
 

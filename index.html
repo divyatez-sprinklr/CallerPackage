@@ -11,7 +11,7 @@
     <style type="text/css">
         body {
             margin: 0;
-            padding: 0;
+            padding: 20px;
             width: 100vw;
             height: 100vh;
             overflow: hidden;
@@ -32,7 +32,7 @@
             padding: 20px 30px;
             display: grid;
             align-items: stretch;
-            place-items: center;
+            justify-items: center;
             grid-template-columns: 1fr 1fr;
             column-gap: 30px;
             row-gap: 20px;
@@ -59,6 +59,10 @@
             background-color: rgb(230, 230, 240);
             box-shadow: 1px 1px 1px 1px darkturquoise;
         }
+
+        button:disabled {
+            visibility: hidden;
+        }
     </style>
 </head>
 
@@ -70,35 +74,44 @@
                        id="phone-number"
                        placeholder="phone number">
             </div>
-            <div class="grid-item">
-                <button id="call">Call</button>
+            <div class="grid-item-large">
+                <button id="connect">Connect</button>
             </div>
             <div class="grid-item">
-                <button id="hangup">Hangup</button>
+                <button id="call"
+                        disabled>Call</button>
             </div>
             <div class="grid-item">
-                <button id="mute">Mute</button>
+                <button id="hangup"
+                        disabled>Hangup</button>
             </div>
             <div class="grid-item">
-                <button id="unmute">Unmute</button>
+                <button id="mute"
+                        disabled>Mute</button>
             </div>
             <div class="grid-item">
-                <button id="hold">Hold</button>
+                <button id="unmute"
+                        disabled>Unmute</button>
             </div>
             <div class="grid-item">
-                <button id="unhold">Unhold</button>
+                <button id="hold"
+                        disabled>Hold</button>
+            </div>
+            <div class="grid-item">
+                <button id="unhold"
+                        disabled>Unhold</button>
             </div>
         </div>
-       
+
     </div>
-    
+
     <p id="socket-info"></p>
     <p id='hold-info'></p>
     <p id="mute-info"></p>
     <p id="call-active-info"></p>
-    
 
-        <script src="./src/client/cbundle.js"></script>
+
+    <script src="./src/cbundle.js"></script>
 </body>
 
 </html>

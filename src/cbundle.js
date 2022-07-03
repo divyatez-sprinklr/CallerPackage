@@ -7,10 +7,6 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-//This is parent window
-// We need to add communication listeners and emittters for dialer window to listen
-// This PARENT need to be done in an object, so that user can instantiate it.
-// Later remove constant also.
 var EventEmitter = require("events");
 
 var Message = /*#__PURE__*/_createClass(function Message(to, from, type, object) {
@@ -110,45 +106,54 @@ var CallerPackage = /*#__PURE__*/function () {
       this.channel.postMessage(message);
     }
   }, {
+    key: "connectToServer",
+    value: function connectToServer(callback) {
+      if (localStorage.getItem("is_popup_active") === null) {
+        window.open("./CallerPackage/popup.html", "connection", "left=0, top=0, width=200, height=200");
+      }
+
+      callback();
+    }
+  }, {
     key: "call",
     value: function call(receiver) {
       this.callObject.receiver = receiver;
-      this.sendEngine(new Message('POPUP', 'PARENT', "REQUEST_OUTGOING_CALL_START", this.callObject));
+      this.sendEngine(new Message("POPUP", "PARENT", "REQUEST_OUTGOING_CALL_START", this.callObject));
     }
   }, {
     key: "endOut",
     value: function endOut() {
-      this.sendEngine(new Message('POPUP', 'PARENT', "REQUEST_OUTGOING_CALL_END", {}));
+      this.sendEngine(new Message("POPUP", "PARENT", "REQUEST_OUTGOING_CALL_END", {}));
     }
   }, {
     key: "endIn",
     value: function endIn() {
-      this.sendEngine(new Message('POPUP', 'PARENT', "REQUEST_INCOMING_CALL_END", {}));
+      this.sendEngine(new Message("POPUP", "PARENT", "REQUEST_INCOMING_CALL_END", {}));
     }
   }, {
     key: "hold",
     value: function hold() {
-      this.sendEngine(new Message('POPUP', 'PARENT', "REQUEST_CALL_HOLD", {}));
+      this.sendEngine(new Message("POPUP", "PARENT", "REQUEST_CALL_HOLD", {}));
     }
   }, {
     key: "unhold",
     value: function unhold() {
-      this.sendEngine(new Message('POPUP', 'PARENT', "REQUEST_CALL_UNHOLD", {}));
+      this.sendEngine(new Message("POPUP", "PARENT", "REQUEST_CALL_UNHOLD", {}));
     }
   }, {
     key: "mute",
     value: function mute() {
-      this.sendEngine(new Message('POPUP', 'PARENT', "REQUEST_CALL_MUTE", {}));
+      this.sendEngine(new Message("POPUP", "PARENT", "REQUEST_CALL_MUTE", {}));
     }
   }, {
     key: "unmute",
     value: function unmute() {
-      this.sendEngine(new Message('POPUP', 'PARENT', "REQUEST_CALL_UNMUTE", {}));
+      this.sendEngine(new Message("POPUP", "PARENT", "REQUEST_CALL_UNMUTE", {}));
     }
   }, {
     key: "accept",
     value: function accept() {
-      this.sendEngine(new Message('POPUP', 'PARENT', "REQUEST_INCOMING_CALL_START", {}));
+      this.sendEngine(new Message("POPUP", "PARENT", "REQUEST_INCOMING_CALL_START", {}));
     }
   }, {
     key: "ping",
@@ -172,62 +177,84 @@ var _require = require("./CallerPackage/client/client.js"),
     CallerPackage = _require.CallerPackage;
 
 var callerPackage = new CallerPackage();
-var mute = 'Mute State : Unmute';
-var hold = 'Hold State : Unhold';
-var socket = 'Socket : Disconnected';
-var callActive = 'CallActve : Inative';
-document.getElementById('socket-info').innerText = socket;
-document.getElementById('mute-info').innerText = hold;
-document.getElementById('hold-info').innerText = mute;
-document.getElementById("call").addEventListener("click", function () {
+var mute = "Mute State : Unmute";
+var hold = "Hold State : Unhold";
+var socket = "Socket : Disconnected";
+var callActive = "CallActve : Inative";
+document.getElementById("socket-info").innerText = socket;
+document.getElementById("mute-info").innerText = hold;
+document.getElementById("hold-info").innerText = mute;
+var connect_button = document.getElementById("connect");
+var call_button = document.getElementById("call");
+var hangup_button = document.getElementById("hangup");
+var mute_button = document.getElementById("mute");
+var unmute_button = document.getElementById("unmute");
+var hold_button = document.getElementById("hold");
+var unhold_button = document.getElementById("unhold");
+
+var toggleButtonState = function toggleButtonState(value) {
+  call_button.disabled = !value;
+  hangup_button.disabled = !value;
+  mute_button.disabled = !value;
+  unmute_button.disabled = !value;
+  hold_button.disabled = !value;
+  unhold_button.disabled = !value;
+};
+
+connect_button.addEventListener("click", function () {
+  callerPackage.connectToServer(function () {
+    toggleButtonState(true);
+  });
+});
+call_button.addEventListener("click", function () {
   callerPackage.call("6285004633");
 });
-document.getElementById("hangup").addEventListener("click", function () {
+hangup_button.addEventListener("click", function () {
   callerPackage.endOut();
 });
-document.getElementById("hold").addEventListener("click", function () {
+hold_button.addEventListener("click", function () {
   callerPackage.hold();
 });
-document.getElementById("unhold").addEventListener("click", function () {
+unhold_button.addEventListener("click", function () {
   callerPackage.unhold();
 });
-document.getElementById("mute").addEventListener("click", function () {
+mute_button.addEventListener("click", function () {
   callerPackage.mute();
 });
-document.getElementById("unmute").addEventListener("click", function () {
+unmute_button.addEventListener("click", function () {
   callerPackage.unmute();
 });
-callerPackage.eventEmitter.on('INFORM_SOCKET_CONNECTED', function () {
-  socket = 'Socket : Connected';
-  document.getElementById('socket-info').innerText = socket;
+callerPackage.eventEmitter.on("INFORM_SOCKET_CONNECTED", function () {
+  socket = "Socket : Connected";
+  document.getElementById("socket-info").innerText = socket;
 });
-callerPackage.eventEmitter.on('INFORM_SOCKET_DISCONNECTED', function () {
-  socket = 'Socket : Disconnected';
-  document.getElementById('socket-info').innerText = socket;
+callerPackage.eventEmitter.on("INFORM_SOCKET_DISCONNECTED", function () {
+  socket = "Socket : Disconnected";
+  document.getElementById("socket-info").innerText = socket;
 });
-callerPackage.eventEmitter.on('ACK_OUTGOING_CALL_START', function () {
-  callActive = 'CallActve : Active';
-  document.getElementById('call-actve-info').innerText = callActive;
+callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_START", function () {
+  callActive = "CallActve : Active";
+  document.getElementById("call-actve-info").innerText = callActive;
 });
-callerPackage.eventEmitter.on('ACK_OUTGOING_CALL_END', function () {
-  callActive = 'CallActve : Inative';
-  document.getElementById('call-actve-info').innerText = callActive;
+callerPackage.eventEmitter.on("ACK_OUTGOING_CALL_END", function () {
+  callActive = "CallActve : Inative";
+  document.getElementById("call-actve-info").innerText = callActive;
 });
-callerPackage.eventEmitter.on('ACK_CALL_HOLD', function () {
-  hold = 'Hold State : Hold';
-  document.getElementById('hold-info').innerText = callActive;
+callerPackage.eventEmitter.on("ACK_CALL_HOLD", function () {
+  hold = "Hold State : Hold";
+  document.getElementById("hold-info").innerText = callActive;
 });
-callerPackage.eventEmitter.on('ACK_CALL_UNHOLD', function () {
-  hold = 'Hold State : Unhold';
-  document.getElementById('hold-info').innerText = callActive;
+callerPackage.eventEmitter.on("ACK_CALL_UNHOLD", function () {
+  hold = "Hold State : Unhold";
+  document.getElementById("hold-info").innerText = callActive;
 });
-callerPackage.eventEmitter.on('ACK_CALL_MUTE', function () {
-  mute = 'Mute State : Mute';
-  document.getElementById('mute-info').innerText = callActive;
+callerPackage.eventEmitter.on("ACK_CALL_MUTE", function () {
+  mute = "Mute State : Mute";
+  document.getElementById("mute-info").innerText = callActive;
 });
-callerPackage.eventEmitter.on('ACK_CALL_UNMUTE', function () {
-  mute = 'Mute State : Unmute';
-  document.getElementById('mute-info').innerText = callActive;
+callerPackage.eventEmitter.on("ACK_CALL_UNMUTE", function () {
+  mute = "Mute State : Unmute";
+  document.getElementById("mute-info").innerText = callActive;
 });
 
 },{"./CallerPackage/client/client.js":1}],3:[function(require,module,exports){

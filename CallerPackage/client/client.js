@@ -1,8 +1,3 @@
-//This is parent window
-// We need to add communication listeners and emittters for dialer window to listen
-// This PARENT need to be done in an object, so that user can instantiate it.
-// Later remove constant also.
-
 const EventEmitter = require("events");
 
 class Message {
@@ -27,8 +22,8 @@ class CallerPackage {
       startTime: "",
       endTime: "",
       hold: false,
-      mute: false,  
-    }
+      mute: false,
+    };
   }
 
   receiveEngine(message) {
@@ -68,7 +63,7 @@ class CallerPackage {
   }
 
   sendEngine(message) {
-    console.log("Sending : "+message.type);
+    console.log("Sending : " + message.type);
     if (message.type == "REQUEST_OUTGOING_CALL_START") {
       this.postHandler(message);
     } else if (message.type == "REQUEST_OUTGOING_CALL_END") {
@@ -77,9 +72,9 @@ class CallerPackage {
       this.postHandler(message);
     } else if (message.type == "REQUEST_CALL_UNHOLD") {
       this.postHandler(message);
-    }  else if (message.type == "REQUEST_CALL_MUTE") {
+    } else if (message.type == "REQUEST_CALL_MUTE") {
       this.postHandler(message);
-    }  else if (message.type == "REQUEST_CALL_UNMUTE") {
+    } else if (message.type == "REQUEST_CALL_UNMUTE") {
       this.postHandler(message);
     } else if (message.type == "REQUEST_SESSION_DETAILS") {
       this.postHandler(message);
@@ -90,47 +85,68 @@ class CallerPackage {
     this.channel.postMessage(message);
   }
 
-
-  call(receiver){
-      this.callObject.receiver = receiver;
-      this.sendEngine(new Message('POPUP','PARENT',"REQUEST_OUTGOING_CALL_START",this.callObject));
+  connectToServer(callback) {
+    if (localStorage.getItem("is_popup_active") === null) {
+      window.open(
+        "./CallerPackage/popup.html",
+        "connection",
+        "left=0, top=0, width=200, height=200"
+      );
+    }
+    callback();
   }
 
-  endOut(){
-    this.sendEngine(new Message('POPUP','PARENT',"REQUEST_OUTGOING_CALL_END",{}));
+  call(receiver) {
+    this.callObject.receiver = receiver;
+    this.sendEngine(
+      new Message(
+        "POPUP",
+        "PARENT",
+        "REQUEST_OUTGOING_CALL_START",
+        this.callObject
+      )
+    );
   }
 
-  endIn(){
-    this.sendEngine(new Message('POPUP','PARENT',"REQUEST_INCOMING_CALL_END",{}));
+  endOut() {
+    this.sendEngine(
+      new Message("POPUP", "PARENT", "REQUEST_OUTGOING_CALL_END", {})
+    );
   }
 
-  hold(){
-    this.sendEngine(new Message('POPUP','PARENT',"REQUEST_CALL_HOLD",{}));
+  endIn() {
+    this.sendEngine(
+      new Message("POPUP", "PARENT", "REQUEST_INCOMING_CALL_END", {})
+    );
   }
 
-  unhold(){
-    this.sendEngine(new Message('POPUP','PARENT',"REQUEST_CALL_UNHOLD",{}));
+  hold() {
+    this.sendEngine(new Message("POPUP", "PARENT", "REQUEST_CALL_HOLD", {}));
   }
 
-
-  mute(){
-    this.sendEngine(new Message('POPUP','PARENT',"REQUEST_CALL_MUTE",{}));
+  unhold() {
+    this.sendEngine(new Message("POPUP", "PARENT", "REQUEST_CALL_UNHOLD", {}));
   }
 
-  unmute(){
-    this.sendEngine(new Message('POPUP','PARENT',"REQUEST_CALL_UNMUTE",{}));
+  mute() {
+    this.sendEngine(new Message("POPUP", "PARENT", "REQUEST_CALL_MUTE", {}));
   }
 
-  accept(){
-    this.sendEngine(new Message('POPUP','PARENT',"REQUEST_INCOMING_CALL_START",{}));
+  unmute() {
+    this.sendEngine(new Message("POPUP", "PARENT", "REQUEST_CALL_UNMUTE", {}));
   }
 
+  accept() {
+    this.sendEngine(
+      new Message("POPUP", "PARENT", "REQUEST_INCOMING_CALL_START", {})
+    );
+  }
 
   ping() {
     // setInterval(() => {
     //   this.sendEngine(new Message('POPUP','PARENT',"REQUEST_SESSION_DETAILS",this.callObject));
     // }, 1000);
-   }
+  }
 }
 
 module.exports = { CallerPackage: CallerPackage };
