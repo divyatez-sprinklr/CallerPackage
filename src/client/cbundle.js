@@ -175,6 +175,7 @@ var callerPackage = new CallerPackage();
 var mute = 'Mute State : Unmute';
 var hold = 'Hold State : Unhold';
 var socket = 'Socket : Disconnected';
+var callActive = 'CallActve : Inative';
 document.getElementById('socket-info').innerText = socket;
 document.getElementById('mute-info').innerText = hold;
 document.getElementById('hold-info').innerText = mute;
@@ -200,7 +201,34 @@ callerPackage.eventEmitter.on('INFORM_SOCKET_CONNECTED', function () {
   socket = 'Socket : Connected';
   document.getElementById('socket-info').innerText = socket;
 });
-callerPackage.eventEmitter.on('', function () {});
+callerPackage.eventEmitter.on('INFORM_SOCKET_DISCONNECTED', function () {
+  socket = 'Socket : Disconnected';
+  document.getElementById('socket-info').innerText = socket;
+});
+callerPackage.eventEmitter.on('ACK_OUTGOING_CALL_START', function () {
+  callActive = 'CallActve : Active';
+  document.getElementById('call-actve-info').innerText = callActive;
+});
+callerPackage.eventEmitter.on('ACK_OUTGOING_CALL_END', function () {
+  callActive = 'CallActve : Inative';
+  document.getElementById('call-actve-info').innerText = callActive;
+});
+callerPackage.eventEmitter.on('ACK_CALL_HOLD', function () {
+  hold = 'Hold State : Hold';
+  document.getElementById('hold-info').innerText = callActive;
+});
+callerPackage.eventEmitter.on('ACK_CALL_UNHOLD', function () {
+  hold = 'Hold State : Unhold';
+  document.getElementById('hold-info').innerText = callActive;
+});
+callerPackage.eventEmitter.on('ACK_CALL_MUTE', function () {
+  mute = 'Mute State : Mute';
+  document.getElementById('mute-info').innerText = callActive;
+});
+callerPackage.eventEmitter.on('ACK_CALL_UNMUTE', function () {
+  mute = 'Mute State : Unmute';
+  document.getElementById('mute-info').innerText = callActive;
+});
 
 },{"./CallerPackage/client/client.js":1}],3:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.

@@ -445,8 +445,6 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
       }
 
       function call_answer() {
-        var _this3 = this;
-
         if (session) {
           session.answer({
             eventHandlers: {
@@ -460,9 +458,7 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
                 console.log("call ended with cause: " + e.data);
               },
               confirmed: function confirmed(e) {
-                _this3.eventEmitter.emit('ACK_OUTGOING_CALL_START'); //this.emitters('ACK_OUTGOING_CALL_START');
-
-
+                //this.emitters('ACK_OUTGOING_CALL_START');
                 console.log("call confirmed");
               }
             },
@@ -627,24 +623,7 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
         }
 
         console.log("ACK_CALL_UNMUTE");
-      } // this.eventEmitter.on("REQUEST_CALL_MUTE", () => {
-      // });
-      // this.eventEmitter.on("REQUEST_CALL_UNMUTE", () => {
-      // });
-      // this.eventEmitter.on("REQUEST_OUTGOING_CALL_START", () => {
-      //   console.log("Request to call caught by wrapper");
-      //   call_outgoing(callObject.receiver);
-      // });
-      // this.eventEmitter.on("REQUEST_OUTGOING_CALL_END", () => {
-      //   call_terminate();
-      // });
-      // this.eventEmitter.on('REQUEST_INCOMING_CALL_START',()=>{
-      //   call_answer();
-      // })
-      // this.eventEmitter.on('REQUEST_INCOMING_CALL_END',()=>{
-      //   call_terminate();
-      // })
-
+      }
     }
   }]);
 

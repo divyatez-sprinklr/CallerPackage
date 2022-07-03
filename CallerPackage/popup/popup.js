@@ -376,7 +376,6 @@ class JsSIP_Wrapper {
               console.log("call ended with cause: " + e.data);
             },
             confirmed: (e) => {
-              this.eventEmitter.emit('ACK_OUTGOING_CALL_START');
               //this.emitters('ACK_OUTGOING_CALL_START');
               console.log("call confirmed");
             },
@@ -503,30 +502,6 @@ class JsSIP_Wrapper {
     } 
 
   
-    // this.eventEmitter.on("REQUEST_CALL_MUTE", () => {
-      
-    // });
-
-    // this.eventEmitter.on("REQUEST_CALL_UNMUTE", () => {
-      
-    // });
-
-    // this.eventEmitter.on("REQUEST_OUTGOING_CALL_START", () => {
-    //   console.log("Request to call caught by wrapper");
-    //   call_outgoing(callObject.receiver);
-    // });
-
-    // this.eventEmitter.on("REQUEST_OUTGOING_CALL_END", () => {
-    //   call_terminate();
-    // });
-
-    // this.eventEmitter.on('REQUEST_INCOMING_CALL_START',()=>{
-    //   call_answer();
-    // })
-
-    // this.eventEmitter.on('REQUEST_INCOMING_CALL_END',()=>{
-    //   call_terminate();
-    // })
   }
 }
 
