@@ -180,10 +180,6 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
     this.userAgent = null;
     this.session = null;
     this.config = config;
-    this.incomingCallAudio = null;
-    this.remoteAudio = null;
-    this.remoteView = null;
-    this.localView = null;
     setInterval(function () {
       var channel = new BroadcastChannel("client_popup_channel");
       channel.postMessage(new Message("PARENT", "POPUP", "PING_POPUP_ALIVE", {}));
@@ -236,7 +232,7 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
           } else if (message.type == "REQUEST_CALL_UNMUTE") {
             call_unmute();
           } else if (message.type == "ACK_OUTGOING_CALL_START") {
-            ring.pause();
+            //ring.pause();
             callObject.startTime = session.start_time;
             callObject.sender = session.local_identity;
             callObject.receiver = session.remote_identity;
@@ -333,10 +329,12 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
         connection_recovery_max_interval: 30,
         connection_recovery_min_interval: 2
       }; // ________________________________________________________________
+      // let incomingCallAudio = new window.Audio(
+      //   "http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/bonus.wav"
+      // );
+      // incomingCallAudio.loop = true;
 
-      var incomingCallAudio = new window.Audio("http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/bonus.wav");
-      incomingCallAudio.loop = true;
-      var ring = new window.Audio('./abc.wav');
+      var ring = new window.Audio('https://github.com/divyatez-sprinklr/CallerPackage/raw/main/CallerPackage/popup/media/abc.wav');
       ring.loop = true;
       var remoteAudio = new window.Audio();
       remoteAudio.autoplay = true;
@@ -522,7 +520,8 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
 
       function addStreams() {
         session.connection.addEventListener("addstream", function (event) {
-          incomingCallAudio.pause();
+          // incomingCallAudio.pause();
+          ring.pause();
           remoteAudio.srcObject = event.stream;
           document.getElementById("localMedia").srcObject = session.connection.getLocalStreams()[0];
           document.getElementById("remoteMedia").srcObject = session.connection.getRemoteStreams()[0];

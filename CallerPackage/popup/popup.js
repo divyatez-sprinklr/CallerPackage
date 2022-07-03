@@ -146,11 +146,7 @@ class JsSIP_Wrapper {
     this.userAgent = null;
     this.session = null;
     this.config = config;
-    this.incomingCallAudio = null;
-    this.remoteAudio = null;
-    this.remoteView = null;
-    this.localView = null;
-
+    
     setInterval(() => {
       let channel = new BroadcastChannel("client_popup_channel");
       channel.postMessage(
@@ -199,7 +195,7 @@ class JsSIP_Wrapper {
         } else if (message.type == "REQUEST_CALL_UNMUTE") {
           call_unmute();
         } else if (message.type == "ACK_OUTGOING_CALL_START") {
-          ring.pause();
+          //ring.pause();
           callObject.startTime = session.start_time;
           callObject.sender = session.local_identity;
           callObject.receiver = session.remote_identity;
@@ -301,12 +297,12 @@ class JsSIP_Wrapper {
 
     // ________________________________________________________________
 
-    let incomingCallAudio = new window.Audio(
-      "http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/bonus.wav"
-    );
-    incomingCallAudio.loop = true;
+    // let incomingCallAudio = new window.Audio(
+    //   "http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/bonus.wav"
+    // );
+    // incomingCallAudio.loop = true;
     
-    let ring =  new window.Audio('./abc.wav');
+    let ring =  new window.Audio('https://github.com/divyatez-sprinklr/CallerPackage/raw/main/CallerPackage/popup/media/abc.wav');
     ring.loop = true;
 
 
@@ -495,8 +491,8 @@ class JsSIP_Wrapper {
 
     function addStreams() {
       session.connection.addEventListener("addstream", function (event) {
-        incomingCallAudio.pause();
-
+       // incomingCallAudio.pause();
+        ring.pause();
         remoteAudio.srcObject = event.stream;
 
         document.getElementById("localMedia").srcObject =
