@@ -23,7 +23,12 @@ enum MESSAGE_TYPE {
     REQUEST_CALL_MUTE = 'REQUEST_CALL_MUTE',
     REQUEST_CALL_UNMUTE = 'REQUEST_CALL_UNMUTE',
     REQUEST_SESSION_DETAILS = 'REQUEST_SESSION_DETAILS',
-    REQUEST_INCOMING_CALL_END = 'REQUEST_INCOMING_CALL_END'
+    REQUEST_INCOMING_CALL_END = 'REQUEST_INCOMING_CALL_END',
+    REQUEST_INCOMING_CALL_START = 'REQUEST_INCOMING_CALL_START',
+    ACK_CALL_MUTE_FAILED = 'ACK_CALL_MUTE_FAILED',
+    ACK_CALL_UNMUTE_FAILED = 'ACK_CALL_UNMUTE_FAILED',
+    ACK_CALL_UNHOLD_FAILED = 'ACK_CALL_UNHOLD_FAILED', 
+    ACK_CALL_HOLD_FAILED = 'ACK_CALL_HOLD_FAILED',
 }
 
 enum USER{
@@ -40,7 +45,7 @@ enum CHANNEL{
     client_popup_channel = 'client_popup_channel'
 }
 
-interface Message {
+interface MESSAGE {
     to: USER;
     from: USER;
     type: MESSAGE_TYPE;
@@ -55,6 +60,9 @@ interface CALL_OBJECT{
     hold: boolean,
     mute: boolean,
 }
+
+interface CALLBACK { (): void }
+
 
 
 const EMPTY_CALL_OBJECT: CALL_OBJECT ={
@@ -90,7 +98,7 @@ class CallerPackage {
         // };
     }
 
-  resetCallObject() {
+  resetCallObject(): void {
     this.setCallObject({
       sender: "",
       receiver: "",
@@ -112,7 +120,7 @@ class CallerPackage {
    * This function handles recieved messege and directs the logic.
    * @param {object} message
    */
-  receiveEngine(message: Message): void{
+  receiveEngine(message: MESSAGE): void{
     if (message.to == "PARENT") {
       console.log(message);
       if (message.type == MESSAGE_TYPE.INFORM_SOCKET_CONNECTED) {
@@ -122,8 +130,12 @@ class CallerPackage {
       } else if (message.type ==  MESSAGE_TYPE.ACK_OUTGOING_CALL_START) {
         this.setCallObject({
           startTime: message.object.startTime,
+          endTime: null,
+          hold: null,
+          mute: null,
           sender: message.object.sender,
           receiver: message.object.receiver,
+            
         });
         this.eventEmitter.emit(message.type);
       } else if (message.type ==  MESSAGE_TYPE.ACK_OUTGOING_CALL_END) {
@@ -131,6 +143,9 @@ class CallerPackage {
           hold: false,
           mute: false,
           endTime: message.object.endTime,
+          startTime: null,
+          sender: null,
+          receiver: null,
         });
         this.setCallActive(false);
         this.eventEmitter.emit(message.type);
@@ -140,20 +155,22 @@ class CallerPackage {
           mute: false,
           startTime: "-|-",
           endTime: "-|-",
+          sender: null,
+          receiver: null,
         });
         this.setCallActive(false);
         this.eventEmitter.emit(message.type);
       } else if (message.type ==  MESSAGE_TYPE.ACK_CALL_HOLD) {
-        this.setCallObject({ hold: true });
+        this.setCallObject({ hold: true , mute: null,  startTime: null,endTime: null,sender: null,receiver: null});
         this.eventEmitter.emit(message.type);
       } else if (message.type ==  MESSAGE_TYPE.ACK_CALL_UNHOLD) {
-        this.setCallObject({ hold: false });
+        this.setCallObject({ hold: false , mute: null,  startTime: null,endTime: null,sender: null,receiver: null});
         this.eventEmitter.emit(message.type);
       } else if (message.type ==  MESSAGE_TYPE.ACK_CALL_MUTE) {
-        this.setCallObject({ mute: true });
+        this.setCallObject({ mute: true , hold: null,  startTime: null,endTime: null,sender: null,receiver: null});
         this.eventEmitter.emit(message.type);
       } else if (message.type ==  MESSAGE_TYPE.ACK_CALL_UNMUTE) {
-        this.setCallObject({ mute: false });
+        this.setCallObject({ mute: false , hold: null,  startTime: null,endTime: null,sender: null,receiver: null});
         this.eventEmitter.emit(message.type);
       } else if (message.type ==  MESSAGE_TYPE.POPUP_CLOSED) {
         this.eventEmitter.emit(message.type);
@@ -182,8 +199,8 @@ class CallerPackage {
    * @param {function} callback
    */
 
-  on(header, callback) {
-    this.eventEmitter.on(header, () => {
+  on(event:string, callback: CALLBACK) {
+    this.eventEmitter.on(event, () => {
       callback();
     });
   }
@@ -192,7 +209,7 @@ class CallerPackage {
    * This function sets callActive variable.
    * @param {boolean} ifActive
    */
-  setCallActive(ifActive) {
+  setCallActive(ifActive: boolean):void {
     this.callActive = ifActive;
   }
 
@@ -200,7 +217,7 @@ class CallerPackage {
    * This function handle send request from Parent to Popup.
    * @param {object} message
    */
-  sendEngine(message: Message): void {
+  sendEngine(message: MESSAGE): void {
     console.log("Sending : " + message.type);
     if (message.type == MESSAGE_TYPE.REQUEST_OUTGOING_CALL_START) {
       if (this.callActive == true) {
@@ -228,7 +245,7 @@ class CallerPackage {
    * This function posts message in broadcast channel.
    * @param {object} message
    */
-  postHandler(message: Message) {
+  postHandler(message: MESSAGE):void {
     this.channel.postMessage(message);
   }
 
@@ -238,7 +255,7 @@ class CallerPackage {
    *     2) If popup is not active, then it creates a new popup.
    * @param {function} callback
    */
-  connect(callback: any) {
+  connect(callback: CALLBACK):void {
     if (localStorage.getItem(LOCAL_STORAGE.is_popup_active) === null) {
       const popup_path = path.parse(__filename).dir + "/popup/popup.html";
       window.open(
@@ -264,7 +281,7 @@ class CallerPackage {
    * @param {object} callObject
    *
    */
-  setCallObject(callObject) {
+  setCallObject(callObject: CALL_OBJECT):void {
     if (!callObject.sender) {
       this.callObject.sender = callObject.sender;
     }
@@ -289,9 +306,9 @@ class CallerPackage {
    * This function sends the request to popup to start an outgoing call.
    * @param {string} receiver
    */
-  call(receiver) {
+  call(receiver: string):void {
     this.resetCallObject();
-    this.setCallObject({ receiver: receiver });
+    this.setCallObject({ sender: null , receiver: receiver , hold: null, mute:null ,startTime: null,endTime: null});
     this.sendEngine({
       to: USER.POPUP,
       from: USER.PARENT,
@@ -302,7 +319,7 @@ class CallerPackage {
   /**
    * This function sends the request to popup to end the current outgoing call.
    */
-  endOut() {
+  endOut():void {
     this.sendEngine({
       to: USER.POPUP,
       from: USER.PARENT,
