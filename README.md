@@ -1,26 +1,41 @@
 # CallerPackage
 
-# CallerPackage
 
-Caller Package is
+
+Caller Package is used to handle cross window calling service , using JsSIP.
+This library moved the intra-window calling logic to a popup window.
+This makes the state of popup window independent of state of parent window , overall mitigating the issues caused by this previously like refresh causing call end, etc. 
+
+## Index
+
+ * Requirements
+ * Installation
+ * Configuration
+ * Getting Started
+ * Contributions
+
+
+## Requirements 
+
+* JsSIP : https://www.npmjs.com/package/jssip
+
+## Installation
+
+
+## Configuration
+> Add Config details in popup.html manually or through running.
+
 
 ## Getting Started
 ```
-let config = {
-	sip: sample1234, 
-    password: samplePassword, 
-    server_address: 12.34.56.78, 
-    port: 7654/ws
-}
-
-const callerPackage = new CallerPackage(config);
-
-
+const callerPackage = new CallerPackage();
 
 ```
+In popup.html , add config using  input , or hardcode the config.
 
 
 ## Attributes 
+This is needed to be configured in popup side.
 
 ### config
 ```
@@ -156,31 +171,5 @@ callerPackage.on('ACK_SESSION_DETAILS',()=>{
 ```
 //// Not Working ### POPUP_CLOSED
 
-```
-browserify ./src/app.js -o ./dist/bundle.js
-Then -> Live Server
 
-## For convenience
-Download "run on save" extention.
-Open its setting.json in settings>extentions>Run On Save> edit in settings.json
-Paste following:-
-{
-    "workbench.startupEditor": "none",
-    "window.zoomLevel": 1,
-    "emeraldwalk.runonsave": {
-        "commands": [
-            {
-                "match": "\\.js$",
-                "cmd": "browserify ./src/app.js -o ./dist/bundle.js "
-            }
-        ]
-    }
-}
-
-Now command will auto run with save.
-```
-
-```
-browserify src/popup/popup.js -o src/child_bundle.js 
-browserify src/client/client.js -o src/parent_bundle.js
-```
+## Contributions
