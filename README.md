@@ -12,7 +12,6 @@ This makes the state of popup window independent of state of parent window , ove
  * Installation
  * Configuration
  * Getting Started
- * Contributions
 
 
 ## Requirements 
@@ -62,8 +61,7 @@ This is needed to be configured in popup side.
 
 ## Methods
 
-# Rename this----------
-###  connectToServer()
+###  connect()
 This method is used to connect to popup.
 If popup is already active it will connect to that, otherwise it will start a new popup window.
 ##### Arguments
@@ -171,7 +169,4 @@ callerPackage.on('ACK_SESSION_DETAILS',()=>{
         console.log(sessionDetails);
 });
 ```
-//// Not Working ### POPUP_CLOSED
 
-
-## Contributions
