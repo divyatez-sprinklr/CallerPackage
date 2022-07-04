@@ -9,23 +9,29 @@ window.addEventListener("DOMContentLoaded", function () {
 });
 window.addEventListener("beforeunload", function () {
   localStorage.clear();
-  return "hi";
-}); // window.onbeforeunload = (event) => {
-//   localStorage.clear();
-//   popup.informUnload();
-//   return '';
-// };
+  return "";
+});
+var popup = null; // global popup variable
 
-var popup = new Popup({
-  sip: "1000",
-  password: "1000_client",
-  server_address: "18.212.171.223",
-  port: "7443/ws"
-});
-popup.connect(function () {
-  document.querySelector("h2").textContent = "CONNECTED";
-  document.querySelector(".ripple").remove();
-});
+document.getElementById("configure").onclick = function (event) {
+  event.preventDefault();
+  document.getElementById("before-login").classList.toggle("hidden");
+  document.getElementById("after-login").classList.toggle("hidden");
+  popup = new Popup({
+    sip: document.getElementById("username").value,
+    password: document.getElementById("password").value,
+    server_address: document.getElementById("server-address").value,
+    port: document.getElementById("port").value
+  });
+  main();
+};
+
+function main() {
+  popup.connect(function () {
+    document.querySelector("h1").textContent = "CONNECTED";
+    document.querySelector(".ripple").remove();
+  });
+}
 
 },{"./popup.js":2}],2:[function(require,module,exports){
 "use strict";
@@ -351,7 +357,7 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
       // );
       // incomingCallAudio.loop = true;
 
-      var ring = new window.Audio('https://github.com/divyatez-sprinklr/CallerPackage/raw/main/CallerPackage/popup/media/abc.wav');
+      var ring = new window.Audio("https://github.com/divyatez-sprinklr/CallerPackage/raw/main/CallerPackage/popup/media/abc.wav");
       ring.loop = true;
       var remoteAudio = new window.Audio();
       remoteAudio.autoplay = true;

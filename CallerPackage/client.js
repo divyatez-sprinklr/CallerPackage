@@ -173,9 +173,9 @@ class CallerPackage {
       window.open(
         popup_path,
         "connection",
-        "left=0, top=0, width=200, height=200"
+        "left=0, top=0, width=300, height=325"
       );
-      console.log(popup_path);
+      console.log("popup path: " + popup_path);
     } else {
       console.log("Session details request");
       this.sendEngine({

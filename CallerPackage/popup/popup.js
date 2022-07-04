@@ -30,7 +30,7 @@ class Popup {
     }, 1000);
   }
 
-  informUnload(){
+  informUnload() {
     this.JsSIP_Wrapper.call_terminate();
     this.channel.postMessage({
       to: "PARENT",
@@ -40,7 +40,7 @@ class Popup {
     });
   }
 
-  sendEngine(message){
+  sendEngine(message) {
     this.channel.postMessage(message);
   }
 
@@ -115,8 +115,12 @@ class Popup {
 
   handleSessionDetails() {
     console.log("handleSessionDetails");
-    this.sendEngine({to: "PARENT", from: "POPUP", type: "ACK_SESSION_DETAILS", object: this.callObject}
-    );
+    this.sendEngine({
+      to: "PARENT",
+      from: "POPUP",
+      type: "ACK_SESSION_DETAILS",
+      object: this.callObject,
+    });
   }
 
   receiveEngine(message) {
@@ -150,7 +154,7 @@ class JsSIP_Wrapper {
     this.userAgent = null;
     this.session = null;
     this.config = config;
-    
+
     // setInterval(() => {
     //   let channel = new BroadcastChannel("client_popup_channel");
     //   channel.postMessage(
@@ -181,9 +185,8 @@ class JsSIP_Wrapper {
       if (message.to == "WRAPPER") {
         console.log("Recieved in Wrapper:", message);
         if (message.type == "REQUEST_OUTGOING_CALL_START") {
-          if(callActive == true){
-
-          }else{
+          if (callActive == true) {
+          } else {
             callActive = true;
             callObject.receiver = message.object.receiver;
             call_outgoing(callObject.receiver);
@@ -202,7 +205,8 @@ class JsSIP_Wrapper {
             from: "POPUP",
             type: "ACK_SESSION_DETAILS",
             object: callObject,
-          });        } else if (message.type == "REQUEST_CALL_UNMUTE") {
+          });
+        } else if (message.type == "REQUEST_CALL_UNMUTE") {
           call_unmute();
         } else if (message.type == "ACK_OUTGOING_CALL_START") {
           //ring.pause();
@@ -258,7 +262,6 @@ class JsSIP_Wrapper {
       }
     }
 
-
     const configuration = {
       sockets: [
         new JsSIP.WebSocketInterface("wss://" + server_address + ":" + port),
@@ -281,11 +284,11 @@ class JsSIP_Wrapper {
     //   "http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/bonus.wav"
     // );
     // incomingCallAudio.loop = true;
-    
-    let ring =  new window.Audio('https://github.com/divyatez-sprinklr/CallerPackage/raw/main/CallerPackage/popup/media/abc.wav');
+
+    let ring = new window.Audio(
+      "https://github.com/divyatez-sprinklr/CallerPackage/raw/main/CallerPackage/popup/media/abc.wav"
+    );
     ring.loop = true;
-
-
 
     let remoteAudio = new window.Audio();
     remoteAudio.autoplay = true;
@@ -471,7 +474,7 @@ class JsSIP_Wrapper {
 
     function addStreams() {
       session.connection.addEventListener("addstream", function (event) {
-       // incomingCallAudio.pause();
+        // incomingCallAudio.pause();
         ring.pause();
         remoteAudio.srcObject = event.stream;
 

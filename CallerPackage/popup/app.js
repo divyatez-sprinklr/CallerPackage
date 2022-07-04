@@ -4,27 +4,32 @@ window.addEventListener("DOMContentLoaded", () => {
   localStorage.setItem("is_popup_active", "true");
 });
 
-
-window.addEventListener("beforeunload", function() {
+window.addEventListener("beforeunload", function () {
   localStorage.clear();
-  return "hi";
+  return "";
 });
 
+let popup = null; // global popup variable
 
-// window.onbeforeunload = (event) => {
-//   localStorage.clear();
-//   popup.informUnload();
-//   return '';
-// };
+document.getElementById("configure").onclick = (event) => {
+  event.preventDefault();
 
-const popup = new Popup({
-  sip: "1000",
-  password: "1000_client",
-  server_address: "18.212.171.223",
-  port: "7443/ws",
-});
+  document.getElementById("before-login").classList.toggle("hidden");
+  document.getElementById("after-login").classList.toggle("hidden");
 
-popup.connect(() => {
-  document.querySelector("h2").textContent = "CONNECTED";
-  document.querySelector(".ripple").remove();
-});
+  popup = new Popup({
+    sip: document.getElementById("username").value,
+    password: document.getElementById("password").value,
+    server_address: document.getElementById("server-address").value,
+    port: document.getElementById("port").value,
+  });
+
+  main();
+};
+
+function main() {
+  popup.connect(() => {
+    document.querySelector("h1").textContent = "CONNECTED";
+    document.querySelector(".ripple").remove();
+  });
+}

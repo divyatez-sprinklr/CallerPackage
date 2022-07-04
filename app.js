@@ -44,7 +44,7 @@ connect_button.addEventListener("click", () => {
 
 call_button.addEventListener("click", () => {
   //resetState();
-  callerPackage.call(document.getElementById('phone-number').value);
+  callerPackage.call(document.getElementById("phone-number").value);
 });
 
 hangup_button.addEventListener("click", () => {
@@ -80,7 +80,7 @@ callerPackage.on("INFORM_SOCKET_DISCONNECTED", () => {
 callerPackage.on("ACK_OUTGOING_CALL_START", () => {
   resetState();
   callActive = "CallActive : Active";
-  callObject= callerPackage.getCallObject(); 
+  callObject = callerPackage.getCallObject();
   displayCallObject();
   document.getElementById("call-active-info").innerText = callActive;
 });
@@ -88,7 +88,7 @@ callerPackage.on("ACK_OUTGOING_CALL_START", () => {
 callerPackage.on("ACK_OUTGOING_CALL_END", () => {
   resetState();
   callActive = "CallActive : Inactive";
-  callObject= callerPackage.getCallObject(); 
+  callObject = callerPackage.getCallObject();
   displayCallObject();
   resetHold();
   resetMute();
@@ -98,7 +98,7 @@ callerPackage.on("ACK_OUTGOING_CALL_END", () => {
 callerPackage.on("ACK_OUTGOING_CALL_FAIL", () => {
   resetState();
   callActive = "CallActive : FAIL";
-  callObject= callerPackage.getCallObject(); 
+  callObject = callerPackage.getCallObject();
   displayCallObject();
   resetHold();
   resetMute();
@@ -107,78 +107,73 @@ callerPackage.on("ACK_OUTGOING_CALL_FAIL", () => {
 
 callerPackage.on("ACK_CALL_HOLD", () => {
   hold = "Hold State : Hold";
-  callObject= callerPackage.getCallObject(); 
+  callObject = callerPackage.getCallObject();
   displayCallObject();
   document.getElementById("hold-info").innerText = hold;
 });
 
 callerPackage.on("ACK_CALL_UNHOLD", () => {
   hold = "Hold State : Unhold";
-  callObject= callerPackage.getCallObject();
-  displayCallObject(); 
+  callObject = callerPackage.getCallObject();
+  displayCallObject();
   document.getElementById("hold-info").innerText = hold;
 });
 
 callerPackage.on("ACK_CALL_MUTE", () => {
   mute = "Mute State : Mute";
-  callObject= callerPackage.getCallObject();
-  displayCallObject(); 
+  callObject = callerPackage.getCallObject();
+  displayCallObject();
   document.getElementById("mute-info").innerText = mute;
 });
 
 callerPackage.on("ACK_CALL_UNMUTE", () => {
   mute = "Mute State : Unmute";
-  callObject= callerPackage.getCallObject(); 
-  displayCallObject(); 
+  callObject = callerPackage.getCallObject();
+  displayCallObject();
   document.getElementById("mute-info").innerText = mute;
 });
 
-
-
 callerPackage.on("ACK_SESSION_DETAILS", () => {
-  console.log('Caught session details');
-  callObject= callerPackage.getCallObject(); 
+  console.log("Caught session details");
+  callObject = callerPackage.getCallObject();
   displayCallObject();
-  if(callObject.mute==true){
+  if (callObject.mute == true) {
     mute = "Mute State : Mute";
     document.getElementById("mute-info").innerText = mute;
   }
-  if(callObject.hold==true){
+  if (callObject.hold == true) {
     hold = "Hold State : Hold";
     document.getElementById("hold-info").innerText = hold;
   }
-
 });
-
 
 callerPackage.on("POPUP_CLOSED", () => {
   socket = "Socket : Disconnected";
   document.getElementById("socket-info").innerText = socket;
 });
 
-function displayCallObject(){
-  console.log('Displaying call obj');
-  document.getElementById("call-object-info").innerText = "Call Details: " +JSON.stringify(callObject);
+function displayCallObject() {
+  console.log("Displaying call obj");
+  document.getElementById("call-object-info").innerText =
+    "Call Details: " + JSON.stringify(callObject);
 }
 
-function resetHold(){
+function resetHold() {
   hold = "Hold State : Unhold";
   document.getElementById("hold-info").innerText = hold;
 }
 
-function resetMute(){
+function resetMute() {
   mute = "Mute State : Unmute";
   document.getElementById("mute-info").innerText = mute;
 }
 
-function resetcallActive(){
+function resetcallActive() {
   callActive = "CallActve : Inative";
   document.getElementById("call-active-info").innerText = callActive;
 }
 
-
-function resetState(){
-
+function resetState() {
   callObject = {
     sender: "",
     receiver: "",
@@ -192,5 +187,4 @@ function resetState(){
   resetHold();
   resetMute();
   resetcallActive();
-
 }

@@ -215,8 +215,8 @@ var CallerPackage = /*#__PURE__*/function () {
     value: function connect(callback) {
       if (localStorage.getItem("is_popup_active") === null) {
         var popup_path = path.parse(__filename).dir + "/popup/popup.html";
-        window.open(popup_path, "connection", "left=0, top=0, width=200, height=200");
-        console.log(popup_path);
+        window.open(popup_path, "connection", "left=0, top=0, width=300, height=325");
+        console.log("popup path: " + popup_path);
       } else {
         console.log("Session details request");
         this.sendEngine({
@@ -435,7 +435,7 @@ connect_button.addEventListener("click", function () {
 });
 call_button.addEventListener("click", function () {
   //resetState();
-  callerPackage.call(document.getElementById('phone-number').value);
+  callerPackage.call(document.getElementById("phone-number").value);
 });
 hangup_button.addEventListener("click", function () {
   callerPackage.endOut();
@@ -510,7 +510,7 @@ callerPackage.on("ACK_CALL_UNMUTE", function () {
   document.getElementById("mute-info").innerText = mute;
 });
 callerPackage.on("ACK_SESSION_DETAILS", function () {
-  console.log('Caught session details');
+  console.log("Caught session details");
   callObject = callerPackage.getCallObject();
   displayCallObject();
 
@@ -530,7 +530,7 @@ callerPackage.on("POPUP_CLOSED", function () {
 });
 
 function displayCallObject() {
-  console.log('Displaying call obj');
+  console.log("Displaying call obj");
   document.getElementById("call-object-info").innerText = "Call Details: " + JSON.stringify(callObject);
 }
 
