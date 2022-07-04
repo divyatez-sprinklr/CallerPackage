@@ -1,6 +1,35 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 
+var _require = require("./popup.js"),
+    Popup = _require.Popup;
+
+window.addEventListener("DOMContentLoaded", function () {
+  localStorage.setItem("is_popup_active", "true");
+});
+window.addEventListener("beforeunload", function () {
+  localStorage.clear();
+  return "hi";
+}); // window.onbeforeunload = (event) => {
+//   localStorage.clear();
+//   popup.informUnload();
+//   return '';
+// };
+
+var popup = new Popup({
+  sip: "1000",
+  password: "1000_client",
+  server_address: "18.212.171.223",
+  port: "7443/ws"
+});
+popup.connect(function () {
+  document.querySelector("h2").textContent = "CONNECTED";
+  document.querySelector(".ripple").remove();
+});
+
+},{"./popup.js":2}],2:[function(require,module,exports){
+"use strict";
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -651,36 +680,7 @@ module.exports = {
   Popup: Popup
 };
 
-},{"events":5,"jssip":13}],2:[function(require,module,exports){
-"use strict";
-
-var _require = require("./popup.js"),
-    Popup = _require.Popup;
-
-window.addEventListener("DOMContentLoaded", function () {
-  localStorage.setItem("is_popup_active", "true");
-});
-window.addEventListener("beforeunload", function () {
-  localStorage.clear();
-  return "hi";
-}); // window.onbeforeunload = (event) => {
-//   localStorage.clear();
-//   popup.informUnload();
-//   return '';
-// };
-
-var popup = new Popup({
-  sip: "1000",
-  password: "1000_client",
-  server_address: "18.212.171.223",
-  port: "7443/ws"
-});
-popup.connect(function () {
-  document.querySelector("h2").textContent = "CONNECTED";
-  document.querySelector(".ripple").remove();
-});
-
-},{"./popup.js":1}],3:[function(require,module,exports){
+},{"events":5,"jssip":13}],3:[function(require,module,exports){
 (function (process){(function (){
 /* eslint-env browser */
 
@@ -29000,4 +29000,4 @@ module.exports = function (session, opts) {
   return sdp.join('\r\n') + '\r\n';
 };
 
-},{"./grammar":39}]},{},[2]);
+},{"./grammar":39}]},{},[1]);

@@ -5,9 +5,8 @@
   "description": "Caller Package",
   "main": "./src/app.js",
   "scripts": {
-    "dev-command1": "browserify ./CallerPackage/popup/popup_app.js > ./CallerPackage/popup/popup_bundle.js -t babelify",
-    "command1": "browserify ./client_app.js > ./src/cbundle.js -t babelify",
-
+    "dev-command1": "browserify ./CallerPackage/popup/app.js > ./CallerPackage/popup/bundle.js -t babelify",
+    "command1": "browserify ./app.js > ./bundle.js -t babelify",
     "build": "npm run dev-command1 & npm run command1"
   },
   "repository": {
@@ -22,7 +21,8 @@
   },
   "homepage": "https://github.com/divyatez-sprinklr/CallerPackage#readme",
   "dependencies": {
-    "jssip": "^3.9.0"
+    "jssip": "^3.9.0",
+    "path": "^0.12.7"
   },
   "devDependencies": {
     "@babel/core": "^7.18.2",

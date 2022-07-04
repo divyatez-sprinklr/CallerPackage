@@ -1,4 +1,4 @@
-const { CallerPackage } = require("./CallerPackage/client/client.js");
+const { CallerPackage } = require("./CallerPackage/client.js");
 
 let callerPackage = new CallerPackage();
 
