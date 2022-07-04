@@ -79,7 +79,7 @@ interface CONFIG{
   }
 
 class Popup {
-    channel: any;
+    channel: BroadcastChannel;
     callObject: CALL_OBJECT;
     callActive: boolean;
     JsSIP_Wrapper: JsSIP_Wrapper;
@@ -241,8 +241,8 @@ class Popup {
 }
 
 class JsSIP_Wrapper {
-    userAgent: any;
-    session: any;
+    userAgent: typeof JsSIP.UA;
+    session: typeof JsSIP.newRTCSession;  // check this <---------------
     config: CONFIG;
   constructor( config: CONFIG) {
     this.userAgent = null;
@@ -509,7 +509,7 @@ class JsSIP_Wrapper {
       addStreams();
     }
 
-    function call_answer() {
+    function call_answer():void {
       if (session) {
         session.answer({
           eventHandlers: {
@@ -559,13 +559,11 @@ class JsSIP_Wrapper {
         remoteAudio.srcObject = event.stream;
         
         let local = document.getElementById("localMedia") as HTMLVideoElement;
-        //////////----------ERROR HERE
         local.srcObject =session.connection.getLocalStreams()[0];
 
         let remote =  document.getElementById("remoteMedia") as HTMLVideoElement;
         remote.srcObject =
           session.connection.getRemoteStreams()[0];
-                  //////////----------ERROR HERE
 
       });
     }

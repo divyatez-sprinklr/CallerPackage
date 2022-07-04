@@ -76,8 +76,8 @@ const EMPTY_CALL_OBJECT: CALL_OBJECT ={
 
 class CallerPackage {
     callActive: boolean;
-    eventEmitter: any;
-    channel: any;
+    eventEmitter: typeof EventEmitter;
+    channel: BroadcastChannel;
     callObject: CALL_OBJECT;
 
     constructor() {
