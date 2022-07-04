@@ -49,20 +49,23 @@ var CallerPackage = /*#__PURE__*/function () {
         endTime: "",
         hold: false,
         mute: false
-      }); // this.callObject = {
-      //   sender: "",
-      //   receiver: "",
-      //   startTime: "",
-      //   endTime: "",
-      //   hold: false,
-      //   mute: false,
-      // };
+      });
     }
+    /**
+     * This returns the private call object variable.
+     * @returns object
+     */
+
   }, {
     key: "getCallObject",
     value: function getCallObject() {
       return this.callObject;
     }
+    /**
+     * This function handles recieved messege and directs the logic.
+     * @param {object} message 
+     */
+
   }, {
     key: "receiveEngine",
     value: function receiveEngine(message) {
@@ -139,6 +142,12 @@ var CallerPackage = /*#__PURE__*/function () {
         }
       }
     }
+    /**
+     * This function helps setup eventlistener on eventEmitter.
+     * @param {string} header 
+     * @param {function} callback 
+     */
+
   }, {
     key: "on",
     value: function on(header, callback) {
@@ -146,11 +155,21 @@ var CallerPackage = /*#__PURE__*/function () {
         callback();
       });
     }
+    /**
+     * This function sets callActive variable.
+     * @param {boolean} ifActive 
+     */
+
   }, {
     key: "setCallActive",
     value: function setCallActive(ifActive) {
       this.callActive = ifActive;
     }
+    /**
+     * This function handle send request from Parent to Popup.
+     * @param {object} message 
+     */
+
   }, {
     key: "sendEngine",
     value: function sendEngine(message) {
@@ -177,11 +196,23 @@ var CallerPackage = /*#__PURE__*/function () {
         this.postHandler(message);
       }
     }
+    /**
+     * This function posts message in broadcast channel.
+     * @param {object} message 
+     */
+
   }, {
     key: "postHandler",
     value: function postHandler(message) {
       this.channel.postMessage(message);
     }
+    /**
+     * This function :
+     *     1) If popup is already active, gets details from them.
+     *     2) If popup is not active, then it creates a new popup.
+     * @param {function} callback 
+     */
+
   }, {
     key: "connect",
     value: function connect(callback) {
@@ -199,6 +230,12 @@ var CallerPackage = /*#__PURE__*/function () {
 
       callback();
     }
+    /**
+     * This function sets the local call object.
+     * @param {object} callObject
+     *  
+     */
+
   }, {
     key: "setCallObject",
     value: function setCallObject(callObject) {
@@ -230,6 +267,11 @@ var CallerPackage = /*#__PURE__*/function () {
         this.callObject.mute = callObject.mute;
       }
     }
+    /**
+     * This function sends the request to popup to start an outgoing call.
+     * @param {string} receiver 
+     */
+
   }, {
     key: "call",
     value: function call(receiver) {
@@ -244,6 +286,10 @@ var CallerPackage = /*#__PURE__*/function () {
         object: this.callObject
       });
     }
+    /**
+     * This function sends the request to popup to end the current outgoing call.
+     */
+
   }, {
     key: "endOut",
     value: function endOut() {
@@ -264,6 +310,10 @@ var CallerPackage = /*#__PURE__*/function () {
         object: {}
       });
     }
+    /**
+     * This function sends the request to popup to put on hold.
+     */
+
   }, {
     key: "hold",
     value: function hold() {
@@ -274,6 +324,10 @@ var CallerPackage = /*#__PURE__*/function () {
         object: {}
       });
     }
+    /**
+     * This function sends the request to popup to put on unhold.
+     */
+
   }, {
     key: "unhold",
     value: function unhold() {
@@ -284,6 +338,10 @@ var CallerPackage = /*#__PURE__*/function () {
         object: {}
       });
     }
+    /**
+     * This function sends the request to popup to put on mute.
+     */
+
   }, {
     key: "mute",
     value: function mute() {
@@ -294,6 +352,10 @@ var CallerPackage = /*#__PURE__*/function () {
         object: {}
       });
     }
+    /**
+     * This function sends the request to popup to put on unmute.
+     */
+
   }, {
     key: "unmute",
     value: function unmute() {

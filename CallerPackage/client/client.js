@@ -21,6 +21,7 @@ class CallerPackage {
     };
   }
 
+  
 
   resetCallObject(){
     this.setCallObject({sender: "",
@@ -30,20 +31,20 @@ class CallerPackage {
     hold: false,
     mute: false,
   });
-    // this.callObject = {
-    //   sender: "",
-    //   receiver: "",
-    //   startTime: "",
-    //   endTime: "",
-    //   hold: false,
-    //   mute: false,
-    // };
   }
-
+  /**
+   * This returns the private call object variable.
+   * @returns object
+   */
   getCallObject(){
     return this.callObject;
   }
 
+
+  /**
+   * This function handles recieved messege and directs the logic.
+   * @param {object} message 
+   */
   receiveEngine(message) {
     if (message.to == "PARENT") {
       console.log(message);
@@ -96,17 +97,32 @@ class CallerPackage {
     }
   }
 
-
+  /**
+   * This function helps setup eventlistener on eventEmitter.
+   * @param {string} header 
+   * @param {function} callback 
+   */
 
   on(header,callback){
           this.eventEmitter.on(header,()=>{
             callback();
           })
   }
+
   
+  /**
+   * This function sets callActive variable.
+   * @param {boolean} ifActive 
+   */
   setCallActive(ifActive){
     this.callActive = ifActive;
   }
+
+
+  /**
+   * This function handle send request from Parent to Popup.
+   * @param {object} message 
+   */
   sendEngine(message) {
     console.log("Sending : " + message.type);
     if (message.type == "REQUEST_OUTGOING_CALL_START") {
@@ -133,10 +149,21 @@ class CallerPackage {
     }
   }
 
+  /**
+   * This function posts message in broadcast channel.
+   * @param {object} message 
+   */
   postHandler(message) {
     this.channel.postMessage(message);
   }
 
+  
+  /**
+   * This function :
+   *     1) If popup is already active, gets details from them.
+   *     2) If popup is not active, then it creates a new popup.
+   * @param {function} callback 
+   */
   connect(callback) {
     if (localStorage.getItem("is_popup_active") === null) {
       
@@ -155,6 +182,11 @@ class CallerPackage {
     callback();
   }
 
+  /**
+   * This function sets the local call object.
+   * @param {object} callObject
+   *  
+   */
   setCallObject(callObject){
       if(!callObject.receiver){
         this.callObject.receiver = callObject.receiver;
@@ -178,7 +210,11 @@ class CallerPackage {
         this.callObject.mute = callObject.mute;
       } 
   }
-
+ 
+  /**
+   * This function sends the request to popup to start an outgoing call.
+   * @param {string} receiver 
+   */
   call(receiver) {
     this.resetCallObject();
     this.setCallObject({receiver:receiver})
@@ -191,7 +227,9 @@ class CallerPackage {
       }
     );
   }
-
+  /**
+   * This function sends the request to popup to end the current outgoing call.
+   */
   endOut() {
     this.sendEngine(
       {to: "POPUP",from: "PARENT",type: "REQUEST_OUTGOING_CALL_END",object: {}}
@@ -203,19 +241,27 @@ class CallerPackage {
       {to: "POPUP",from: "PARENT",type: "REQUEST_INCOMING_CALL_END",object: {}}
     );
   }
-
+  /**
+   * This function sends the request to popup to put on hold.
+   */
   hold() {
     this.sendEngine({to: "POPUP",from: "PARENT",type: "REQUEST_CALL_HOLD",object: {}});
   }
-
+  /**
+   * This function sends the request to popup to put on unhold.
+   */
   unhold() {
     this.sendEngine({to: "POPUP",from: "PARENT",type: "REQUEST_CALL_UNHOLD",object: {}});
   }
-
+  /**
+   * This function sends the request to popup to put on mute.
+   */
   mute() {
     this.sendEngine({to: "POPUP",from: "PARENT",type: "REQUEST_CALL_MUTE",object: {}});
   }
-
+  /**
+   * This function sends the request to popup to put on unmute.
+   */
   unmute() {
     this.sendEngine({to: "POPUP",from: "PARENT",type: "REQUEST_CALL_UNMUTE",object: {}});
   }
