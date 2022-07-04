@@ -57,7 +57,7 @@ This is needed to be configured in popup side.
     port: 7654/ws
 }
 ```
-
+![alt text](https://raw.githubusercontent.com/divyatez-sprinklr/CallerPackage/main/readme_media/popup.png)
 
 ## Methods
 
