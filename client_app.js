@@ -37,7 +37,7 @@ const toggleButtonState = (value) => {
 };
 
 connect_button.addEventListener("click", () => {
-  callerPackage.connectToServer(() => {
+  callerPackage.connect(() => {
     toggleButtonState(true);
   });
 });

@@ -2,15 +2,6 @@ const JsSIP = require("jssip");
 JsSIP.debug.enable("JsSIP:*");
 const EventEmitter = require("events");
 
-class Message {
-  constructor(to, from, type, object) {
-    this.to = to;
-    this.from = from;
-    this.type = type;
-    this.object = object;
-  }
-}
-
 class Popup {
   constructor(config) {
     console.log("PopUp Instance Created");
@@ -49,6 +40,10 @@ class Popup {
     });
   }
 
+  sendEngine(message){
+    this.channel.postMessage(message);
+  }
+
   resetCallObject() {
     sender("");
     receiver("");
@@ -60,7 +55,7 @@ class Popup {
 
   handleOutgoingCallStart(callObject) {
     console.log("HandleOutgoingCallStart");
-    this.channel.postMessage({
+    this.sendEngine({
       to: "WRAPPER",
       from: "POPUP",
       type: "REQUEST_OUTGOING_CALL_START",
@@ -70,7 +65,7 @@ class Popup {
 
   handleOutgoingCallEnd() {
     console.log("handleOutgoingCallEnd");
-    this.channel.postMessage({
+    this.sendEngine({
       to: "WRAPPER",
       from: "POPUP",
       type: "REQUEST_OUTGOING_CALL_END",
@@ -80,7 +75,7 @@ class Popup {
 
   handleCallHold() {
     console.log("handleCallHold");
-    this.channel.postMessage({
+    this.sendEngine({
       to: "WRAPPER",
       from: "POPUP",
       type: "REQUEST_CALL_HOLD",
@@ -90,7 +85,7 @@ class Popup {
 
   handleCallUnhold() {
     console.log("handleCallUnhold");
-    this.channel.postMessage({
+    this.sendEngine({
       to: "WRAPPER",
       from: "POPUP",
       type: "REQUEST_CALL_UNHOLD",
@@ -100,7 +95,7 @@ class Popup {
 
   handleCallMute() {
     console.log("handleCallMute");
-    this.channel.postMessage({
+    this.sendEngine({
       to: "WRAPPER",
       from: "POPUP",
       type: "REQUEST_CALL_MUTE",
@@ -110,7 +105,7 @@ class Popup {
 
   handleCallUnmute() {
     console.log("handleCallUnmute");
-    this.channel.postMessage({
+    this.sendEngine({
       to: "WRAPPER",
       from: "POPUP",
       type: "REQUEST_CALL_UNMUTE",
@@ -120,8 +115,7 @@ class Popup {
 
   handleSessionDetails() {
     console.log("handleSessionDetails");
-    this.sendEngine(
-      new Message("PARENT", "POPUP", "ACK_SESSION_DETAILS", this.callObject)
+    this.sendEngine({to: "PARENT", from: "POPUP", type: "ACK_SESSION_DETAILS", object: this.callObject}
     );
   }
 
@@ -157,12 +151,12 @@ class JsSIP_Wrapper {
     this.session = null;
     this.config = config;
     
-    setInterval(() => {
-      let channel = new BroadcastChannel("client_popup_channel");
-      channel.postMessage(
-        new Message("PARENT", "POPUP", "PING_POPUP_ALIVE", {})
-      );
-    }, 10000);
+    // setInterval(() => {
+    //   let channel = new BroadcastChannel("client_popup_channel");
+    //   channel.postMessage(
+    //     {to: "PARENT", from: "POPUP", type: "PING_POPUP_ALIVE",object: {}}
+    //   );
+    // }, 10000);
   }
 
   connect(callback) {
@@ -264,36 +258,6 @@ class JsSIP_Wrapper {
       }
     }
 
-    const callOptions = {
-      eventHandlers: {
-        progress: function (e) {
-          console.log("call is in progress");
-        },
-        failed: function (e) {
-          console.log("call failed with cause: " + e.data);
-        },
-        ended: function (e) {
-          console.log("call ended with cause: " + e.data);
-        },
-        confirmed: function (e) {
-          console.log("call confirmed");
-        },
-      },
-      pcConfig: {
-        rtcpMuxPolicy: "negotiate",
-        hackStripTcp: true,
-        iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
-        iceTransportPolicy: "PARENT",
-      },
-      mediaConstraints: {
-        audio: true,
-        video: false,
-      },
-      rtcOfferConstraints: {
-        offerToReceiveAudio: true,
-        offerToReceiveVideo: false,
-      },
-    };
 
     const configuration = {
       sockets: [

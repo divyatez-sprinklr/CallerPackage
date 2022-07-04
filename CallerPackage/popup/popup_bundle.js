@@ -1,26 +1,17 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var JsSIP = require("jssip");
 
 JsSIP.debug.enable("JsSIP:*");
 
 var EventEmitter = require("events");
-
-var Message = /*#__PURE__*/_createClass(function Message(to, from, type, object) {
-  _classCallCheck(this, Message);
-
-  this.to = to;
-  this.from = from;
-  this.type = type;
-  this.object = object;
-});
 
 var Popup = /*#__PURE__*/function () {
   function Popup(config) {
@@ -69,6 +60,11 @@ var Popup = /*#__PURE__*/function () {
       });
     }
   }, {
+    key: "sendEngine",
+    value: function sendEngine(message) {
+      this.channel.postMessage(message);
+    }
+  }, {
     key: "resetCallObject",
     value: function resetCallObject() {
       sender("");
@@ -82,7 +78,7 @@ var Popup = /*#__PURE__*/function () {
     key: "handleOutgoingCallStart",
     value: function handleOutgoingCallStart(callObject) {
       console.log("HandleOutgoingCallStart");
-      this.channel.postMessage({
+      this.sendEngine({
         to: "WRAPPER",
         from: "POPUP",
         type: "REQUEST_OUTGOING_CALL_START",
@@ -95,7 +91,7 @@ var Popup = /*#__PURE__*/function () {
     key: "handleOutgoingCallEnd",
     value: function handleOutgoingCallEnd() {
       console.log("handleOutgoingCallEnd");
-      this.channel.postMessage({
+      this.sendEngine({
         to: "WRAPPER",
         from: "POPUP",
         type: "REQUEST_OUTGOING_CALL_END",
@@ -106,7 +102,7 @@ var Popup = /*#__PURE__*/function () {
     key: "handleCallHold",
     value: function handleCallHold() {
       console.log("handleCallHold");
-      this.channel.postMessage({
+      this.sendEngine({
         to: "WRAPPER",
         from: "POPUP",
         type: "REQUEST_CALL_HOLD",
@@ -117,7 +113,7 @@ var Popup = /*#__PURE__*/function () {
     key: "handleCallUnhold",
     value: function handleCallUnhold() {
       console.log("handleCallUnhold");
-      this.channel.postMessage({
+      this.sendEngine({
         to: "WRAPPER",
         from: "POPUP",
         type: "REQUEST_CALL_UNHOLD",
@@ -128,7 +124,7 @@ var Popup = /*#__PURE__*/function () {
     key: "handleCallMute",
     value: function handleCallMute() {
       console.log("handleCallMute");
-      this.channel.postMessage({
+      this.sendEngine({
         to: "WRAPPER",
         from: "POPUP",
         type: "REQUEST_CALL_MUTE",
@@ -139,7 +135,7 @@ var Popup = /*#__PURE__*/function () {
     key: "handleCallUnmute",
     value: function handleCallUnmute() {
       console.log("handleCallUnmute");
-      this.channel.postMessage({
+      this.sendEngine({
         to: "WRAPPER",
         from: "POPUP",
         type: "REQUEST_CALL_UNMUTE",
@@ -150,7 +146,12 @@ var Popup = /*#__PURE__*/function () {
     key: "handleSessionDetails",
     value: function handleSessionDetails() {
       console.log("handleSessionDetails");
-      this.sendEngine(new Message("PARENT", "POPUP", "ACK_SESSION_DETAILS", this.callObject));
+      this.sendEngine({
+        to: "PARENT",
+        from: "POPUP",
+        type: "ACK_SESSION_DETAILS",
+        object: this.callObject
+      });
     }
   }, {
     key: "receiveEngine",
@@ -190,11 +191,12 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
     this.eventEmitter = eventEmitter;
     this.userAgent = null;
     this.session = null;
-    this.config = config;
-    setInterval(function () {
-      var channel = new BroadcastChannel("client_popup_channel");
-      channel.postMessage(new Message("PARENT", "POPUP", "PING_POPUP_ALIVE", {}));
-    }, 10000);
+    this.config = config; // setInterval(() => {
+    //   let channel = new BroadcastChannel("client_popup_channel");
+    //   channel.postMessage(
+    //     {to: "PARENT", from: "POPUP", type: "PING_POPUP_ALIVE",object: {}}
+    //   );
+    // }, 10000);
   }
 
   _createClass(JsSIP_Wrapper, [{
@@ -302,38 +304,6 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
         }
       }
 
-      var callOptions = {
-        eventHandlers: {
-          progress: function progress(e) {
-            console.log("call is in progress");
-          },
-          failed: function failed(e) {
-            console.log("call failed with cause: " + e.data);
-          },
-          ended: function ended(e) {
-            console.log("call ended with cause: " + e.data);
-          },
-          confirmed: function confirmed(e) {
-            console.log("call confirmed");
-          }
-        },
-        pcConfig: {
-          rtcpMuxPolicy: "negotiate",
-          hackStripTcp: true,
-          iceServers: [{
-            urls: ["stun:stun.l.google.com:19302"]
-          }],
-          iceTransportPolicy: "PARENT"
-        },
-        mediaConstraints: {
-          audio: true,
-          video: false
-        },
-        rtcOfferConstraints: {
-          offerToReceiveAudio: true,
-          offerToReceiveVideo: false
-        }
-      };
       var configuration = {
         sockets: [new JsSIP.WebSocketInterface("wss://" + server_address + ":" + port)],
         uri: "sip:" + sip + "@" + server_address,
@@ -690,12 +660,14 @@ var _require = require("./popup.js"),
 window.addEventListener("DOMContentLoaded", function () {
   localStorage.setItem("is_popup_active", "true");
 });
-
-window.onbeforeunload = function (event) {
-  localStorage.clear(); //popup.informUnload();
-
-  return '';
-};
+window.addEventListener("beforeunload", function () {
+  localStorage.clear();
+  return "hi";
+}); // window.onbeforeunload = (event) => {
+//   localStorage.clear();
+//   popup.informUnload();
+//   return '';
+// };
 
 var popup = new Popup({
   sip: "1000",
