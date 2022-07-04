@@ -154,13 +154,6 @@ class JsSIP_Wrapper {
     this.userAgent = null;
     this.session = null;
     this.config = config;
-
-    // setInterval(() => {
-    //   let channel = new BroadcastChannel("client_popup_channel");
-    //   channel.postMessage(
-    //     {to: "PARENT", from: "POPUP", type: "PING_POPUP_ALIVE",object: {}}
-    //   );
-    // }, 10000);
   }
 
   connect(callback) {

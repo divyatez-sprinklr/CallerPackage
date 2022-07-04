@@ -8,7 +8,8 @@ window.addEventListener("DOMContentLoaded", function () {
   localStorage.setItem("is_popup_active", "true");
 });
 window.addEventListener("beforeunload", function () {
-  localStorage.clear();
+  localStorage.clear(); //informUnload();
+
   return "";
 });
 var popup = null; // global popup variable
@@ -226,12 +227,7 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
     this.eventEmitter = eventEmitter;
     this.userAgent = null;
     this.session = null;
-    this.config = config; // setInterval(() => {
-    //   let channel = new BroadcastChannel("client_popup_channel");
-    //   channel.postMessage(
-    //     {to: "PARENT", from: "POPUP", type: "PING_POPUP_ALIVE",object: {}}
-    //   );
-    // }, 10000);
+    this.config = config;
   }
 
   _createClass(JsSIP_Wrapper, [{

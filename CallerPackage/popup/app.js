@@ -6,6 +6,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 window.addEventListener("beforeunload", function () {
   localStorage.clear();
+  //informUnload();
   return "";
 });
 

@@ -17,7 +17,9 @@ This makes the state of popup window independent of state of parent window , ove
 
 ## Requirements 
 
-* JsSIP : https://www.npmjs.com/package/jssip
+* JsSIP : https://www.npmjs.com/package/jssip\
+  "jssip": "^3.9.0",
+    "path": "^0.12.7"
 
 ## Installation
 
