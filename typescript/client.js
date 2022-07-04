@@ -1,48 +1,7 @@
 const EventEmitter = require("events");
 const path = require("path");
-var MESSAGE_TYPE;
-(function (MESSAGE_TYPE) {
-    MESSAGE_TYPE["INFORM_SOCKET_CONNECTED"] = "INFORM_SOCKET_CONNECTED";
-    MESSAGE_TYPE["INFORM_SOCKET_DISCONNECTED"] = "INFORM_SOCKET_DISCONNECTED";
-    MESSAGE_TYPE["ACK_OUTGOING_CALL_START"] = "ACK_OUTGOING_CALL_START";
-    MESSAGE_TYPE["ACK_OUTGOING_CALL_END"] = "ACK_OUTGOING_CALL_END";
-    MESSAGE_TYPE["ACK_OUTGOING_CALL_FAIL"] = "ACK_OUTGOING_CALL_FAIL";
-    MESSAGE_TYPE["ACK_CALL_HOLD"] = "ACK_CALL_HOLD";
-    MESSAGE_TYPE["ACK_CALL_UNHOLD"] = "ACK_CALL_UNHOLD";
-    MESSAGE_TYPE["ACK_CALL_MUTE"] = "ACK_CALL_MUTE";
-    MESSAGE_TYPE["ACK_CALL_UNMUTE"] = "ACK_CALL_UNMUTE";
-    MESSAGE_TYPE["POPUP_CLOSED"] = "POPUP_CLOSED";
-    MESSAGE_TYPE["PING_SESSION_DETAILS"] = "PING_SESSION_DETAILS";
-    MESSAGE_TYPE["PING_POPUP_ALIVE"] = "PING_POPUP_ALIVE";
-    MESSAGE_TYPE["ACK_SESSION_DETAILS"] = "ACK_SESSION_DETAILS";
-    MESSAGE_TYPE["REQUEST_OUTGOING_CALL_START"] = "REQUEST_OUTGOING_CALL_START";
-    MESSAGE_TYPE["REQUEST_OUTGOING_CALL_END"] = "REQUEST_OUTGOING_CALL_END";
-    MESSAGE_TYPE["REQUEST_CALL_HOLD"] = "REQUEST_CALL_HOLD";
-    MESSAGE_TYPE["REQUEST_CALL_UNHOLD"] = "REQUEST_CALL_UNHOLD";
-    MESSAGE_TYPE["REQUEST_CALL_MUTE"] = "REQUEST_CALL_MUTE";
-    MESSAGE_TYPE["REQUEST_CALL_UNMUTE"] = "REQUEST_CALL_UNMUTE";
-    MESSAGE_TYPE["REQUEST_SESSION_DETAILS"] = "REQUEST_SESSION_DETAILS";
-    MESSAGE_TYPE["REQUEST_INCOMING_CALL_END"] = "REQUEST_INCOMING_CALL_END";
-    MESSAGE_TYPE["REQUEST_INCOMING_CALL_START"] = "REQUEST_INCOMING_CALL_START";
-    MESSAGE_TYPE["ACK_CALL_MUTE_FAILED"] = "ACK_CALL_MUTE_FAILED";
-    MESSAGE_TYPE["ACK_CALL_UNMUTE_FAILED"] = "ACK_CALL_UNMUTE_FAILED";
-    MESSAGE_TYPE["ACK_CALL_UNHOLD_FAILED"] = "ACK_CALL_UNHOLD_FAILED";
-    MESSAGE_TYPE["ACK_CALL_HOLD_FAILED"] = "ACK_CALL_HOLD_FAILED";
-})(MESSAGE_TYPE || (MESSAGE_TYPE = {}));
-var USER;
-(function (USER) {
-    USER["PARENT"] = "PARENT";
-    USER["POPUP"] = "POPUP";
-    USER["WRAPPER"] = "WRAPPER";
-})(USER || (USER = {}));
-var LOCAL_STORAGE;
-(function (LOCAL_STORAGE) {
-    LOCAL_STORAGE["is_popup_active"] = "is_popup_active";
-})(LOCAL_STORAGE || (LOCAL_STORAGE = {}));
-var CHANNEL;
-(function (CHANNEL) {
-    CHANNEL["client_popup_channel"] = "client_popup_channel";
-})(CHANNEL || (CHANNEL = {}));
+import { MESSAGE_TYPE, AGENT_TYPE } from "./static/enums";
+import { IS_POPUP_ACTIVE, CLIENT_POPUP_CHANNEL, POPUP_WINDOW_LEFT, POPUP_WINDOW_TOP, POPUP_WINDOW_WIDTH, POPUP_WINDOW_HEIGHT } from "./static/constants";
 const EMPTY_CALL_OBJECT = {
     sender: "",
     receiver: "",
@@ -55,19 +14,18 @@ class CallerPackage {
     constructor() {
         this.callActive = false;
         this.eventEmitter = new EventEmitter();
-        this.channel = new BroadcastChannel(CHANNEL.client_popup_channel);
+        this.channel = new BroadcastChannel(CLIENT_POPUP_CHANNEL);
         this.channel.onmessage = (messageEvent) => {
             this.receiveEngine(messageEvent.data);
         };
-        this.resetCallObject();
-        // this.callObject = {
-        //     sender: "",
-        //     receiver: "",
-        //     startTime: "",
-        //     endTime: "",
-        //     hold: false,
-        //     mute: false,
-        // };
+        this.callObject = {
+            sender: "",
+            receiver: "",
+            startTime: "",
+            endTime: "",
+            hold: false,
+            mute: false,
+        };
     }
     resetCallObject() {
         this.setCallObject({
@@ -177,7 +135,7 @@ class CallerPackage {
     }
     /**
      * This function helps setup eventlistener on eventEmitter.
-     * @param {string} header
+     * @param {string} event
      * @param {function} callback
      */
     on(event, callback) {
@@ -240,16 +198,16 @@ class CallerPackage {
      * @param {function} callback
      */
     connect(callback) {
-        if (localStorage.getItem(LOCAL_STORAGE.is_popup_active) === null) {
+        if (localStorage.getItem(IS_POPUP_ACTIVE) === null) {
             const popup_path = path.parse(__filename).dir + "/popup/popup.html";
-            window.open(popup_path, "connection", "left=0, top=0, width=300, height=325");
+            window.open(popup_path, "connection", `left=${POPUP_WINDOW_LEFT}, top=${POPUP_WINDOW_TOP}, width=${POPUP_WINDOW_WIDTH}, height=${POPUP_WINDOW_HEIGHT}`);
             console.log("popup path: " + popup_path);
         }
         else {
             console.log("Session details request");
             this.sendEngine({
-                to: USER.WRAPPER,
-                from: USER.PARENT,
+                to: AGENT_TYPE.WRAPPER,
+                from: AGENT_TYPE.PARENT,
                 type: MESSAGE_TYPE.REQUEST_SESSION_DETAILS,
                 object: EMPTY_CALL_OBJECT,
             });
@@ -259,7 +217,6 @@ class CallerPackage {
     /**
      * This function sets the local call object.
      * @param {object} callObject
-     *
      */
     setCallObject(callObject) {
         if (!callObject.sender) {
@@ -289,27 +246,30 @@ class CallerPackage {
         this.resetCallObject();
         this.setCallObject({ sender: null, receiver: receiver, hold: null, mute: null, startTime: null, endTime: null });
         this.sendEngine({
-            to: USER.POPUP,
-            from: USER.PARENT,
+            to: AGENT_TYPE.POPUP,
+            from: AGENT_TYPE.PARENT,
             type: MESSAGE_TYPE.REQUEST_OUTGOING_CALL_START,
             object: this.callObject,
         });
     }
     /**
-     * This function sends the request to popup to end the current outgoing call.
+     * Requests popup to end the current outgoing call.
      */
     endOut() {
         this.sendEngine({
-            to: USER.POPUP,
-            from: USER.PARENT,
+            to: AGENT_TYPE.POPUP,
+            from: AGENT_TYPE.PARENT,
             type: MESSAGE_TYPE.REQUEST_OUTGOING_CALL_END,
             object: EMPTY_CALL_OBJECT,
         });
     }
+    /**
+     * Requests popup to end the current incoming call.
+     */
     endIn() {
         this.sendEngine({
-            to: USER.POPUP,
-            from: USER.PARENT,
+            to: AGENT_TYPE.POPUP,
+            from: AGENT_TYPE.PARENT,
             type: MESSAGE_TYPE.REQUEST_INCOMING_CALL_END,
             object: EMPTY_CALL_OBJECT,
         });
@@ -319,8 +279,8 @@ class CallerPackage {
      */
     hold() {
         this.sendEngine({
-            to: USER.POPUP,
-            from: USER.PARENT,
+            to: AGENT_TYPE.POPUP,
+            from: AGENT_TYPE.PARENT,
             type: MESSAGE_TYPE.REQUEST_CALL_HOLD,
             object: EMPTY_CALL_OBJECT,
         });
@@ -330,8 +290,8 @@ class CallerPackage {
      */
     unhold() {
         this.sendEngine({
-            to: USER.POPUP,
-            from: USER.PARENT,
+            to: AGENT_TYPE.POPUP,
+            from: AGENT_TYPE.PARENT,
             type: MESSAGE_TYPE.REQUEST_CALL_UNHOLD,
             object: EMPTY_CALL_OBJECT,
         });
@@ -341,8 +301,8 @@ class CallerPackage {
      */
     mute() {
         this.sendEngine({
-            to: USER.POPUP,
-            from: USER.PARENT,
+            to: AGENT_TYPE.POPUP,
+            from: AGENT_TYPE.PARENT,
             type: MESSAGE_TYPE.REQUEST_CALL_MUTE,
             object: EMPTY_CALL_OBJECT,
         });
@@ -352,17 +312,31 @@ class CallerPackage {
      */
     unmute() {
         this.sendEngine({
-            to: USER.POPUP,
-            from: USER.PARENT,
+            to: AGENT_TYPE.POPUP,
+            from: AGENT_TYPE.PARENT,
             type: MESSAGE_TYPE.REQUEST_CALL_UNMUTE,
             object: EMPTY_CALL_OBJECT,
         });
     }
+    /**
+     * This function sends the request to popup to accept incoming call.
+     */
     accept() {
         this.sendEngine({
-            to: USER.POPUP,
-            from: USER.PARENT,
+            to: AGENT_TYPE.POPUP,
+            from: AGENT_TYPE.PARENT,
             type: MESSAGE_TYPE.REQUEST_INCOMING_CALL_START,
+            object: EMPTY_CALL_OBJECT,
+        });
+    }
+    /**
+     * This function sends the request to popup to decline incoming call.
+     */
+    decline() {
+        this.sendEngine({
+            to: AGENT_TYPE.POPUP,
+            from: AGENT_TYPE.PARENT,
+            type: MESSAGE_TYPE.REQUEST_INCOMING_CALL_DECLINE,
             object: EMPTY_CALL_OBJECT,
         });
     }
