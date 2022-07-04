@@ -1,31 +1,37 @@
+
 # CallerPackage
-
-
 
 Caller Package is used to handle cross window calling service , using JsSIP.
 This library moved the intra-window calling logic to a popup window.
 This makes the state of popup window independent of state of parent window , overall mitigating the issues caused by this previously like refresh causing call end, etc. 
 
-## Index
-
- * Requirements
- * Installation
- * Configuration
- * Getting Started
-
+<div style='height:.5px;background-color: #d3d3d3'></div>
 
 ## Requirements 
 
-* JsSIP : https://www.npmjs.com/package/jssip\
-  "jssip": "^3.9.0",
-    "path": "^0.12.7"
+* JsSIP : https://www.npmjs.com/package/jssip
+    ```
+        $ npm install jssip
+    ```
+
+* path : https://www.npmjs.com/package/path
+    ```
+        $ npm install --save path
+    ```
+
+<div style='height:.5px;background-color: #d3d3d3'></div>
+</br>
 
 ## Installation
+
+</br>
+</br>
 
 
 ## Configuration
 > Add Config details in popup.html manually or through running.
 
+</br>
 
 ## Getting Started
 ```
@@ -57,7 +63,12 @@ This is needed to be configured in popup side.
     port: 7654/ws
 }
 ```
-![alt text](https://raw.githubusercontent.com/divyatez-sprinklr/CallerPackage/main/readme_media/popup.png)
+<div align="center" style="display:flex; flex-direction:row;justify-content:center; gap:20px;">
+<img src="https://raw.githubusercontent.com/divyatez-sprinklr/CallerPackage/main/readme_media/popup.png" height="300">
+<img src="https://raw.githubusercontent.com/divyatez-sprinklr/CallerPackage/main/readme_media/connecting.png" height="300">
+<img src="https://raw.githubusercontent.com/divyatez-sprinklr/CallerPackage/main/readme_media/connected.png" height="300">
+</div>
+
 
 ## Methods
 
@@ -66,7 +77,13 @@ This method is used to connect to popup.
 If popup is already active it will connect to that, otherwise it will start a new popup window.
 ##### Arguments
 - callback function
+##### Example:
 
+```
+callerPackage.connect(() => {
+    updateSocketConnectedInUI();
+});
+```
 ---
 
 ### call()
@@ -169,4 +186,4 @@ callerPackage.on('ACK_SESSION_DETAILS',()=>{
         console.log(sessionDetails);
 });
 ```
-
+</br>
