@@ -1,4 +1,4 @@
-const Wrapper = require("./wrapper");
+const { Wrapper } = require("./wrapper");
 import { MESSAGE_TYPE, AGENT_TYPE } from "../static/enums";
 import { CLIENT_POPUP_CHANNEL } from "../static/constants";
 const EMPTY_CALL_OBJECT = {
@@ -9,7 +9,7 @@ const EMPTY_CALL_OBJECT = {
     hold: false,
     mute: false,
 };
-export default class Popup {
+class Popup {
     constructor(config) {
         console.log("PopUp Instance Created");
         this.#callActive = false;
@@ -157,3 +157,4 @@ export default class Popup {
         }
     }
 }
+module.exports = { Popup: Popup };

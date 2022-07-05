@@ -1,4 +1,4 @@
-const Wrapper = require("./wrapper");
+const { Wrapper } = require("./wrapper");
 
 import { MESSAGE_TYPE, AGENT_TYPE } from "../static/enums";
 import { CLIENT_POPUP_CHANNEL } from "../static/constants";
@@ -39,22 +39,22 @@ const EMPTY_CALL_OBJECT: CALL_OBJECT = {
     mute: false,
 } 
 
-export default class Popup {
-    #callActive: boolean;
-    #channel: BroadcastChannel;
-    #callObject: CALL_OBJECT;
-    #JsSIP_Wrapper: typeof Wrapper;
+class Popup {
+  #callActive: boolean;
+  #channel: BroadcastChannel;
+  #callObject: CALL_OBJECT;
+  #JsSIP_Wrapper: typeof Wrapper;
 
-    constructor(config: CONFIG) {
-        console.log("PopUp Instance Created");
+  constructor(config: CONFIG) {
+    console.log("PopUp Instance Created");
 
-        this.#callActive = false;
-        this.#channel = new BroadcastChannel(CLIENT_POPUP_CHANNEL);
-        this.#channel.onmessage = (messageEvent) => {
-            this.#receiveEngine(messageEvent.data);
-        };
-        this.#callObject = EMPTY_CALL_OBJECT;
-        this.#JsSIP_Wrapper = new Wrapper(config);
+    this.#callActive = false;
+    this.#channel = new BroadcastChannel(CLIENT_POPUP_CHANNEL);
+    this.#channel.onmessage = (messageEvent) => {
+        this.#receiveEngine(messageEvent.data);
+    };
+    this.#callObject = EMPTY_CALL_OBJECT;
+    this.#JsSIP_Wrapper = new Wrapper(config);
   }
 
   connect(callback: CALLBACK): void {
@@ -195,3 +195,5 @@ export default class Popup {
     }
   }
 }
+
+module.exports = { Popup: Popup };
