@@ -271,22 +271,11 @@ class CallerPackage {
     /**
      * Requests popup to end the current outgoing call.
      */
-    endOut() {
+    terminate() {
         this.#sendEngine({
             to: AGENT_TYPE.POPUP,
             from: AGENT_TYPE.PARENT,
             type: MESSAGE_TYPE.REQUEST_OUTGOING_CALL_END,
-            object: EMPTY_CALL_OBJECT,
-        });
-    }
-    /**
-     * Requests popup to end the current incoming call.
-     */
-    endIn() {
-        this.#sendEngine({
-            to: AGENT_TYPE.POPUP,
-            from: AGENT_TYPE.PARENT,
-            type: MESSAGE_TYPE.REQUEST_INCOMING_CALL_END,
             object: EMPTY_CALL_OBJECT,
         });
     }

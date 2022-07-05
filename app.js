@@ -2,15 +2,11 @@ const { CallerPackage } = require("./CallerPackage/client");
 
 let callerPackage = new CallerPackage();
 
-
-
 let onMute = false;
 let onHold = false;
 let onActiveCall = false;
-let receiver = ""; 
+let receiver = "";
 let timerInterval;
-
-
 
 let mute = "Mute State : Unmute";
 let hold = "Hold State : Unhold";
@@ -31,13 +27,7 @@ document.getElementById("hold-info").innerText = mute;
 displayCallObject();
 
 const connect_button = document.getElementById("configure");
-
 const call_button = document.getElementById("call");
-const hangup_button = document.getElementById("hangup");
-const mute_button = document.getElementById("mute");
-const unmute_button = document.getElementById("unmute");
-const hold_button = document.getElementById("hold");
-const unhold_button = document.getElementById("unhold");
 
 connect_button.addEventListener("click", () => {
   callerPackage.connect(
@@ -47,7 +37,9 @@ connect_button.addEventListener("click", () => {
       server_address: document.getElementById("server-address").value,
       port: document.getElementById("port").value,
     },
-    () => {}
+    () => {
+      connect_button.disabled = true;
+    }
   );
 });
 
@@ -77,23 +69,24 @@ call_button.addEventListener("click", () => {
 //   callerPackage.unmute();
 // });
 
+document.getElementById("mute-call").addEventListener("click", () => {
+  handleMute();
+});
 
-document.getElementById('mute-call').addEventListener('click',()=>{
-    handleMute();
-})
-
-
-document.getElementById('hold-call').addEventListener('click',()=>{
+document.getElementById("hold-call").addEventListener("click", () => {
   handleHold();
-})
+});
 
-document.getElementById('end-call').addEventListener('click',()=>{
-  callerPackage.endOut();
-})
+document.getElementById("end-call").addEventListener("click", () => {
+  callerPackage.terminate();
+});
 
 callerPackage.on("INFORM_SOCKET_CONNECTED", () => {
   socket = "Socket : Connected";
   document.getElementById("socket-info").innerText = socket;
+
+  call_button.disabled = false;
+  connect_button.disabled = false;
 });
 
 callerPackage.on("INFORM_SOCKET_DISCONNECTED", () => {
@@ -107,8 +100,7 @@ callerPackage.on("ACK_OUTGOING_CALL_START", () => {
   callObject = callerPackage.getCallObject();
   displayCallObject();
   document.getElementById("call-active-info").innerText = callActive;
-  
-  
+
   updateConfirmCallUI();
 });
 
@@ -120,8 +112,7 @@ callerPackage.on("ACK_OUTGOING_CALL_END", () => {
   resetHold();
   resetMute();
   document.getElementById("call-active-info").innerText = callActive;
-  
-  
+
   closeCallUI();
 });
 
@@ -133,8 +124,7 @@ callerPackage.on("ACK_OUTGOING_CALL_FAIL", () => {
   resetHold();
   resetMute();
   document.getElementById("call-active-info").innerText = callActive;
-  
-  
+
   closeCallUI();
 });
 
@@ -166,7 +156,6 @@ callerPackage.on("ACK_CALL_MUTE", () => {
 
   onMute = true;
   updateMuteUI(onMute);
-
 });
 
 callerPackage.on("ACK_CALL_UNMUTE", () => {
@@ -235,9 +224,6 @@ function resetState() {
   resetcallActive();
 }
 
-
-
-
 //// Dialpad Float ///
 
 let start_time = 0;
@@ -255,19 +241,18 @@ function toggleTimer(start) {
       m = Math.floor(s / 60);
       s = s - 60 * m;
 
-      let current_time = '';
+      let current_time = "";
       current_time = (s < 10 ? "0" + s : s) + current_time;
-      current_time =(m < 10 ? "0" + m : m) + current_time;
+      current_time = (m < 10 ? "0" + m : m) + current_time;
       current_time = (h < 10 ? "0" + h : h) + current_time;
 
-      document.getElementById('dialpad-timer').innerHTML=`${current_time}`;
-
+      document.getElementById("dialpad-timer").innerHTML = `${current_time}`;
     }, 1000);
   } else {
     console.log(`Call duration: ${h}:${m}:${s}`);
 
     clearInterval(call_timer);
-    document.getElementById('dialpad-timer').innerHTML= ``;
+    document.getElementById("dialpad-timer").innerHTML = ``;
     [h, m, s, call_timer] = [0, 0, 0, null];
   }
 }
@@ -278,69 +263,69 @@ function getHMS(raw_time) {
   return { h: h, m: m, s: s };
 }
 
-function startTimer(){
+function startTimer() {
   start_time = getHMS(callObject.startTime);
   toggleTimer(true);
 }
 
-function endTimer(){
+function endTimer() {
   toggleTimer(false);
 }
 
-
-function closeCallUI(){
-  document.getElementById('dialpad-box').style.visibility = 'hidden';
+function closeCallUI() {
+  document.getElementById("dialpad-box").style.visibility = "hidden";
   endTimer();
 }
 
-function updateInitiateCallUI(){
-    document.getElementById('dialpad-box').style.visibility = 'inherit';
-    document.getElementById('user-number').innerHTML = `${callObject.receiver}`;
-    document.getElementById('dialpad-timer').innerHTML = 'Ringing..';
+function updateInitiateCallUI() {
+  document.getElementById("dialpad-box").style.visibility = "inherit";
+  document.getElementById("user-number").innerHTML = `${callObject.receiver}`;
+  document.getElementById("dialpad-timer").innerHTML = "Ringing..";
 }
 
-function updateConfirmCallUI(){
-    startTimer();
+function updateConfirmCallUI() {
+  startTimer();
 }
 
-
-function handleHold(){
-  if(!onHold){
-      callerPackage.hold();
-  }else{
-      callerPackage.unhold();
+function handleHold() {
+  if (!onHold) {
+    callerPackage.hold();
+  } else {
+    callerPackage.unhold();
   }
 }
 
-function updateHoldUI(putOnHold){
-  if(putOnHold){
-    document.getElementById('hold-call').classList.remove('control-btn-inactive');
-    document.getElementById('hold-call').classList.add('control-btn-active');
-  }else{
-    document.getElementById('hold-call').classList.remove('control-btn-active');
-    document.getElementById('hold-call').classList.add('control-btn-inactive');
+function updateHoldUI(putOnHold) {
+  if (putOnHold) {
+    document
+      .getElementById("hold-call")
+      .classList.remove("control-btn-inactive");
+    document.getElementById("hold-call").classList.add("control-btn-active");
+  } else {
+    document.getElementById("hold-call").classList.remove("control-btn-active");
+    document.getElementById("hold-call").classList.add("control-btn-inactive");
   }
 }
 
-
-function handleMute(){
-  if(!onMute){
-      callerPackage.mute();
-  }else{
-      callerPackage.unmute();
+function handleMute() {
+  if (!onMute) {
+    callerPackage.mute();
+  } else {
+    callerPackage.unmute();
   }
 }
 
-function updateMuteUI(putOnHold){
-  if(putOnHold){
-    document.getElementById('mute-call').classList.remove('control-btn-inactive');
-    document.getElementById('mute-call').classList.add('control-btn-active');
-  }else{
-    document.getElementById('mute-call').classList.remove('control-btn-active');
-    document.getElementById('mute-call').classList.add('control-btn-inactive');
+function updateMuteUI(putOnHold) {
+  if (putOnHold) {
+    document
+      .getElementById("mute-call")
+      .classList.remove("control-btn-inactive");
+    document.getElementById("mute-call").classList.add("control-btn-active");
+  } else {
+    document.getElementById("mute-call").classList.remove("control-btn-active");
+    document.getElementById("mute-call").classList.add("control-btn-inactive");
   }
 }
-
 
 // function updateConfirmCallUI(){
 //   startTimer();

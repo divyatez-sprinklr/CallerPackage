@@ -86,22 +86,7 @@ var Popup = /*#__PURE__*/function () {
   _createClass(Popup, [{
     key: "connect",
     value: function connect(callback) {
-      var _this2 = this;
-
-      setTimeout(function () {
-        _this2.JsSIP_Wrapper.connect(callback);
-      }, 1000);
-    }
-  }, {
-    key: "informUnload",
-    value: function informUnload() {
-      // this.JsSIP_Wrapper.call_terminate(); // function used inside connect()
-      this.channel.postMessage({
-        to: _enums.AGENT_TYPE.PARENT,
-        from: _enums.AGENT_TYPE.POPUP,
-        type: _enums.MESSAGE_TYPE.POPUP_CLOSED,
-        object: EMPTY_CALL_OBJECT
-      });
+      this.JsSIP_Wrapper.connect(callback);
     }
   }, {
     key: "sendEngine",

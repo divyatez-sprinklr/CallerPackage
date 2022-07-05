@@ -240,26 +240,12 @@ var CallerPackage = /*#__PURE__*/function () {
      */
 
   }, {
-    key: "endOut",
-    value: function endOut() {
+    key: "terminate",
+    value: function terminate() {
       _classPrivateMethodGet(this, _sendEngine, _sendEngine2).call(this, {
         to: _enums.AGENT_TYPE.POPUP,
         from: _enums.AGENT_TYPE.PARENT,
         type: _enums.MESSAGE_TYPE.REQUEST_OUTGOING_CALL_END,
-        object: EMPTY_CALL_OBJECT
-      });
-    }
-    /**
-     * Requests popup to end the current incoming call.
-     */
-
-  }, {
-    key: "endIn",
-    value: function endIn() {
-      _classPrivateMethodGet(this, _sendEngine, _sendEngine2).call(this, {
-        to: _enums.AGENT_TYPE.POPUP,
-        from: _enums.AGENT_TYPE.PARENT,
-        type: _enums.MESSAGE_TYPE.REQUEST_INCOMING_CALL_END,
         object: EMPTY_CALL_OBJECT
       });
     }
@@ -662,18 +648,15 @@ document.getElementById("hold-info").innerText = mute;
 displayCallObject();
 var connect_button = document.getElementById("configure");
 var call_button = document.getElementById("call");
-var hangup_button = document.getElementById("hangup");
-var mute_button = document.getElementById("mute");
-var unmute_button = document.getElementById("unmute");
-var hold_button = document.getElementById("hold");
-var unhold_button = document.getElementById("unhold");
 connect_button.addEventListener("click", function () {
   callerPackage.connect({
     sip: document.getElementById("username").value,
     password: document.getElementById("password").value,
     server_address: document.getElementById("server-address").value,
     port: document.getElementById("port").value
-  }, function () {});
+  }, function () {
+    connect_button.disabled = true;
+  });
 });
 call_button.addEventListener("click", function () {
   //resetState();
@@ -695,18 +678,20 @@ call_button.addEventListener("click", function () {
 //   callerPackage.unmute();
 // });
 
-document.getElementById('mute-call').addEventListener('click', function () {
+document.getElementById("mute-call").addEventListener("click", function () {
   handleMute();
 });
-document.getElementById('hold-call').addEventListener('click', function () {
+document.getElementById("hold-call").addEventListener("click", function () {
   handleHold();
 });
-document.getElementById('end-call').addEventListener('click', function () {
-  callerPackage.endOut();
+document.getElementById("end-call").addEventListener("click", function () {
+  callerPackage.terminate();
 });
 callerPackage.on("INFORM_SOCKET_CONNECTED", function () {
   socket = "Socket : Connected";
   document.getElementById("socket-info").innerText = socket;
+  call_button.disabled = false;
+  connect_button.disabled = false;
 });
 callerPackage.on("INFORM_SOCKET_DISCONNECTED", function () {
   socket = "Socket : Disconnected";
@@ -847,16 +832,16 @@ function toggleTimer(start) {
       s = s - 3600 * h;
       m = Math.floor(s / 60);
       s = s - 60 * m;
-      var current_time = '';
+      var current_time = "";
       current_time = (s < 10 ? "0" + s : s) + current_time;
       current_time = (m < 10 ? "0" + m : m) + current_time;
       current_time = (h < 10 ? "0" + h : h) + current_time;
-      document.getElementById('dialpad-timer').innerHTML = "".concat(current_time);
+      document.getElementById("dialpad-timer").innerHTML = "".concat(current_time);
     }, 1000);
   } else {
     console.log("Call duration: ".concat(h, ":").concat(m, ":").concat(s));
     clearInterval(call_timer);
-    document.getElementById('dialpad-timer').innerHTML = "";
+    document.getElementById("dialpad-timer").innerHTML = "";
     h = 0;
     m = 0;
     s = 0;
@@ -890,14 +875,14 @@ function endTimer() {
 }
 
 function closeCallUI() {
-  document.getElementById('dialpad-box').style.visibility = 'hidden';
+  document.getElementById("dialpad-box").style.visibility = "hidden";
   endTimer();
 }
 
 function updateInitiateCallUI() {
-  document.getElementById('dialpad-box').style.visibility = 'inherit';
-  document.getElementById('user-number').innerHTML = "".concat(callObject.receiver);
-  document.getElementById('dialpad-timer').innerHTML = 'Ringing..';
+  document.getElementById("dialpad-box").style.visibility = "inherit";
+  document.getElementById("user-number").innerHTML = "".concat(callObject.receiver);
+  document.getElementById("dialpad-timer").innerHTML = "Ringing..";
 }
 
 function updateConfirmCallUI() {
@@ -914,11 +899,11 @@ function handleHold() {
 
 function updateHoldUI(putOnHold) {
   if (putOnHold) {
-    document.getElementById('hold-call').classList.remove('control-btn-inactive');
-    document.getElementById('hold-call').classList.add('control-btn-active');
+    document.getElementById("hold-call").classList.remove("control-btn-inactive");
+    document.getElementById("hold-call").classList.add("control-btn-active");
   } else {
-    document.getElementById('hold-call').classList.remove('control-btn-active');
-    document.getElementById('hold-call').classList.add('control-btn-inactive');
+    document.getElementById("hold-call").classList.remove("control-btn-active");
+    document.getElementById("hold-call").classList.add("control-btn-inactive");
   }
 }
 
@@ -932,11 +917,11 @@ function handleMute() {
 
 function updateMuteUI(putOnHold) {
   if (putOnHold) {
-    document.getElementById('mute-call').classList.remove('control-btn-inactive');
-    document.getElementById('mute-call').classList.add('control-btn-active');
+    document.getElementById("mute-call").classList.remove("control-btn-inactive");
+    document.getElementById("mute-call").classList.add("control-btn-active");
   } else {
-    document.getElementById('mute-call').classList.remove('control-btn-active');
-    document.getElementById('mute-call').classList.add('control-btn-inactive');
+    document.getElementById("mute-call").classList.remove("control-btn-active");
+    document.getElementById("mute-call").classList.add("control-btn-inactive");
   }
 } // function updateConfirmCallUI(){
 //   startTimer();

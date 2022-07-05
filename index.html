@@ -8,250 +8,9 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
-    <style type="text/css">
-        body {
-            margin: 0;
-            padding: 0px;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            font-family: Verdana, Geneva, Tahoma, sans-serif
-        }
-
-        #root-container {
-            margin: 0;
-            padding: 50px;
-
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 20px;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        #grid-container {
-            padding: 20px 30px;
-            display: grid;
-            align-items: stretch;
-            justify-items: center;
-            grid-template-columns: 1fr 1fr;
-            column-gap: 30px;
-            row-gap: 20px;
-            background-color: rgb(235, 235, 235);
-            border: 1px solid rgb(201, 201, 201);
-            border-radius: 10px;
-        }
-
-        .grid-item-large {
-            grid-column-start: 1;
-            grid-column-end: 3;
-        }
-
-
-        button {
-            background-color: #FFFFFF;
-            border: 0;
-            border-radius: .5rem;
-            box-sizing: border-box;
-            color: #111827;
-            font-family: "Inter var", ui-sans-serif, system-ui, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-            font-size: .875rem;
-            font-weight: 600;
-            line-height: 1.25rem;
-            padding: .75rem 1rem;
-            text-align: center;
-            text-decoration: none #D1D5DB solid;
-            text-decoration-thickness: auto;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            cursor: pointer;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-        }
-
-        button:hover {
-            background-color: rgb(249, 250, 251);
-        }
-
-        button:focus {
-            outline: 2px solid transparent;
-            outline-offset: 2px;
-        }
-
-        button:focus-visible {
-            box-shadow: none;
-        }
-
-        input {
-            font-size: 18px;
-            border-radius: 6px;
-            line-height: 1.5;
-            padding: 5px 10px;
-            transition: box-shadow 100ms ease-in, border 100ms ease-in, background-color 100ms ease-in;
-            border: 2px solid #dee1e2;
-            color: rgb(14, 14, 16);
-            background: #ffffff;
-            display: block;
-            height: 36px;
-        }
-
-        input:hover {
-            border-color: #ccc;
-        }
-
-        input:focus {
-            border-color: #000000;
-            background: #fff;
-            outline: none !important;
-        }
-
-
-        button:disabled {
-            visibility: hidden;
-        }
-
-        .card {
-            background-color: #FFFFFF;
-            border: 0;
-            border-radius: .5rem;
-            box-sizing: border-box;
-            color: #111827;
-            font-family: "Inter var", ui-sans-serif, system-ui, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-            font-size: .875rem;
-            font-weight: 600;
-            line-height: 1.25rem;
-            padding: .75rem 1rem;
-            text-align: center;
-            text-decoration: none #D1D5DB solid;
-            text-decoration-thickness: auto;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            cursor: pointer;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-            width: 300px;
-            overflow: scroll;
-        }
-
-        .header-card {
-            background-color: rgb(173, 216, 230, .5);
-            border-radius: 0rem 0rem 0rem 0rem;
-            width: 100%;
-            height: 50px;
-            box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            padding: 10px;
-        }
-
-        .header-text {
-            font-family: "Inter var", ui-sans-serif, system-ui, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-            color: #ffffff;
-            font-size: 1.5rem;
-            font-weight: 600;
-            padding: 10px;
-        }
-
-        .dialpad-wrapper{
-            position: absolute;
-            background-color: #313131;
-            width: 270px;
-            height: 400px;
-            color: #c2c2c2;
-            border-radius: 30px 30px 0px 0px;
-            bottom: 0px;
-            right: 30px;
-            visibility:hidden;
-        }
-        .dialpad-header{
-            background-color: transparent;
-            width: 250px;
-            height: 30px;
-            color: #ffffff;
-            border-radius: 30px 30px 0px 0px;
-        }
-
-        .dialpad-gap{
-            background-color: transparent;
-            width: 250px;
-        }
-
-        .height20{
-            height: 20px;
-        }
-
-        .height40{
-            height: 40px;
-        }
-
-        .flexCol{
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .flexRow{
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-            gap:20px;
-        }
-        
-        .control-btn{
-            border-radius: 5px;
-            width: 80px;
-            height: 65px;
-            border: 2px solid #414141;
-        }
-
-        .control-btn:hover{
-            border: 2px solid #cbcbcb;
-        }
-
-        .control-btn-inactive{
-            background-color: #313131;
-        }
-
-        .control-btn-active{
-            background-color: #414141;
-        }
-        
-        .end-call-btn{
-            width: 65px;
-            height: 65px;
-            background-color: #CA3E47;
-            border-radius: 50%;
-        }
-
-        .end-call-btn:hover{
-            background-color: #820d14;
-        }
-
-        .btn-icon{
-            width: 40px;
-            height: 40px;
-            background-color: transparent;
-        } 
-        .user-icon{
-            width: 50px;
-            height: 50px;
-            background-color: transparent;
-        } 
-        .greyContainer{
-            background-color: #525252;
-            border-radius: 50%;
-            width: 70px;
-            height: 70px;
-            
-        }
-        #user-number{
-            font-family: "Inter var", ui-sans-serif, system-ui, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-        }
-        #dialpad-timer{
-            font-family: "Inter var", ui-sans-serif, system-ui, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-        }
-
-    </style>
+    <link rel="stylesheet"
+          href="./index.css"
+          type="text/css">
 </head>
 
 <body>
@@ -259,7 +18,7 @@
         <div class="header-text">CallerPackage Demo</div>
     </header>
     <div id="root-container">
-        <div id="sip-config">
+        <div class="flex-container">
             <input type="text"
                    id="username"
                    placeholder="Username"
@@ -277,37 +36,18 @@
                    placeholder="Port"
                    value="7443/ws">
             <button id="configure">Connect</button>
-        </div>
-
-        <div id="grid-container">
-            <div class="grid-item-large">
+            <div id="call-div">
                 <input id="phone-number"
                        placeholder="phone number"
                        value="4153260912">
                 <!-- value="4153260912"> -->
                 <!-- value="6285004633"> -->
-
-            </div>
-            <div class="grid-item">
-                <button id="call">Call</button>
-            </div>
-            <div class="grid-item">
-                <button id="hangup">Hangup</button>
-            </div>
-            <div class="grid-item">
-                <button id="mute">Mute</button>
-            </div>
-            <div class="grid-item">
-                <button id="unmute">Unmute</button>
-            </div>
-            <div class="grid-item">
-                <button id="hold">Hold</button>
-            </div>
-            <div class="grid-item">
-                <button id="unhold">Unhold</button>
+                <button id="call"
+                        disabled>Call</button>
             </div>
         </div>
-        <div>
+
+        <div class="flex-container">
             <p class='card'
                id="socket-info"></p>
             <p class='card'
@@ -320,37 +60,50 @@
                id="call-object-info"></p>
         </div>
 
+
     </div>
 
-    <div id="dialpad-box" class="dialpad-wrapper">
+    <div id="dialpad-box"
+         class="dialpad-wrapper">
         <div class="dialpad-header"></div>
 
         <div class="flexCol">
-            <div id="dialpad-user" class="dialpad-user-container flexRow greyContainer">
-                <img class='user-icon' src="./icons/user-grey.png">
+            <div id="dialpad-user"
+                 class="dialpad-user-container flexRow greyContainer">
+                <img class='user-icon'
+                     src="./icons/user-grey.png">
             </div>
             <div class="dialpad-gap height20"></div>
             <div id="user-number">
-            </div>            
+            </div>
         </div>
         <div class="dialpad-gap height40"></div>
         <div class="flexCol">
-            <div id="dialpad-timer" class=""></div>
+            <div id="dialpad-timer"
+                 class=""></div>
         </div>
         <div class="dialpad-gap height40"></div>
         <div class="dialpad-gap"></div>
-        <div id="dialpad-control-buttons" class="flexRow">
-            <div id="mute-call" class="flexCol control-btn control-btn-inactive">
-                <img class='btn-icon' src="./icons/microphone-grey-2.png">
+        <div id="dialpad-control-buttons"
+             class="flexRow">
+            <div id="mute-call"
+                 class="flexCol control-btn control-btn-inactive">
+                <img class='btn-icon'
+                     src="./icons/microphone-grey-2.png">
             </div>
-            <div id="hold-call" class="flexCol control-btn control-btn-inactive">
-                <img class='btn-icon' src="./icons/pause-grey-2.png">
+            <div id="hold-call"
+                 class="flexCol control-btn control-btn-inactive">
+                <img class='btn-icon'
+                     src="./icons/pause-grey-2.png">
             </div>
         </div>
         <div class="dialpad-gap height20"></div>
-        <div id="dialpad-call-end" class="flexCol">
-            <div id="end-call" class="end-call-btn flexCol">
-                <img class='btn-icon' src="./icons/call-grey-2.png">
+        <div id="dialpad-call-end"
+             class="flexCol">
+            <div id="end-call"
+                 class="end-call-btn flexCol">
+                <img class='btn-icon'
+                     src="./icons/call-grey-2.png">
             </div>
         </div>
     </div>

@@ -21,18 +21,7 @@ class Popup {
         this.JsSIP_Wrapper = new Wrapper(config);
     }
     connect(callback) {
-        setTimeout(() => {
-            this.JsSIP_Wrapper.connect(callback);
-        }, 1000);
-    }
-    informUnload() {
-        // this.JsSIP_Wrapper.call_terminate(); // function used inside connect()
-        this.channel.postMessage({
-            to: AGENT_TYPE.PARENT,
-            from: AGENT_TYPE.POPUP,
-            type: MESSAGE_TYPE.POPUP_CLOSED,
-            object: EMPTY_CALL_OBJECT,
-        });
+        this.JsSIP_Wrapper.connect(callback);
     }
     sendEngine(message) {
         this.channel.postMessage(message);
