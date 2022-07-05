@@ -37,35 +37,35 @@ const EMPTY_CALL_OBJECT: CALL_OBJECT = {
     endTime: "",
     hold: false,
     mute: false,
-} 
+}
 
 class Popup {
-  #callActive: boolean;
-  #channel: BroadcastChannel;
-  #callObject: CALL_OBJECT;
-  #JsSIP_Wrapper: typeof Wrapper;
+  private callActive: boolean;
+  private channel: BroadcastChannel;
+  private callObject: CALL_OBJECT;
+  private JsSIP_Wrapper: typeof Wrapper;
 
   constructor(config: CONFIG) {
     console.log("PopUp Instance Created");
 
-    this.#callActive = false;
-    this.#channel = new BroadcastChannel(CLIENT_POPUP_CHANNEL);
-    this.#channel.onmessage = (messageEvent) => {
-        this.#receiveEngine(messageEvent.data);
+    this.callActive = false;
+    this.channel = new BroadcastChannel(CLIENT_POPUP_CHANNEL);
+    this.channel.onmessage = (messageEvent) => {
+        this.receiveEngine(messageEvent.data);
     };
-    this.#callObject = EMPTY_CALL_OBJECT;
-    this.#JsSIP_Wrapper = new Wrapper(config);
+    this.callObject = EMPTY_CALL_OBJECT;
+    this.JsSIP_Wrapper = new Wrapper(config);
   }
 
   connect(callback: CALLBACK): void {
     setTimeout(() => {
-      this.#JsSIP_Wrapper.connect(callback);
+      this.JsSIP_Wrapper.connect(callback);
     }, 1000);
   }
 
-  informUnload(): void {
-    // this.#JsSIP_Wrapper.call_terminate(); // function used inside connect()
-    this.#channel.postMessage({
+  private informUnload(): void {
+    // this.JsSIP_Wrapper.call_terminate(); // function used inside connect()
+    this.channel.postMessage({
       to: AGENT_TYPE.PARENT,
       from: AGENT_TYPE.POPUP,
       type: MESSAGE_TYPE.POPUP_CLOSED,
@@ -73,38 +73,38 @@ class Popup {
     });
   }
 
-  #sendEngine(message: MESSAGE): void {
-    this.#channel.postMessage(message);
+  private sendEngine(message: MESSAGE): void {
+    this.channel.postMessage(message);
   }
 
-  #resetCallObject(): void {
-    this.#setCallObject(EMPTY_CALL_OBJECT);
+  private resetCallObject(): void {
+    this.setCallObject(EMPTY_CALL_OBJECT);
   }
 
-  #setCallObject(callObject: CALL_OBJECT): void {
-    if (!callObject.sender) {
-      this.#callObject.sender = callObject.sender;
+  private setCallObject(callObject: CALL_OBJECT): void {
+    if (callObject.sender) {
+      this.callObject.sender = callObject.sender;
     }
-    if (!callObject.receiver) {
-      this.#callObject.receiver = callObject.receiver;
+    if (callObject.receiver) {
+      this.callObject.receiver = callObject.receiver;
     }
-    if (!callObject.startTime) {
-      this.#callObject.startTime = callObject.startTime;
+    if (callObject.startTime) {
+      this.callObject.startTime = callObject.startTime;
     }
-    if (!callObject.endTime) {
-      this.#callObject.endTime = callObject.endTime;
+    if (callObject.endTime) {
+      this.callObject.endTime = callObject.endTime;
     }
-    if (!callObject.hold) {
-      this.#callObject.hold = callObject.hold;
+    if (callObject.hold) {
+      this.callObject.hold = callObject.hold;
     }
-    if (!callObject.mute) {
-      this.#callObject.mute = callObject.mute;
+    if (callObject.mute) {
+      this.callObject.mute = callObject.mute;
     }
   }
 
-  handleOutgoingCallStart(callObject: CALL_OBJECT): void {
+  private handleOutgoingCallStart(callObject: CALL_OBJECT): void {
     console.log("HandleOutgoingCallStart");
-    this.#sendEngine({
+    this.sendEngine({
       to: AGENT_TYPE.WRAPPER,
       from: AGENT_TYPE.POPUP,
       type: MESSAGE_TYPE.REQUEST_OUTGOING_CALL_START,
@@ -112,9 +112,9 @@ class Popup {
     });
   }
 
-  handleOutgoingCallEnd(): void {
+  private handleOutgoingCallEnd(): void {
     console.log("handleOutgoingCallEnd");
-    this.#sendEngine({
+    this.sendEngine({
       to: AGENT_TYPE.WRAPPER,
       from: AGENT_TYPE.POPUP,
       type: MESSAGE_TYPE.REQUEST_OUTGOING_CALL_END,
@@ -122,9 +122,9 @@ class Popup {
     });
   }
 
-  handleCallHold(): void {
+  private handleCallHold(): void {
     console.log("handleCallHold");
-    this.#sendEngine({
+    this.sendEngine({
       to: AGENT_TYPE.WRAPPER,
       from:  AGENT_TYPE.POPUP,
       type: MESSAGE_TYPE.REQUEST_CALL_HOLD,
@@ -132,9 +132,9 @@ class Popup {
     });
   }
 
-  handleCallUnhold(): void {
+  private handleCallUnhold(): void {
     console.log("handleCallUnhold");
-    this.#sendEngine({
+    this.sendEngine({
       to: AGENT_TYPE.WRAPPER,
       from: AGENT_TYPE.POPUP,
       type: MESSAGE_TYPE.REQUEST_CALL_UNHOLD,
@@ -142,9 +142,9 @@ class Popup {
     });
   }
 
-  handleCallMute(): void {
+  private handleCallMute(): void {
     console.log("handleCallMute");
-    this.#sendEngine({
+    this.sendEngine({
       to: AGENT_TYPE.WRAPPER,
       from: AGENT_TYPE.POPUP,
       type: MESSAGE_TYPE.REQUEST_CALL_MUTE,
@@ -152,9 +152,9 @@ class Popup {
     });
   }
 
-  handleCallUnmute(): void {
+  private handleCallUnmute(): void {
     console.log("handleCallUnmute");
-    this.#sendEngine({
+    this.sendEngine({
       to: AGENT_TYPE.WRAPPER,
       from: AGENT_TYPE.POPUP,
       type: MESSAGE_TYPE.REQUEST_CALL_UNMUTE,
@@ -162,17 +162,17 @@ class Popup {
     });
   }
 
-  handleSessionDetails(): void {
+  private handleSessionDetails(): void {
     console.log("handleSessionDetails");
-    this.#sendEngine({
+    this.sendEngine({
       to: AGENT_TYPE.PARENT,
       from: AGENT_TYPE.POPUP,
       type: MESSAGE_TYPE.ACK_SESSION_DETAILS,
-      object: this.#callObject,
+      object: this.callObject,
     });
   }
 
-  #receiveEngine(message): void {
+  private receiveEngine(message): void {
     if (message.to == AGENT_TYPE.POPUP) {
       console.log("Recieved:", message);
       if (message.type ==  MESSAGE_TYPE.REQUEST_OUTGOING_CALL_START) {

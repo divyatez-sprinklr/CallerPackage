@@ -488,27 +488,27 @@ function _postHandler2(message) {
 }
 
 function _setCallObject2(callObject) {
-  if (!callObject.sender) {
+  if (callObject.sender) {
     _classPrivateFieldGet(this, _callObject).sender = callObject.sender;
   }
 
-  if (!callObject.receiver) {
+  if (callObject.receiver) {
     _classPrivateFieldGet(this, _callObject).receiver = callObject.receiver;
   }
 
-  if (!callObject.startTime) {
+  if (callObject.startTime) {
     _classPrivateFieldGet(this, _callObject).startTime = callObject.startTime;
   }
 
-  if (!callObject.endTime) {
+  if (callObject.endTime) {
     _classPrivateFieldGet(this, _callObject).endTime = callObject.endTime;
   }
 
-  if (!callObject.hold) {
+  if (callObject.hold) {
     _classPrivateFieldGet(this, _callObject).hold = callObject.hold;
   }
 
-  if (!callObject.mute) {
+  if (callObject.mute) {
     _classPrivateFieldGet(this, _callObject).mute = callObject.mute;
   }
 }
@@ -517,7 +517,7 @@ module.exports = {
   CallerPackage: CallerPackage
 };
 
-}).call(this)}).call(this,"/CallerPackage_ts/client.js")
+}).call(this)}).call(this,"/CallerPackage/client.js")
 },{"./static/constants":2,"./static/enums":3,"events":5,"path":6}],2:[function(require,module,exports){
 "use strict";
 
@@ -590,7 +590,7 @@ exports.MESSAGE_TYPE = MESSAGE_TYPE;
 },{}],4:[function(require,module,exports){
 "use strict";
 
-var _require = require("./CallerPackage_ts/client"),
+var _require = require("./CallerPackage/client"),
     CallerPackage = _require.CallerPackage;
 
 var callerPackage = new CallerPackage();
@@ -763,7 +763,7 @@ function resetState() {
   resetcallActive();
 }
 
-},{"./CallerPackage_ts/client":1}],5:[function(require,module,exports){
+},{"./CallerPackage/client":1}],5:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a

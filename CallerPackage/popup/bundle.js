@@ -37,17 +37,27 @@ function main() {
 },{"./popup.js":2}],2:[function(require,module,exports){
 "use strict";
 
+var _enums = require("../static/enums");
+
+var _constants = require("../static/constants");
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var JsSIP = require("jssip");
+var _require = require("./wrapper"),
+    Wrapper = _require.Wrapper;
 
-JsSIP.debug.enable("JsSIP:*");
-
-var EventEmitter = require("events");
+var EMPTY_CALL_OBJECT = {
+  sender: "",
+  receiver: "",
+  startTime: "",
+  endTime: "",
+  hold: false,
+  mute: false
+};
 
 var Popup = /*#__PURE__*/function () {
   function Popup(config) {
@@ -56,23 +66,15 @@ var Popup = /*#__PURE__*/function () {
     _classCallCheck(this, Popup);
 
     console.log("PopUp Instance Created");
-    this.eventEmitter = new EventEmitter();
-    this.channel = new BroadcastChannel("client_popup_channel");
-    this.callActive;
+    this.callActive = false;
+    this.channel = new BroadcastChannel(_constants.CLIENT_POPUP_CHANNEL);
 
     this.channel.onmessage = function (messageEvent) {
       _this.receiveEngine(messageEvent.data);
     };
 
-    this.JsSIP_Wrapper = new JsSIP_Wrapper(this.eventEmitter, config);
-    this.callObject = {
-      sender: "",
-      receiver: "",
-      startTime: "",
-      endTime: "",
-      hold: false,
-      mute: false
-    };
+    this.callObject = EMPTY_CALL_OBJECT;
+    this.JsSIP_Wrapper = new Wrapper(config);
   }
 
   _createClass(Popup, [{
@@ -87,12 +89,12 @@ var Popup = /*#__PURE__*/function () {
   }, {
     key: "informUnload",
     value: function informUnload() {
-      this.JsSIP_Wrapper.call_terminate();
+      // this.JsSIP_Wrapper.call_terminate(); // function used inside connect()
       this.channel.postMessage({
-        to: "PARENT",
-        from: "POPUP",
-        type: "POPUP_CLOSED",
-        object: {}
+        to: _enums.AGENT_TYPE.PARENT,
+        from: _enums.AGENT_TYPE.POPUP,
+        type: _enums.MESSAGE_TYPE.POPUP_CLOSED,
+        object: EMPTY_CALL_OBJECT
       });
     }
   }, {
@@ -103,23 +105,50 @@ var Popup = /*#__PURE__*/function () {
   }, {
     key: "resetCallObject",
     value: function resetCallObject() {
-      sender("");
-      receiver("");
-      startTime("");
-      endTime("");
-      hold(false);
-      mute(false);
+      this.setCallObject(EMPTY_CALL_OBJECT);
+    }
+  }, {
+    key: "setCallObject",
+    value: function setCallObject(callObject) {
+      if (callObject.sender) {
+        this.callObject.sender = callObject.sender;
+      }
+
+      if (callObject.receiver) {
+        this.callObject.receiver = callObject.receiver;
+      }
+
+      if (callObject.startTime) {
+        this.callObject.startTime = callObject.startTime;
+      }
+
+      if (callObject.endTime) {
+        this.callObject.endTime = callObject.endTime;
+      }
+
+      if (callObject.hold) {
+        this.callObject.hold = callObject.hold;
+      }
+
+      if (callObject.mute) {
+        this.callObject.mute = callObject.mute;
+      }
     }
   }, {
     key: "handleOutgoingCallStart",
     value: function handleOutgoingCallStart(callObject) {
       console.log("HandleOutgoingCallStart");
       this.sendEngine({
-        to: "WRAPPER",
-        from: "POPUP",
-        type: "REQUEST_OUTGOING_CALL_START",
+        to: _enums.AGENT_TYPE.WRAPPER,
+        from: _enums.AGENT_TYPE.POPUP,
+        type: _enums.MESSAGE_TYPE.REQUEST_OUTGOING_CALL_START,
         object: {
-          receiver: callObject.receiver
+          receiver: callObject.receiver,
+          sender: null,
+          startTime: null,
+          endTime: null,
+          hold: null,
+          mute: null
         }
       });
     }
@@ -128,10 +157,10 @@ var Popup = /*#__PURE__*/function () {
     value: function handleOutgoingCallEnd() {
       console.log("handleOutgoingCallEnd");
       this.sendEngine({
-        to: "WRAPPER",
-        from: "POPUP",
-        type: "REQUEST_OUTGOING_CALL_END",
-        object: {}
+        to: _enums.AGENT_TYPE.WRAPPER,
+        from: _enums.AGENT_TYPE.POPUP,
+        type: _enums.MESSAGE_TYPE.REQUEST_OUTGOING_CALL_END,
+        object: EMPTY_CALL_OBJECT
       });
     }
   }, {
@@ -139,10 +168,10 @@ var Popup = /*#__PURE__*/function () {
     value: function handleCallHold() {
       console.log("handleCallHold");
       this.sendEngine({
-        to: "WRAPPER",
-        from: "POPUP",
-        type: "REQUEST_CALL_HOLD",
-        object: {}
+        to: _enums.AGENT_TYPE.WRAPPER,
+        from: _enums.AGENT_TYPE.POPUP,
+        type: _enums.MESSAGE_TYPE.REQUEST_CALL_HOLD,
+        object: EMPTY_CALL_OBJECT
       });
     }
   }, {
@@ -150,10 +179,10 @@ var Popup = /*#__PURE__*/function () {
     value: function handleCallUnhold() {
       console.log("handleCallUnhold");
       this.sendEngine({
-        to: "WRAPPER",
-        from: "POPUP",
-        type: "REQUEST_CALL_UNHOLD",
-        object: {}
+        to: _enums.AGENT_TYPE.WRAPPER,
+        from: _enums.AGENT_TYPE.POPUP,
+        type: _enums.MESSAGE_TYPE.REQUEST_CALL_UNHOLD,
+        object: EMPTY_CALL_OBJECT
       });
     }
   }, {
@@ -161,10 +190,10 @@ var Popup = /*#__PURE__*/function () {
     value: function handleCallMute() {
       console.log("handleCallMute");
       this.sendEngine({
-        to: "WRAPPER",
-        from: "POPUP",
-        type: "REQUEST_CALL_MUTE",
-        object: {}
+        to: _enums.AGENT_TYPE.WRAPPER,
+        from: _enums.AGENT_TYPE.POPUP,
+        type: _enums.MESSAGE_TYPE.REQUEST_CALL_MUTE,
+        object: EMPTY_CALL_OBJECT
       });
     }
   }, {
@@ -172,10 +201,10 @@ var Popup = /*#__PURE__*/function () {
     value: function handleCallUnmute() {
       console.log("handleCallUnmute");
       this.sendEngine({
-        to: "WRAPPER",
-        from: "POPUP",
-        type: "REQUEST_CALL_UNMUTE",
-        object: {}
+        to: _enums.AGENT_TYPE.WRAPPER,
+        from: _enums.AGENT_TYPE.POPUP,
+        type: _enums.MESSAGE_TYPE.REQUEST_CALL_UNMUTE,
+        object: EMPTY_CALL_OBJECT
       });
     }
   }, {
@@ -183,36 +212,35 @@ var Popup = /*#__PURE__*/function () {
     value: function handleSessionDetails() {
       console.log("handleSessionDetails");
       this.sendEngine({
-        to: "PARENT",
-        from: "POPUP",
-        type: "ACK_SESSION_DETAILS",
+        to: _enums.AGENT_TYPE.PARENT,
+        from: _enums.AGENT_TYPE.POPUP,
+        type: _enums.MESSAGE_TYPE.ACK_SESSION_DETAILS,
         object: this.callObject
       });
     }
   }, {
     key: "receiveEngine",
     value: function receiveEngine(message) {
-      if (message.to == "POPUP") {
+      if (message.to == _enums.AGENT_TYPE.POPUP) {
         console.log("Recieved:", message);
 
-        if (message.type == "REQUEST_OUTGOING_CALL_START") {
+        if (message.type == _enums.MESSAGE_TYPE.REQUEST_OUTGOING_CALL_START) {
           this.handleOutgoingCallStart(message.object);
-        } else if (message.type == "REQUEST_OUTGOING_CALL_END") {
+        } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_OUTGOING_CALL_END) {
           this.handleOutgoingCallEnd();
-        } else if (message.type == "REQUEST_CALL_HOLD") {
+        } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_CALL_HOLD) {
           this.handleCallHold();
-        } else if (message.type == "REQUEST_CALL_UNHOLD") {
+        } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_CALL_UNHOLD) {
           this.handleCallUnhold();
-        } else if (message.type == "REQUEST_CALL_MUTE") {
+        } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_CALL_MUTE) {
           this.handleCallMute();
-        } else if (message.type == "REQUEST_CALL_UNMUTE") {
+        } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_CALL_UNMUTE) {
           this.handleCallUnmute();
-        } else if (message.type == "REQUEST_SESSION_DETAILS") {
+        } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_SESSION_DETAILS) {
           this.handleSessionDetails();
         } else {
           console.log("UNKNOWN TYPE: ", message);
-        } // }
-
+        }
       }
     }
   }]);
@@ -220,121 +248,60 @@ var Popup = /*#__PURE__*/function () {
   return Popup;
 }();
 
-var JsSIP_Wrapper = /*#__PURE__*/function () {
-  function JsSIP_Wrapper(eventEmitter, config) {
-    _classCallCheck(this, JsSIP_Wrapper);
+module.exports = {
+  Popup: Popup
+};
 
-    this.eventEmitter = eventEmitter;
-    this.userAgent = null;
-    this.session = null;
+},{"../static/constants":4,"../static/enums":5,"./wrapper":3}],3:[function(require,module,exports){
+"use strict";
+
+var _enums = require("../static/enums");
+
+var _constants = require("../static/constants");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+var JsSIP = require("jssip");
+
+JsSIP.debug.enable("JsSIP:*");
+var EMPTY_CALL_OBJECT = {
+  sender: "",
+  receiver: "",
+  startTime: "",
+  endTime: "",
+  hold: false,
+  mute: false
+};
+
+var Wrapper = /*#__PURE__*/function () {
+  function Wrapper(config) {
+    _classCallCheck(this, Wrapper);
+
     this.config = config;
   }
 
-  _createClass(JsSIP_Wrapper, [{
+  _createClass(Wrapper, [{
     key: "connect",
     value: function connect(callback) {
-      var userAgent = null,
-          session = null;
-      var _this$config = this.config,
-          sip = _this$config.sip,
-          password = _this$config.password,
-          server_address = _this$config.server_address,
-          port = _this$config.port;
+      var channel = new BroadcastChannel(_constants.CLIENT_POPUP_CHANNEL);
+      var userAgent = null;
+      var session = null;
       var callActive = false;
-      var callObject = {
-        sender: "",
-        receiver: "",
-        startTime: "",
-        endTime: "",
-        hold: false,
-        mute: false
-      };
-      var channel = new BroadcastChannel("client_popup_channel");
+      var callObject = EMPTY_CALL_OBJECT;
 
       channel.onmessage = function (messageEvent) {
         receiveEngine(messageEvent.data);
       };
 
-      function receiveEngine(message) {
-        if (message.to == "WRAPPER") {
-          console.log("Recieved in Wrapper:", message);
-
-          if (message.type == "REQUEST_OUTGOING_CALL_START") {
-            if (callActive == true) {} else {
-              callActive = true;
-              callObject.receiver = message.object.receiver;
-              call_outgoing(callObject.receiver);
-            }
-          } else if (message.type == "REQUEST_OUTGOING_CALL_END") {
-            call_terminate();
-          } else if (message.type == "REQUEST_CALL_HOLD") {
-            call_hold();
-          } else if (message.type == "REQUEST_CALL_UNHOLD") {
-            call_unhold();
-          } else if (message.type == "REQUEST_CALL_MUTE") {
-            call_mute();
-          } else if (message.type == "REQUEST_SESSION_DETAILS") {
-            channel.postMessage({
-              to: "PARENT",
-              from: "POPUP",
-              type: "ACK_SESSION_DETAILS",
-              object: callObject
-            });
-          } else if (message.type == "REQUEST_CALL_UNMUTE") {
-            call_unmute();
-          } else if (message.type == "ACK_OUTGOING_CALL_START") {
-            //ring.pause();
-            callObject.startTime = session.start_time;
-            callObject.sender = session.local_identity;
-            callObject.receiver = session.remote_identity;
-            channel.postMessage({
-              to: "PARENT",
-              from: "POPUP",
-              type: "ACK_OUTGOING_CALL_START",
-              object: callObject
-            });
-          } else if (message.type == "ACK_OUTGOING_CALL_END") {
-            callObject.endTime = session.end_time;
-            callActive = false;
-            channel.postMessage({
-              to: "PARENT",
-              from: "POPUP",
-              type: "ACK_OUTGOING_CALL_END",
-              object: callObject
-            });
-            callObject = {
-              sender: "",
-              receiver: "",
-              startTime: "",
-              endTime: "",
-              hold: false,
-              mute: false
-            };
-            session = null;
-          } else if (message.type == "ACK_OUTGOING_CALL_FAIL") {
-            callActive = false;
-            channel.postMessage({
-              to: "PARENT",
-              from: "POPUP",
-              type: "ACK_OUTGOING_CALL_FAIL",
-              object: callObject
-            });
-            callObject = {
-              sender: "",
-              receiver: "",
-              startTime: "",
-              endTime: "",
-              hold: false,
-              mute: false
-            };
-            session = null;
-          } else {
-            console.log("UNKNOWN TYPE: ", message);
-          } // }
-
-        }
-      }
-
+      var _this$config = this.config,
+          sip = _this$config.sip,
+          password = _this$config.password,
+          server_address = _this$config.server_address,
+          port = _this$config.port;
       var configuration = {
         sockets: [new JsSIP.WebSocketInterface("wss://" + server_address + ":" + port)],
         uri: "sip:" + sip + "@" + server_address,
@@ -347,20 +314,78 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
         trace_sip: true,
         connection_recovery_max_interval: 30,
         connection_recovery_min_interval: 2
-      }; // ________________________________________________________________
-      // let incomingCallAudio = new window.Audio(
-      //   "http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/bonus.wav"
-      // );
-      // incomingCallAudio.loop = true;
-
-      var ring = new window.Audio("./media/abc.wav");
+      };
+      var ring = new window.Audio("./media/ring.wav");
       ring.loop = true;
       var remoteAudio = new window.Audio();
       remoteAudio.autoplay = true;
-      var localView = document.getElementById("localMedia");
-      var remoteView = document.getElementById("remoteMedia");
       userAgent = new JsSIP.UA(configuration);
       userAgent.start();
+
+      function receiveEngine(message) {
+        if (message.to == _enums.AGENT_TYPE.WRAPPER) {
+          console.log("Recieved in Wrapper:", message);
+
+          if (message.type == _enums.MESSAGE_TYPE.REQUEST_OUTGOING_CALL_START) {
+            if (!callActive) {
+              callObject.receiver = message.object.receiver;
+              call_outgoing(callObject.receiver);
+            }
+          } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_OUTGOING_CALL_END) {
+            call_terminate();
+          } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_CALL_HOLD) {
+            call_hold();
+          } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_CALL_UNHOLD) {
+            call_unhold();
+          } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_CALL_MUTE) {
+            call_mute();
+          } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_SESSION_DETAILS) {
+            channel.postMessage({
+              to: _enums.AGENT_TYPE.PARENT,
+              from: _enums.AGENT_TYPE.POPUP,
+              type: _enums.MESSAGE_TYPE.ACK_SESSION_DETAILS,
+              object: callObject
+            });
+          } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_CALL_UNMUTE) {
+            call_unmute();
+          } else if (message.type == _enums.MESSAGE_TYPE.ACK_OUTGOING_CALL_START) {
+            //ring.pause();
+            callObject.startTime = session.start_time;
+            callObject.sender = session.local_identity;
+            callObject.receiver = session.remote_identity;
+            channel.postMessage({
+              to: _enums.AGENT_TYPE.PARENT,
+              from: _enums.AGENT_TYPE.POPUP,
+              type: _enums.MESSAGE_TYPE.ACK_OUTGOING_CALL_START,
+              object: callObject
+            });
+          } else if (message.type == _enums.MESSAGE_TYPE.ACK_OUTGOING_CALL_END) {
+            callObject.endTime = session.end_time;
+            callActive = false;
+            channel.postMessage({
+              to: _enums.AGENT_TYPE.PARENT,
+              from: _enums.AGENT_TYPE.POPUP,
+              type: _enums.MESSAGE_TYPE.ACK_OUTGOING_CALL_END,
+              object: callObject
+            });
+            callObject = EMPTY_CALL_OBJECT;
+            session = null;
+          } else if (message.type == _enums.MESSAGE_TYPE.ACK_OUTGOING_CALL_FAIL) {
+            callActive = false;
+            channel.postMessage({
+              to: _enums.AGENT_TYPE.PARENT,
+              from: _enums.AGENT_TYPE.POPUP,
+              type: _enums.MESSAGE_TYPE.ACK_OUTGOING_CALL_FAIL,
+              object: callObject
+            });
+            callObject = EMPTY_CALL_OBJECT;
+            session = null;
+          } else {
+            console.log("UNKNOWN TYPE: ", message);
+          } // }
+
+        }
+      }
 
       var addEventListeners = function addEventListeners() {
         userAgent.on("newRTCSession", function (event) {
@@ -384,8 +409,7 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
             call_terminate();
           });
           session.on("failed", function (e) {
-            console.log("Call failed: ", e);
-            call_terminate();
+            console.log("Call failed: ", e); // call_terminate();
           });
           session.on("peerconnection", function (e) {
             console.log("call peerconnection: ", e);
@@ -395,11 +419,10 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
 
       userAgent.on("connected", function (e) {
         setTimeout(function () {
-          var channel = new BroadcastChannel("client_popup_channel");
           channel.postMessage({
-            to: "PARENT",
-            from: "POPUP",
-            type: "INFORM_SOCKET_CONNECTED",
+            to: _enums.AGENT_TYPE.PARENT,
+            from: _enums.AGENT_TYPE.POPUP,
+            type: _enums.MESSAGE_TYPE.INFORM_SOCKET_CONNECTED,
             object: {}
           });
         }, 0);
@@ -409,11 +432,10 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
       });
       userAgent.on("disconnected", function (e) {
         setTimeout(function () {
-          var channel = new BroadcastChannel("client_popup_channel");
           channel.postMessage({
-            to: "PARENT",
-            from: "POPUP",
-            type: "INFORM_SOCKET_DISCONNECTED",
+            to: _enums.AGENT_TYPE.PARENT,
+            from: _enums.AGENT_TYPE.POPUP,
+            type: _enums.MESSAGE_TYPE.INFORM_SOCKET_DISCONNECTED,
             object: {}
           });
         }, 0);
@@ -434,11 +456,10 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
             },
             failed: function failed(e) {
               setTimeout(function () {
-                var channel = new BroadcastChannel("client_popup_channel");
                 channel.postMessage({
-                  to: "WRAPPER",
-                  from: "WRAPPER",
-                  type: "ACK_OUTGOING_CALL_FAIL",
+                  to: _enums.AGENT_TYPE.WRAPPER,
+                  from: _enums.AGENT_TYPE.WRAPPER,
+                  type: _enums.MESSAGE_TYPE.ACK_OUTGOING_CALL_FAIL,
                   object: {
                     object: e.data
                   }
@@ -448,11 +469,10 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
             },
             ended: function ended(e) {
               setTimeout(function () {
-                var channel = new BroadcastChannel("client_popup_channel");
                 channel.postMessage({
-                  to: "WRAPPER",
-                  from: "WRAPPER",
-                  type: "ACK_OUTGOING_CALL_END",
+                  to: _enums.AGENT_TYPE.WRAPPER,
+                  from: _enums.AGENT_TYPE.WRAPPER,
+                  type: _enums.MESSAGE_TYPE.ACK_OUTGOING_CALL_END,
                   object: {}
                 });
               }, 0);
@@ -460,11 +480,10 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
             },
             confirmed: function confirmed(e) {
               setTimeout(function () {
-                var channel = new BroadcastChannel("client_popup_channel");
                 channel.postMessage({
-                  to: "WRAPPER",
-                  from: "WRAPPER",
-                  type: "ACK_OUTGOING_CALL_START",
+                  to: _enums.AGENT_TYPE.WRAPPER,
+                  from: _enums.AGENT_TYPE.WRAPPER,
+                  type: _enums.MESSAGE_TYPE.ACK_OUTGOING_CALL_START,
                   object: {}
                 });
               }, 0);
@@ -505,7 +524,6 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
                 console.log("call ended with cause: " + e.data);
               },
               confirmed: function confirmed(e) {
-                //this.emitters('ACK_OUTGOING_CALL_START');
                 console.log("call confirmed");
               }
             },
@@ -515,7 +533,7 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
               iceServers: [{
                 urls: ["stun:stun.l.google.com:19302"]
               }],
-              iceTransportPolicy: "PARENT"
+              iceTransportPolicy: _enums.AGENT_TYPE.PARENT
             },
             mediaConstraints: {
               audio: true,
@@ -539,11 +557,12 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
 
       function addStreams() {
         session.connection.addEventListener("addstream", function (event) {
-          // incomingCallAudio.pause();
           ring.pause();
           remoteAudio.srcObject = event.stream;
-          document.getElementById("localMedia").srcObject = session.connection.getLocalStreams()[0];
-          document.getElementById("remoteMedia").srcObject = session.connection.getRemoteStreams()[0];
+          var local = document.getElementById("localMedia");
+          local.srcObject = session.connection.getLocalStreams()[0];
+          var remote = document.getElementById("remoteMedia");
+          remote.srcObject = session.connection.getRemoteStreams()[0];
         });
       }
 
@@ -561,22 +580,20 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
 
         if (session.isOnHold().local) {
           setTimeout(function () {
-            var channel = new BroadcastChannel("client_popup_channel");
             channel.postMessage({
-              to: "PARENT",
-              from: "POPUP",
-              type: "ACK_CALL_HOLD",
+              to: _enums.AGENT_TYPE.PARENT,
+              from: _enums.AGENT_TYPE.POPUP,
+              type: _enums.MESSAGE_TYPE.ACK_CALL_HOLD,
               object: {}
             });
           }, 0);
           console.log("ACK_CALL_HOLD");
         } else {
           setTimeout(function () {
-            var channel = new BroadcastChannel("client_popup_channel");
             channel.postMessage({
-              to: "PARENT",
-              from: "POPUP",
-              type: "ACK_CALL_HOLD_FAILED",
+              to: _enums.AGENT_TYPE.PARENT,
+              from: _enums.AGENT_TYPE.POPUP,
+              type: _enums.MESSAGE_TYPE.ACK_CALL_HOLD_FAILED,
               object: {}
             });
           }, 0);
@@ -590,22 +607,20 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
 
         if (!session.isOnHold().local) {
           setTimeout(function () {
-            var channel = new BroadcastChannel("client_popup_channel");
             channel.postMessage({
-              to: "PARENT",
-              from: "POPUP",
-              type: "ACK_CALL_UNHOLD",
+              to: _enums.AGENT_TYPE.PARENT,
+              from: _enums.AGENT_TYPE.POPUP,
+              type: _enums.MESSAGE_TYPE.ACK_CALL_UNHOLD,
               object: {}
             });
           }, 0);
           console.log("ACK_CALL_UNHOLD");
         } else {
           setTimeout(function () {
-            var channel = new BroadcastChannel("client_popup_channel");
             channel.postMessage({
-              to: "PARENT",
-              from: "POPUP",
-              type: "ACK_CALL_UNHOLD_FAILED",
+              to: _enums.AGENT_TYPE.PARENT,
+              from: _enums.AGENT_TYPE.POPUP,
+              type: _enums.MESSAGE_TYPE.ACK_CALL_UNHOLD_FAILED,
               object: {}
             });
           }, 0);
@@ -619,22 +634,20 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
 
         if (session.isMuted().audio) {
           setTimeout(function () {
-            var channel = new BroadcastChannel("client_popup_channel");
             channel.postMessage({
-              to: "PARENT",
-              from: "POPUP",
-              type: "ACK_CALL_MUTE",
+              to: _enums.AGENT_TYPE.PARENT,
+              from: _enums.AGENT_TYPE.POPUP,
+              type: _enums.MESSAGE_TYPE.ACK_CALL_MUTE,
               object: {}
             });
           }, 0);
           console.log("ACK_CALL_MUTE");
         } else {
           setTimeout(function () {
-            var channel = new BroadcastChannel("client_popup_channel");
             channel.postMessage({
-              to: "PARENT",
-              from: "POPUP",
-              type: "ACK_CALL_MUTE_FAILED",
+              to: _enums.AGENT_TYPE.PARENT,
+              from: _enums.AGENT_TYPE.POPUP,
+              type: _enums.MESSAGE_TYPE.ACK_CALL_MUTE_FAILED,
               object: {}
             });
           }, 0);
@@ -648,22 +661,20 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
 
         if (!session.isMuted().audio) {
           setTimeout(function () {
-            var channel = new BroadcastChannel("client_popup_channel");
             channel.postMessage({
-              to: "PARENT",
-              from: "POPUP",
-              type: "ACK_CALL_UNMUTE",
+              to: _enums.AGENT_TYPE.PARENT,
+              from: _enums.AGENT_TYPE.POPUP,
+              type: _enums.MESSAGE_TYPE.ACK_CALL_UNMUTE,
               object: {}
             });
           }, 0);
           console.log("ACK_CALL_UNMUTE");
         } else {
           setTimeout(function () {
-            var channel = new BroadcastChannel("client_popup_channel");
             channel.postMessage({
-              to: "PARENT",
-              from: "POPUP",
-              type: "ACK_CALL_UNMUTE_FAILED",
+              to: _enums.AGENT_TYPE.PARENT,
+              from: _enums.AGENT_TYPE.POPUP,
+              type: _enums.MESSAGE_TYPE.ACK_CALL_UNMUTE_FAILED,
               object: {}
             });
           }, 0);
@@ -675,14 +686,83 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
     }
   }]);
 
-  return JsSIP_Wrapper;
+  return Wrapper;
 }();
 
 module.exports = {
-  Popup: Popup
+  Wrapper: Wrapper
 };
 
-},{"events":5,"jssip":13}],3:[function(require,module,exports){
+},{"../static/constants":4,"../static/enums":5,"jssip":16}],4:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.POPUP_WINDOW_WIDTH = exports.POPUP_WINDOW_TOP = exports.POPUP_WINDOW_LEFT = exports.POPUP_WINDOW_HEIGHT = exports.IS_POPUP_ACTIVE = exports.CLIENT_POPUP_CHANNEL = void 0;
+var IS_POPUP_ACTIVE = "IS_POPUP_ACTIVE";
+exports.IS_POPUP_ACTIVE = IS_POPUP_ACTIVE;
+var CLIENT_POPUP_CHANNEL = "CLIENT_POPUP_CHANNEL";
+exports.CLIENT_POPUP_CHANNEL = CLIENT_POPUP_CHANNEL;
+var POPUP_WINDOW_LEFT = 0;
+exports.POPUP_WINDOW_LEFT = POPUP_WINDOW_LEFT;
+var POPUP_WINDOW_TOP = 0;
+exports.POPUP_WINDOW_TOP = POPUP_WINDOW_TOP;
+var POPUP_WINDOW_WIDTH = 300;
+exports.POPUP_WINDOW_WIDTH = POPUP_WINDOW_WIDTH;
+var POPUP_WINDOW_HEIGHT = 325;
+exports.POPUP_WINDOW_HEIGHT = POPUP_WINDOW_HEIGHT;
+
+},{}],5:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.MESSAGE_TYPE = exports.AGENT_TYPE = void 0;
+var AGENT_TYPE;
+exports.AGENT_TYPE = AGENT_TYPE;
+
+(function (AGENT_TYPE) {
+  AGENT_TYPE["PARENT"] = "PARENT";
+  AGENT_TYPE["POPUP"] = "POPUP";
+  AGENT_TYPE["WRAPPER"] = "WRAPPER";
+})(AGENT_TYPE || (exports.AGENT_TYPE = AGENT_TYPE = {}));
+
+var MESSAGE_TYPE;
+exports.MESSAGE_TYPE = MESSAGE_TYPE;
+
+(function (MESSAGE_TYPE) {
+  MESSAGE_TYPE["INFORM_SOCKET_CONNECTED"] = "INFORM_SOCKET_CONNECTED";
+  MESSAGE_TYPE["INFORM_SOCKET_DISCONNECTED"] = "INFORM_SOCKET_DISCONNECTED";
+  MESSAGE_TYPE["ACK_OUTGOING_CALL_START"] = "ACK_OUTGOING_CALL_START";
+  MESSAGE_TYPE["ACK_OUTGOING_CALL_END"] = "ACK_OUTGOING_CALL_END";
+  MESSAGE_TYPE["ACK_OUTGOING_CALL_FAIL"] = "ACK_OUTGOING_CALL_FAIL";
+  MESSAGE_TYPE["ACK_CALL_HOLD"] = "ACK_CALL_HOLD";
+  MESSAGE_TYPE["ACK_CALL_UNHOLD"] = "ACK_CALL_UNHOLD";
+  MESSAGE_TYPE["ACK_CALL_MUTE"] = "ACK_CALL_MUTE";
+  MESSAGE_TYPE["ACK_CALL_UNMUTE"] = "ACK_CALL_UNMUTE";
+  MESSAGE_TYPE["POPUP_CLOSED"] = "POPUP_CLOSED";
+  MESSAGE_TYPE["PING_SESSION_DETAILS"] = "PING_SESSION_DETAILS";
+  MESSAGE_TYPE["PING_POPUP_ALIVE"] = "PING_POPUP_ALIVE";
+  MESSAGE_TYPE["ACK_SESSION_DETAILS"] = "ACK_SESSION_DETAILS";
+  MESSAGE_TYPE["REQUEST_OUTGOING_CALL_START"] = "REQUEST_OUTGOING_CALL_START";
+  MESSAGE_TYPE["REQUEST_OUTGOING_CALL_END"] = "REQUEST_OUTGOING_CALL_END";
+  MESSAGE_TYPE["REQUEST_CALL_HOLD"] = "REQUEST_CALL_HOLD";
+  MESSAGE_TYPE["REQUEST_CALL_UNHOLD"] = "REQUEST_CALL_UNHOLD";
+  MESSAGE_TYPE["REQUEST_CALL_MUTE"] = "REQUEST_CALL_MUTE";
+  MESSAGE_TYPE["REQUEST_CALL_UNMUTE"] = "REQUEST_CALL_UNMUTE";
+  MESSAGE_TYPE["REQUEST_SESSION_DETAILS"] = "REQUEST_SESSION_DETAILS";
+  MESSAGE_TYPE["REQUEST_INCOMING_CALL_START"] = "REQUEST_INCOMING_CALL_START";
+  MESSAGE_TYPE["REQUEST_INCOMING_CALL_DECLINE"] = "REQUEST_INCOMING_CALL_DECLINE";
+  MESSAGE_TYPE["REQUEST_INCOMING_CALL_END"] = "REQUEST_INCOMING_CALL_END";
+  MESSAGE_TYPE["ACK_CALL_MUTE_FAILED"] = "ACK_CALL_MUTE_FAILED";
+  MESSAGE_TYPE["ACK_CALL_UNMUTE_FAILED"] = "ACK_CALL_UNMUTE_FAILED";
+  MESSAGE_TYPE["ACK_CALL_UNHOLD_FAILED"] = "ACK_CALL_UNHOLD_FAILED";
+  MESSAGE_TYPE["ACK_CALL_HOLD_FAILED"] = "ACK_CALL_HOLD_FAILED";
+})(MESSAGE_TYPE || (exports.MESSAGE_TYPE = MESSAGE_TYPE = {}));
+
+},{}],6:[function(require,module,exports){
 (function (process){(function (){
 /* eslint-env browser */
 
@@ -955,7 +1035,7 @@ formatters.j = function (v) {
 };
 
 }).call(this)}).call(this,require('_process'))
-},{"./common":4,"_process":38}],4:[function(require,module,exports){
+},{"./common":7,"_process":41}],7:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -1231,7 +1311,7 @@ function setup(env) {
 
 module.exports = setup;
 
-},{"ms":37}],5:[function(require,module,exports){
+},{"ms":40}],8:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1730,7 +1810,7 @@ function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
   }
 }
 
-},{}],6:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
@@ -2018,7 +2098,7 @@ exports.load = function (dst, src) {
     }
   }
 };
-},{"./Constants":7,"./Exceptions":11,"./Grammar":12,"./Socket":27,"./URI":32,"./Utils":33}],7:[function(require,module,exports){
+},{"./Constants":10,"./Exceptions":14,"./Grammar":15,"./Socket":30,"./URI":35,"./Utils":36}],10:[function(require,module,exports){
 "use strict";
 
 var pkg = require('../package.json');
@@ -2194,7 +2274,7 @@ module.exports = {
   CONNECTION_RECOVERY_MAX_INTERVAL: 30,
   CONNECTION_RECOVERY_MIN_INTERVAL: 2
 };
-},{"../package.json":36}],8:[function(require,module,exports){
+},{"../package.json":39}],11:[function(require,module,exports){
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2473,7 +2553,7 @@ module.exports = /*#__PURE__*/function () {
 
   return Dialog;
 }();
-},{"./Constants":7,"./Dialog/RequestSender":9,"./Logger":14,"./SIPMessage":26,"./Transactions":29,"./Utils":33}],9:[function(require,module,exports){
+},{"./Constants":10,"./Dialog/RequestSender":12,"./Logger":17,"./SIPMessage":29,"./Transactions":32,"./Utils":36}],12:[function(require,module,exports){
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2596,7 +2676,7 @@ module.exports = /*#__PURE__*/function () {
 
   return DialogRequestSender;
 }();
-},{"../Constants":7,"../RTCSession":19,"../RequestSender":25,"../Transactions":29}],10:[function(require,module,exports){
+},{"../Constants":10,"../RTCSession":22,"../RequestSender":28,"../Transactions":32}],13:[function(require,module,exports){
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2804,7 +2884,7 @@ module.exports = /*#__PURE__*/function () {
 
   return DigestAuthentication;
 }();
-},{"./Logger":14,"./Utils":33}],11:[function(require,module,exports){
+},{"./Logger":17,"./Utils":36}],14:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -2920,7 +3000,7 @@ module.exports = {
   NotSupportedError: NotSupportedError,
   NotReadyError: NotReadyError
 };
-},{}],12:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
@@ -17821,7 +17901,7 @@ module.exports = function () {
   result.SyntaxError.prototype = Error.prototype;
   return result;
 }();
-},{"./NameAddrHeader":16,"./URI":32}],13:[function(require,module,exports){
+},{"./NameAddrHeader":19,"./URI":35}],16:[function(require,module,exports){
 "use strict";
 
 var pkg = require('../package.json');
@@ -17870,7 +17950,7 @@ module.exports = {
   }
 
 };
-},{"../package.json":36,"./Constants":7,"./Exceptions":11,"./Grammar":12,"./NameAddrHeader":16,"./UA":31,"./URI":32,"./Utils":33,"./WebSocketInterface":34,"debug":3}],14:[function(require,module,exports){
+},{"../package.json":39,"./Constants":10,"./Exceptions":14,"./Grammar":15,"./NameAddrHeader":19,"./UA":34,"./URI":35,"./Utils":36,"./WebSocketInterface":37,"debug":6}],17:[function(require,module,exports){
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -17924,7 +18004,7 @@ module.exports = /*#__PURE__*/function () {
 
   return Logger;
 }();
-},{"debug":3}],15:[function(require,module,exports){
+},{"debug":6}],18:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -18245,7 +18325,7 @@ module.exports = /*#__PURE__*/function (_EventEmitter) {
 
   return Message;
 }(EventEmitter);
-},{"./Constants":7,"./Exceptions":11,"./Logger":14,"./RequestSender":25,"./SIPMessage":26,"./URI":32,"./Utils":33,"events":5}],16:[function(require,module,exports){
+},{"./Constants":10,"./Exceptions":14,"./Logger":17,"./RequestSender":28,"./SIPMessage":29,"./URI":35,"./Utils":36,"events":8}],19:[function(require,module,exports){
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -18379,7 +18459,7 @@ module.exports = /*#__PURE__*/function () {
 
   return NameAddrHeader;
 }();
-},{"./Grammar":12,"./URI":32}],17:[function(require,module,exports){
+},{"./Grammar":15,"./URI":35}],20:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -18687,7 +18767,7 @@ module.exports = /*#__PURE__*/function (_EventEmitter) {
 
   return Options;
 }(EventEmitter);
-},{"./Constants":7,"./Exceptions":11,"./Logger":14,"./RequestSender":25,"./SIPMessage":26,"./Utils":33,"events":5}],18:[function(require,module,exports){
+},{"./Constants":10,"./Exceptions":14,"./Logger":17,"./RequestSender":28,"./SIPMessage":29,"./Utils":36,"events":8}],21:[function(require,module,exports){
 "use strict";
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
@@ -19019,7 +19099,7 @@ function parseHeader(message, data, headerStart, headerEnd) {
     return true;
   }
 }
-},{"./Grammar":12,"./Logger":14,"./SIPMessage":26}],19:[function(require,module,exports){
+},{"./Grammar":15,"./Logger":17,"./SIPMessage":29}],22:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -22318,7 +22398,7 @@ module.exports = /*#__PURE__*/function (_EventEmitter) {
 
   return RTCSession;
 }(EventEmitter);
-},{"./Constants":7,"./Dialog":8,"./Exceptions":11,"./Logger":14,"./RTCSession/DTMF":20,"./RTCSession/Info":21,"./RTCSession/ReferNotifier":22,"./RTCSession/ReferSubscriber":23,"./RequestSender":25,"./SIPMessage":26,"./Timers":28,"./Transactions":29,"./URI":32,"./Utils":33,"events":5,"sdp-transform":40}],20:[function(require,module,exports){
+},{"./Constants":10,"./Dialog":11,"./Exceptions":14,"./Logger":17,"./RTCSession/DTMF":23,"./RTCSession/Info":24,"./RTCSession/ReferNotifier":25,"./RTCSession/ReferSubscriber":26,"./RequestSender":28,"./SIPMessage":29,"./Timers":31,"./Transactions":32,"./URI":35,"./Utils":36,"events":8,"sdp-transform":43}],23:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -22519,7 +22599,7 @@ module.exports = /*#__PURE__*/function (_EventEmitter) {
 
 
 module.exports.C = C;
-},{"../Constants":7,"../Exceptions":11,"../Logger":14,"../Utils":33,"events":5}],21:[function(require,module,exports){
+},{"../Constants":10,"../Exceptions":14,"../Logger":17,"../Utils":36,"events":8}],24:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -22655,7 +22735,7 @@ module.exports = /*#__PURE__*/function (_EventEmitter) {
 
   return Info;
 }(EventEmitter);
-},{"../Constants":7,"../Exceptions":11,"../Utils":33,"events":5}],22:[function(require,module,exports){
+},{"../Constants":10,"../Exceptions":14,"../Utils":36,"events":8}],25:[function(require,module,exports){
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -22721,7 +22801,7 @@ module.exports = /*#__PURE__*/function () {
 
   return ReferNotifier;
 }();
-},{"../Constants":7,"../Logger":14}],23:[function(require,module,exports){
+},{"../Constants":10,"../Logger":17}],26:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -22910,7 +22990,7 @@ module.exports = /*#__PURE__*/function (_EventEmitter) {
 
   return ReferSubscriber;
 }(EventEmitter);
-},{"../Constants":7,"../Grammar":12,"../Logger":14,"../Utils":33,"events":5}],24:[function(require,module,exports){
+},{"../Constants":10,"../Grammar":15,"../Logger":17,"../Utils":36,"events":8}],27:[function(require,module,exports){
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -23277,7 +23357,7 @@ module.exports = /*#__PURE__*/function () {
 
   return Registrator;
 }();
-},{"./Constants":7,"./Logger":14,"./RequestSender":25,"./SIPMessage":26,"./Utils":33}],25:[function(require,module,exports){
+},{"./Constants":10,"./Logger":17,"./RequestSender":28,"./SIPMessage":29,"./Utils":36}],28:[function(require,module,exports){
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -23453,7 +23533,7 @@ module.exports = /*#__PURE__*/function () {
 
   return RequestSender;
 }();
-},{"./Constants":7,"./DigestAuthentication":10,"./Logger":14,"./Transactions":29}],26:[function(require,module,exports){
+},{"./Constants":10,"./DigestAuthentication":13,"./Logger":17,"./Transactions":32}],29:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -24309,7 +24389,7 @@ module.exports = {
   IncomingRequest: IncomingRequest,
   IncomingResponse: IncomingResponse
 };
-},{"./Constants":7,"./Grammar":12,"./Logger":14,"./NameAddrHeader":16,"./Utils":33,"sdp-transform":40}],27:[function(require,module,exports){
+},{"./Constants":10,"./Grammar":15,"./Logger":17,"./NameAddrHeader":19,"./Utils":36,"sdp-transform":43}],30:[function(require,module,exports){
 "use strict";
 
 var Logger = require('./Logger');
@@ -24383,7 +24463,7 @@ exports.isSocket = function (socket) {
 
   return true;
 };
-},{"./Grammar":12,"./Logger":14,"./Utils":33}],28:[function(require,module,exports){
+},{"./Grammar":15,"./Logger":17,"./Utils":36}],31:[function(require,module,exports){
 "use strict";
 
 var T1 = 500,
@@ -24405,7 +24485,7 @@ module.exports = {
   PROVISIONAL_RESPONSE_INTERVAL: 60000 // See RFC 3261 Section 13.3.1.1
 
 };
-},{}],29:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -25231,7 +25311,7 @@ module.exports = {
   InviteServerTransaction: InviteServerTransaction,
   checkTransaction: checkTransaction
 };
-},{"./Constants":7,"./Logger":14,"./SIPMessage":26,"./Timers":28,"events":5}],30:[function(require,module,exports){
+},{"./Constants":10,"./Logger":17,"./SIPMessage":29,"./Timers":31,"events":8}],33:[function(require,module,exports){
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -25561,7 +25641,7 @@ module.exports = /*#__PURE__*/function () {
 
   return Transport;
 }();
-},{"./Constants":7,"./Logger":14,"./Socket":27}],31:[function(require,module,exports){
+},{"./Constants":10,"./Logger":17,"./Socket":30}],34:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -26620,7 +26700,7 @@ function onTransportData(data) {
     }
   }
 }
-},{"./Config":6,"./Constants":7,"./Exceptions":11,"./Logger":14,"./Message":15,"./Options":17,"./Parser":18,"./RTCSession":19,"./Registrator":24,"./SIPMessage":26,"./Transactions":29,"./Transport":30,"./URI":32,"./Utils":33,"./sanityCheck":35,"events":5}],32:[function(require,module,exports){
+},{"./Config":9,"./Constants":10,"./Exceptions":14,"./Logger":17,"./Message":18,"./Options":20,"./Parser":21,"./RTCSession":22,"./Registrator":27,"./SIPMessage":29,"./Transactions":32,"./Transport":33,"./URI":35,"./Utils":36,"./sanityCheck":38,"events":8}],35:[function(require,module,exports){
 "use strict";
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
@@ -26882,7 +26962,7 @@ module.exports = /*#__PURE__*/function () {
 
   return URI;
 }();
-},{"./Constants":7,"./Grammar":12,"./Utils":33}],33:[function(require,module,exports){
+},{"./Constants":10,"./Grammar":15,"./Utils":36}],36:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -27415,7 +27495,7 @@ exports.cloneObject = function (obj) {
   var fallback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   return obj && Object.assign({}, obj) || fallback;
 };
-},{"./Constants":7,"./Grammar":12,"./URI":32}],34:[function(require,module,exports){
+},{"./Constants":10,"./Grammar":15,"./URI":35}],37:[function(require,module,exports){
 "use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -27585,7 +27665,7 @@ module.exports = /*#__PURE__*/function () {
 
   return WebSocketInterface;
 }();
-},{"./Grammar":12,"./Logger":14}],35:[function(require,module,exports){
+},{"./Grammar":15,"./Logger":17}],38:[function(require,module,exports){
 "use strict";
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
@@ -27838,7 +27918,7 @@ function reply(status_code) {
   response += '\r\n';
   transport.send(response);
 }
-},{"./Constants":7,"./Logger":14,"./SIPMessage":26,"./Utils":33}],36:[function(require,module,exports){
+},{"./Constants":10,"./Logger":17,"./SIPMessage":29,"./Utils":36}],39:[function(require,module,exports){
 module.exports={
   "name": "jssip",
   "title": "JsSIP",
@@ -27901,7 +27981,7 @@ module.exports={
   }
 }
 
-},{}],37:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -28065,7 +28145,7 @@ function plural(ms, msAbs, n, name) {
   return Math.round(ms / n) + ' ' + name + (isPlural ? 's' : '');
 }
 
-},{}],38:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -28251,7 +28331,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],39:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 var grammar = module.exports = {
   v: [{
     name: 'version',
@@ -28747,7 +28827,7 @@ Object.keys(grammar).forEach(function (key) {
   });
 });
 
-},{}],40:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 var parser = require('./parser');
 var writer = require('./writer');
 
@@ -28760,7 +28840,7 @@ exports.parseRemoteCandidates = parser.parseRemoteCandidates;
 exports.parseImageAttributes = parser.parseImageAttributes;
 exports.parseSimulcastStreamList = parser.parseSimulcastStreamList;
 
-},{"./parser":41,"./writer":42}],41:[function(require,module,exports){
+},{"./parser":44,"./writer":45}],44:[function(require,module,exports){
 var toIntIfInt = function (v) {
   return String(Number(v)) === v ? Number(v) : v;
 };
@@ -28886,7 +28966,7 @@ exports.parseSimulcastStreamList = function (str) {
   });
 };
 
-},{"./grammar":39}],42:[function(require,module,exports){
+},{"./grammar":42}],45:[function(require,module,exports){
 var grammar = require('./grammar');
 
 // customized util.format - discards excess arguments and can void middle ones
@@ -29002,4 +29082,4 @@ module.exports = function (session, opts) {
   return sdp.join('\r\n') + '\r\n';
 };
 
-},{"./grammar":39}]},{},[1]);
+},{"./grammar":42}]},{},[1]);

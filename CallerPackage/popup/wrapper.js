@@ -12,30 +12,44 @@ const EMPTY_CALL_OBJECT = {
 };
 class Wrapper {
     constructor(config) {
-        this.#channel = new BroadcastChannel(CLIENT_POPUP_CHANNEL);
-        this.#userAgent = null;
-        this.#session = null;
-        this.#config = config;
+        this.config = config;
     }
-    #channel;
-    #userAgent;
-    #session;
-    #config;
     connect(callback) {
-        let { sip, password, server_address, port } = this.#config;
+        const channel = new BroadcastChannel(CLIENT_POPUP_CHANNEL);
+        let userAgent = null;
+        let session = null;
         let callActive = false;
         let callObject = EMPTY_CALL_OBJECT;
-        this.#channel.onmessage = (messageEvent) => {
+        channel.onmessage = (messageEvent) => {
             receiveEngine(messageEvent.data);
         };
+        let { sip, password, server_address, port } = this.config;
+        const configuration = {
+            sockets: [
+                new JsSIP.WebSocketInterface("wss://" + server_address + ":" + port),
+            ],
+            uri: "sip:" + sip + "@" + server_address,
+            authorization_user: sip,
+            password: password,
+            registrar_server: "sip:" + server_address,
+            no_answer_timeout: 20,
+            session_timers: false,
+            register: true,
+            trace_sip: true,
+            connection_recovery_max_interval: 30,
+            connection_recovery_min_interval: 2,
+        };
+        let ring = new window.Audio("./media/ring.wav");
+        ring.loop = true;
+        let remoteAudio = new window.Audio();
+        remoteAudio.autoplay = true;
+        userAgent = new JsSIP.UA(configuration);
+        userAgent.start();
         function receiveEngine(message) {
             if (message.to == AGENT_TYPE.WRAPPER) {
                 console.log("Recieved in Wrapper:", message);
                 if (message.type == MESSAGE_TYPE.REQUEST_OUTGOING_CALL_START) {
-                    if (callActive == true) {
-                    }
-                    else {
-                        callActive = true;
+                    if (!callActive) {
                         callObject.receiver = message.object.receiver;
                         call_outgoing(callObject.receiver);
                     }
@@ -53,7 +67,7 @@ class Wrapper {
                     call_mute();
                 }
                 else if (message.type == MESSAGE_TYPE.REQUEST_SESSION_DETAILS) {
-                    this.#channel.postMessage({
+                    channel.postMessage({
                         to: AGENT_TYPE.PARENT,
                         from: AGENT_TYPE.POPUP,
                         type: MESSAGE_TYPE.ACK_SESSION_DETAILS,
@@ -65,10 +79,10 @@ class Wrapper {
                 }
                 else if (message.type == MESSAGE_TYPE.ACK_OUTGOING_CALL_START) {
                     //ring.pause();
-                    callObject.startTime = this.#session.start_time;
-                    callObject.sender = this.#session.local_identity;
-                    callObject.receiver = this.#session.remote_identity;
-                    this.#channel.postMessage({
+                    callObject.startTime = session.start_time;
+                    callObject.sender = session.local_identity;
+                    callObject.receiver = session.remote_identity;
+                    channel.postMessage({
                         to: AGENT_TYPE.PARENT,
                         from: AGENT_TYPE.POPUP,
                         type: MESSAGE_TYPE.ACK_OUTGOING_CALL_START,
@@ -76,27 +90,27 @@ class Wrapper {
                     });
                 }
                 else if (message.type == MESSAGE_TYPE.ACK_OUTGOING_CALL_END) {
-                    callObject.endTime = this.#session.end_time;
+                    callObject.endTime = session.end_time;
                     callActive = false;
-                    this.#channel.postMessage({
+                    channel.postMessage({
                         to: AGENT_TYPE.PARENT,
                         from: AGENT_TYPE.POPUP,
                         type: MESSAGE_TYPE.ACK_OUTGOING_CALL_END,
                         object: callObject,
                     });
                     callObject = EMPTY_CALL_OBJECT;
-                    this.#session = null;
+                    session = null;
                 }
                 else if (message.type == MESSAGE_TYPE.ACK_OUTGOING_CALL_FAIL) {
                     callActive = false;
-                    this.#channel.postMessage({
+                    channel.postMessage({
                         to: AGENT_TYPE.PARENT,
                         from: AGENT_TYPE.POPUP,
                         type: MESSAGE_TYPE.ACK_OUTGOING_CALL_FAIL,
                         object: callObject,
                     });
                     callObject = EMPTY_CALL_OBJECT;
-                    this.#session = null;
+                    session = null;
                 }
                 else {
                     console.log("UNKNOWN TYPE: ", message);
@@ -104,60 +118,39 @@ class Wrapper {
                 // }
             }
         }
-        const configuration = {
-            sockets: [
-                new JsSIP.WebSocketInterface("wss://" + server_address + ":" + port),
-            ],
-            uri: "sip:" + sip + "@" + server_address,
-            authorization_user: sip,
-            password: password,
-            registrar_server: "sip:" + server_address,
-            no_answer_timeout: 20,
-            session_timers: false,
-            register: true,
-            trace_sip: true,
-            connection_recovery_max_interval: 30,
-            connection_recovery_min_interval: 2,
-        };
-        let ring = new window.Audio("./media/abc.wav");
-        ring.loop = true;
-        let remoteAudio = new window.Audio();
-        remoteAudio.autoplay = true;
-        this.#userAgent = new JsSIP.UA(configuration);
-        this.#userAgent.start();
         const addEventListeners = () => {
-            this.#userAgent.on("newRTCSession", function (event) {
+            userAgent.on("newRTCSession", function (event) {
                 console.log("newRTCSession", event);
-                this.#session = event.#session;
-                console.log("Direction: ", this.#session.direction);
-                this.#session.on("sdp", function (e) {
+                session = event.session;
+                console.log("Direction: ", session.direction);
+                session.on("sdp", function (e) {
                     console.log("call sdp: ", e.sdp);
                 });
-                this.#session.on("accepted", function (e) {
+                session.on("accepted", function (e) {
                     console.log("call accepted: ", e);
                 });
-                this.#session.on("progress", function (e) {
+                session.on("progress", function (e) {
                     console.log("call is in progress: ", e);
                 });
-                this.#session.on("confirmed", function (e) {
+                session.on("confirmed", function (e) {
                     console.log("confirmed by", e.originator);
                 });
-                this.#session.on("ended", function (e) {
+                session.on("ended", function (e) {
                     console.log("Call ended: ", e);
                     call_terminate();
                 });
-                this.#session.on("failed", function (e) {
+                session.on("failed", function (e) {
                     console.log("Call failed: ", e);
-                    call_terminate();
+                    // call_terminate();
                 });
-                this.#session.on("peerconnection", function (e) {
+                session.on("peerconnection", function (e) {
                     console.log("call peerconnection: ", e);
                 });
             });
         };
-        this.#userAgent.on("connected", (e) => {
+        userAgent.on("connected", (e) => {
             setTimeout(() => {
-                this.#channel.postMessage({
+                channel.postMessage({
                     to: AGENT_TYPE.PARENT,
                     from: AGENT_TYPE.POPUP,
                     type: MESSAGE_TYPE.INFORM_SOCKET_CONNECTED,
@@ -168,9 +161,9 @@ class Wrapper {
             callback();
             console.log("INFORM_SOCKET_CONNECTED", e.data);
         });
-        this.#userAgent.on("disconnected", (e) => {
+        userAgent.on("disconnected", (e) => {
             setTimeout(() => {
-                this.#channel.postMessage({
+                channel.postMessage({
                     to: AGENT_TYPE.PARENT,
                     from: AGENT_TYPE.POPUP,
                     type: MESSAGE_TYPE.INFORM_SOCKET_DISCONNECTED,
@@ -179,21 +172,21 @@ class Wrapper {
             }, 0);
             console.log("INFORM_SOCKET_DISCONNECTED", e.data);
         });
-        this.#userAgent.on("newMessage", function (e) {
+        userAgent.on("newMessage", function (e) {
             e.data.message.accept();
             console.log(e);
         });
         function call_outgoing(number) {
             console.log("CALL CLICKED", number);
             ring.play();
-            this.#userAgent.call("125311" + number, {
+            userAgent.call("125311" + number, {
                 eventHandlers: {
                     progress: function (e) {
                         console.log("call is in progress");
                     },
                     failed: (e) => {
                         setTimeout(() => {
-                            this.#channel.postMessage({
+                            channel.postMessage({
                                 to: AGENT_TYPE.WRAPPER,
                                 from: AGENT_TYPE.WRAPPER,
                                 type: MESSAGE_TYPE.ACK_OUTGOING_CALL_FAIL,
@@ -204,7 +197,7 @@ class Wrapper {
                     },
                     ended: (e) => {
                         setTimeout(() => {
-                            this.#channel.postMessage({
+                            channel.postMessage({
                                 to: AGENT_TYPE.WRAPPER,
                                 from: AGENT_TYPE.WRAPPER,
                                 type: MESSAGE_TYPE.ACK_OUTGOING_CALL_END,
@@ -215,7 +208,7 @@ class Wrapper {
                     },
                     confirmed: (e) => {
                         setTimeout(() => {
-                            this.#channel.postMessage({
+                            channel.postMessage({
                                 to: AGENT_TYPE.WRAPPER,
                                 from: AGENT_TYPE.WRAPPER,
                                 type: MESSAGE_TYPE.ACK_OUTGOING_CALL_START,
@@ -243,8 +236,8 @@ class Wrapper {
             addStreams();
         }
         function call_answer() {
-            if (this.#session) {
-                this.#session.answer({
+            if (session) {
+                session.answer({
                     eventHandlers: {
                         progress: function (e) {
                             console.log("call is in progress");
@@ -277,34 +270,34 @@ class Wrapper {
             }
         }
         function call_terminate() {
-            if (this.#session) {
-                this.#session.terminate();
+            if (session) {
+                session.terminate();
             }
-            this.#session = null;
+            session = null;
         }
         function addStreams() {
-            this.#session.connection.addEventListener("addstream", function (event) {
+            session.connection.addEventListener("addstream", function (event) {
                 ring.pause();
                 remoteAudio.srcObject = event.stream;
                 let local = document.getElementById("localMedia");
-                local.srcObject = this.#session.connection.getLocalStreams()[0];
+                local.srcObject = session.connection.getLocalStreams()[0];
                 let remote = document.getElementById("remoteMedia");
                 remote.srcObject =
-                    this.#session.connection.getRemoteStreams()[0];
+                    session.connection.getRemoteStreams()[0];
             });
         }
         function endTime() {
-            return this.#session.end_Time;
+            return session.end_Time;
         }
         function startTime() {
-            return this.#session.startTime();
+            return session.startTime();
         }
         function call_hold() {
             console.log("Request to hold caught by wrapper");
-            this.#session.hold();
-            if (this.#session.isOnHold().local) {
+            session.hold();
+            if (session.isOnHold().local) {
                 setTimeout(() => {
-                    this.#channel.postMessage({
+                    channel.postMessage({
                         to: AGENT_TYPE.PARENT,
                         from: AGENT_TYPE.POPUP,
                         type: MESSAGE_TYPE.ACK_CALL_HOLD,
@@ -315,7 +308,7 @@ class Wrapper {
             }
             else {
                 setTimeout(() => {
-                    this.#channel.postMessage({
+                    channel.postMessage({
                         to: AGENT_TYPE.PARENT,
                         from: AGENT_TYPE.POPUP,
                         type: MESSAGE_TYPE.ACK_CALL_HOLD_FAILED,
@@ -327,10 +320,10 @@ class Wrapper {
         }
         function call_unhold() {
             console.log("Request to unhold caught by wrapper");
-            this.#session.unhold();
-            if (!this.#session.isOnHold().local) {
+            session.unhold();
+            if (!session.isOnHold().local) {
                 setTimeout(() => {
-                    this.#channel.postMessage({
+                    channel.postMessage({
                         to: AGENT_TYPE.PARENT,
                         from: AGENT_TYPE.POPUP,
                         type: MESSAGE_TYPE.ACK_CALL_UNHOLD,
@@ -341,7 +334,7 @@ class Wrapper {
             }
             else {
                 setTimeout(() => {
-                    this.#channel.postMessage({
+                    channel.postMessage({
                         to: AGENT_TYPE.PARENT,
                         from: AGENT_TYPE.POPUP,
                         type: MESSAGE_TYPE.ACK_CALL_UNHOLD_FAILED,
@@ -353,10 +346,10 @@ class Wrapper {
         }
         function call_mute() {
             console.log("Request to MUTE caught by wrapper");
-            this.#session.mute();
-            if (this.#session.isMuted().audio) {
+            session.mute();
+            if (session.isMuted().audio) {
                 setTimeout(() => {
-                    this.#channel.postMessage({
+                    channel.postMessage({
                         to: AGENT_TYPE.PARENT,
                         from: AGENT_TYPE.POPUP,
                         type: MESSAGE_TYPE.ACK_CALL_MUTE,
@@ -367,7 +360,7 @@ class Wrapper {
             }
             else {
                 setTimeout(() => {
-                    this.#channel.postMessage({
+                    channel.postMessage({
                         to: AGENT_TYPE.PARENT,
                         from: AGENT_TYPE.POPUP,
                         type: MESSAGE_TYPE.ACK_CALL_MUTE_FAILED,
@@ -379,10 +372,10 @@ class Wrapper {
         }
         function call_unmute() {
             console.log("Request to UNMUTE caught by wrapper");
-            this.#session.unmute();
-            if (!this.#session.isMuted().audio) {
+            session.unmute();
+            if (!session.isMuted().audio) {
                 setTimeout(() => {
-                    this.#channel.postMessage({
+                    channel.postMessage({
                         to: AGENT_TYPE.PARENT,
                         from: AGENT_TYPE.POPUP,
                         type: MESSAGE_TYPE.ACK_CALL_UNMUTE,
@@ -393,7 +386,7 @@ class Wrapper {
             }
             else {
                 setTimeout(() => {
-                    this.#channel.postMessage({
+                    channel.postMessage({
                         to: AGENT_TYPE.PARENT,
                         from: AGENT_TYPE.POPUP,
                         type: MESSAGE_TYPE.ACK_CALL_UNMUTE_FAILED,

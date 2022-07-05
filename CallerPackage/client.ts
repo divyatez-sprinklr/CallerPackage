@@ -245,22 +245,22 @@ class CallerPackage {
    * @param {object} #callObject
    */
   #setCallObject(callObject: CALL_OBJECT): void {
-    if (!callObject.sender) {
+    if (callObject.sender) {
       this.#callObject.sender = callObject.sender;
     }
-    if (!callObject.receiver) {
+    if (callObject.receiver) {
       this.#callObject.receiver = callObject.receiver;
     }
-    if (!callObject.startTime) {
+    if (callObject.startTime) {
       this.#callObject.startTime = callObject.startTime;
     }
-    if (!callObject.endTime) {
+    if (callObject.endTime) {
       this.#callObject.endTime = callObject.endTime;
     }
-    if (!callObject.hold) {
+    if (callObject.hold) {
       this.#callObject.hold = callObject.hold;
     }
-    if (!callObject.mute) {
+    if (callObject.mute) {
       this.#callObject.mute = callObject.mute;
     }
   }
