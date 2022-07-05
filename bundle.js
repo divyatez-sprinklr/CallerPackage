@@ -725,6 +725,7 @@ callerPackage.on("ACK_OUTGOING_CALL_START", function () {
   displayCallObject();
   document.getElementById("call-active-info").innerText = callActive;
   updateConfirmCallUI();
+  call_button.disabled = true;
 });
 callerPackage.on("ACK_OUTGOING_CALL_END", function () {
   resetState();
@@ -735,6 +736,7 @@ callerPackage.on("ACK_OUTGOING_CALL_END", function () {
   resetMute();
   document.getElementById("call-active-info").innerText = callActive;
   closeCallUI();
+  call_button.disabled = false;
 });
 callerPackage.on("ACK_OUTGOING_CALL_FAIL", function () {
   resetState();
@@ -745,6 +747,7 @@ callerPackage.on("ACK_OUTGOING_CALL_FAIL", function () {
   resetMute();
   document.getElementById("call-active-info").innerText = callActive;
   closeCallUI();
+  call_button.disabled = false;
 });
 callerPackage.on("ACK_CALL_HOLD", function () {
   hold = "Hold State : Hold";
@@ -781,18 +784,25 @@ callerPackage.on("ACK_CALL_UNMUTE", function () {
 callerPackage.on("ACK_SESSION_DETAILS", function () {
   console.log("Caught session details");
   callObject = callerPackage.getCallObject();
-  if (callObject.receiver != "" && callObject.startTime === "") updateInitiateCallUI();else if (callObject.startTime != "" && callObject.endTime === "") updateConfirmCallUI();
+  console.log(callObject);
+  if (callObject.receiver != "" && callObject.startTime == "") updateInitiateCallUI();else if (callObject.startTime != "" && callObject.endTime == "") updateConfirmCallUI();
   displayCallObject();
 
   if (callObject.mute == true) {
     mute = "Mute State : Mute";
     document.getElementById("mute-info").innerText = mute;
+    onMute = true;
+    updateMuteUI(onMute);
   }
 
   if (callObject.hold == true) {
     hold = "Hold State : Hold";
     document.getElementById("hold-info").innerText = hold;
+    onHold = true;
+    updateHoldUI(onHold);
   }
+
+  call_button.disabled = false;
 });
 callerPackage.on("POPUP_CLOSED", function () {
   socket = "Socket : Disconnected";
@@ -838,7 +848,8 @@ function resetState() {
 var start_time = 0;
 
 var secondsPassed = function secondsPassed(start_time) {
-  return Math.round((Date.now() - start_time) / 1000);
+  var d = new Date();
+  return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() - start_time;
 };
 
 var h = 0,
@@ -850,14 +861,16 @@ function toggleTimer(start) {
   if (start) {
     call_timer = setInterval(function () {
       s = secondsPassed(start_time);
+      console.log("s is", s);
       h = Math.floor(s / 3600);
       s = s - 3600 * h;
       m = Math.floor(s / 60);
       s = s - 60 * m;
+      console.log("Call duration: ".concat(String(h), ":").concat(String(m), ":").concat(String(s)));
       var current_time = "";
       current_time = (s < 10 ? "0" + s : s) + current_time;
-      current_time = (m < 10 ? "0" + m : m) + current_time;
-      current_time = (h < 10 ? "0" + h : h) + current_time;
+      current_time = (m < 10 ? "0" + m : m) + ":" + current_time;
+      if (h != 0) current_time = (h < 10 ? "0" + h : h) + ":" + current_time;
       document.getElementById("dialpad-timer").innerHTML = "".concat(current_time);
     }, 1000);
   } else {
@@ -880,15 +893,13 @@ function getHMS(raw_time) {
       m = _raw_time$match$0$spl2[1],
       s = _raw_time$match$0$spl2[2];
 
-  return {
-    h: h,
-    m: m,
-    s: s
-  };
+  console.log(h, m, s);
+  return parseInt(h, 10) * 3600 + parseInt(m, 10) * 60 + parseInt(s, 10);
 }
 
 function startTimer() {
   start_time = getHMS(callObject.startTime);
+  console.log(start_time);
   toggleTimer(true);
 }
 
@@ -907,7 +918,15 @@ function updateInitiateCallUI() {
   document.getElementById("dialpad-timer").innerHTML = "Ringing..";
 }
 
+function restoreInitiateCallUI() {
+  document.getElementById("dialpad-box").style.visibility = "inherit";
+  document.getElementById("user-number").innerHTML = "".concat(callObject.receiver);
+  document.getElementById("dialpad-timer").innerHTML = "";
+}
+
 function updateConfirmCallUI() {
+  restoreInitiateCallUI();
+  document.getElementById("user-number").innerHTML = "".concat(callObject.receiver._uri._user);
   startTimer();
 }
 

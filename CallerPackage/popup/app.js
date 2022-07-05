@@ -3,7 +3,7 @@ const { Popup } = require("./popup.js");
 import { CONFIG_CHANNEL } from "../static/constants";
 
 window.addEventListener("DOMContentLoaded", () => {
-  localStorage.setItem("is_popup_active", "true");
+  localStorage.setItem("IS_POPUP_ACTIVE", "true");
 });
 
 /*
@@ -26,7 +26,7 @@ const windowUnloadHandler = (event) => {
 };
 
 const windowContextHandler = (event) => {
-  event.preventDefault();
+  //event.preventDefault();
   return false;
 };
 

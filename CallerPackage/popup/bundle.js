@@ -7,7 +7,7 @@ var _require = require("./popup.js"),
     Popup = _require.Popup;
 
 window.addEventListener("DOMContentLoaded", function () {
-  localStorage.setItem("is_popup_active", "true");
+  localStorage.setItem("IS_POPUP_ACTIVE", "true");
 });
 /*
   WINDOW RESTRICTIONS & DEVELOPER MODE
@@ -31,7 +31,7 @@ var windowUnloadHandler = function windowUnloadHandler(event) {
 };
 
 var windowContextHandler = function windowContextHandler(event) {
-  event.preventDefault();
+  //event.preventDefault();
   return false;
 };
 
