@@ -15,55 +15,8 @@ body {
     display: none;
 }
 
-/* ----- before login ----- */
-
+h1,
 h2 {
-    color: azure;
-    font-weight: bold;
-}
-
-form {
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: center;
-    align-items: center;
-    padding: 10px 20px;
-
-    color: azure;
-    border: 2px solid azure;
-    border-radius: 10px;
-}
-
-input {
-    padding: 5px 15px;
-    font-size: 16px;
-    border: transparent;
-    border-radius: 10px;
-
-    margin: 2.5px 0;
-    box-shadow: 0 0 5px 2.5px rgb(125, 125, 125) inset;
-}
-
-button {
-    padding: 5px 15px;
-    font-size: 18px;
-    border: transparent;
-    border-radius: 10px;
-
-    margin: 7.5px 0 2.5px 0;
-    background-color: royalblue;
-    color: azure;
-}
-
-button:hover {
-    cursor: pointer;
-    background-color: royalblue;
-    box-shadow: .5px .5px 1px 1px silver;
-}
-
-/* ----- after login ----- */
-
-h1 {
     color: azure;
     font-weight: bold;
 }

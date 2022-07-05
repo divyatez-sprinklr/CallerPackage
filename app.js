@@ -19,7 +19,8 @@ document.getElementById("mute-info").innerText = hold;
 document.getElementById("hold-info").innerText = mute;
 displayCallObject();
 
-const connect_button = document.getElementById("connect");
+const connect_button = document.getElementById("configure");
+
 const call_button = document.getElementById("call");
 const hangup_button = document.getElementById("hangup");
 const mute_button = document.getElementById("mute");
@@ -27,19 +28,16 @@ const unmute_button = document.getElementById("unmute");
 const hold_button = document.getElementById("hold");
 const unhold_button = document.getElementById("unhold");
 
-const toggleButtonState = (value) => {
-  call_button.disabled = !value;
-  hangup_button.disabled = !value;
-  mute_button.disabled = !value;
-  unmute_button.disabled = !value;
-  hold_button.disabled = !value;
-  unhold_button.disabled = !value;
-};
-
 connect_button.addEventListener("click", () => {
-  callerPackage.connect(() => {
-    toggleButtonState(true);
-  });
+  callerPackage.connect(
+    {
+      sip: document.getElementById("username").value,
+      password: document.getElementById("password").value,
+      server_address: document.getElementById("server-address").value,
+      port: document.getElementById("port").value,
+    },
+    () => {}
+  );
 });
 
 call_button.addEventListener("click", () => {

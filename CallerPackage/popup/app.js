@@ -1,5 +1,7 @@
 const { Popup } = require("./popup.js");
 
+import { CONFIG_CHANNEL } from "../static/constants";
+
 window.addEventListener("DOMContentLoaded", () => {
   localStorage.setItem("is_popup_active", "true");
 });
@@ -10,19 +12,17 @@ window.addEventListener("beforeunload", function () {
   return "";
 });
 
-let popup = null; // global popup variable
+let popup = null;
 
-document.getElementById("configure").onclick = (event) => {
-  event.preventDefault();
-
-  document.getElementById("before-login").classList.toggle("hidden");
-  document.getElementById("after-login").classList.toggle("hidden");
-
+const config_channel = new BroadcastChannel(CONFIG_CHANNEL);
+config_channel.onmessage = (event) => {
+  console.log(event);
+  let { sip, password, server_address, port } = event.data;
   popup = new Popup({
-    sip: document.getElementById("username").value,
-    password: document.getElementById("password").value,
-    server_address: document.getElementById("server-address").value,
-    port: document.getElementById("port").value,
+    sip: sip,
+    password: password,
+    server_address: server_address,
+    port: port,
   });
 
   main();
@@ -30,7 +30,7 @@ document.getElementById("configure").onclick = (event) => {
 
 function main() {
   popup.connect(() => {
-    document.querySelector("h1").textContent = "CONNECTED";
+    document.querySelector("h2").textContent = "CONNECTED";
     document.querySelector(".ripple").remove();
   });
 }

@@ -1,6 +1,8 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 
+var _constants = require("../static/constants");
+
 var _require = require("./popup.js"),
     Popup = _require.Popup;
 
@@ -12,29 +14,33 @@ window.addEventListener("beforeunload", function () {
 
   return "";
 });
-var popup = null; // global popup variable
+var popup = null;
+var config_channel = new BroadcastChannel(_constants.CONFIG_CHANNEL);
 
-document.getElementById("configure").onclick = function (event) {
-  event.preventDefault();
-  document.getElementById("before-login").classList.toggle("hidden");
-  document.getElementById("after-login").classList.toggle("hidden");
+config_channel.onmessage = function (event) {
+  console.log(event);
+  var _event$data = event.data,
+      sip = _event$data.sip,
+      password = _event$data.password,
+      server_address = _event$data.server_address,
+      port = _event$data.port;
   popup = new Popup({
-    sip: document.getElementById("username").value,
-    password: document.getElementById("password").value,
-    server_address: document.getElementById("server-address").value,
-    port: document.getElementById("port").value
+    sip: sip,
+    password: password,
+    server_address: server_address,
+    port: port
   });
   main();
 };
 
 function main() {
   popup.connect(function () {
-    document.querySelector("h1").textContent = "CONNECTED";
+    document.querySelector("h2").textContent = "CONNECTED";
     document.querySelector(".ripple").remove();
   });
 }
 
-},{"./popup.js":2}],2:[function(require,module,exports){
+},{"../static/constants":4,"./popup.js":2}],2:[function(require,module,exports){
 "use strict";
 
 var _enums = require("../static/enums");
@@ -696,18 +702,20 @@ module.exports = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.POPUP_WINDOW_WIDTH = exports.POPUP_WINDOW_TOP = exports.POPUP_WINDOW_LEFT = exports.POPUP_WINDOW_HEIGHT = exports.IS_POPUP_ACTIVE = exports.CLIENT_POPUP_CHANNEL = void 0;
+exports.POPUP_WINDOW_WIDTH = exports.POPUP_WINDOW_TOP = exports.POPUP_WINDOW_LEFT = exports.POPUP_WINDOW_HEIGHT = exports.IS_POPUP_ACTIVE = exports.CONFIG_CHANNEL = exports.CLIENT_POPUP_CHANNEL = void 0;
 var IS_POPUP_ACTIVE = "IS_POPUP_ACTIVE";
 exports.IS_POPUP_ACTIVE = IS_POPUP_ACTIVE;
 var CLIENT_POPUP_CHANNEL = "CLIENT_POPUP_CHANNEL";
 exports.CLIENT_POPUP_CHANNEL = CLIENT_POPUP_CHANNEL;
+var CONFIG_CHANNEL = "CONFIG_CHANNEL";
+exports.CONFIG_CHANNEL = CONFIG_CHANNEL;
 var POPUP_WINDOW_LEFT = 0;
 exports.POPUP_WINDOW_LEFT = POPUP_WINDOW_LEFT;
 var POPUP_WINDOW_TOP = 0;
 exports.POPUP_WINDOW_TOP = POPUP_WINDOW_TOP;
-var POPUP_WINDOW_WIDTH = 300;
+var POPUP_WINDOW_WIDTH = 200;
 exports.POPUP_WINDOW_WIDTH = POPUP_WINDOW_WIDTH;
-var POPUP_WINDOW_HEIGHT = 325;
+var POPUP_WINDOW_HEIGHT = 200;
 exports.POPUP_WINDOW_HEIGHT = POPUP_WINDOW_HEIGHT;
 
 },{}],5:[function(require,module,exports){

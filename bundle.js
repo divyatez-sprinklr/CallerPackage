@@ -49,7 +49,11 @@ var _eventEmitter = /*#__PURE__*/new WeakMap();
 
 var _channel = /*#__PURE__*/new WeakMap();
 
+var _config_channel = /*#__PURE__*/new WeakMap();
+
 var _callObject = /*#__PURE__*/new WeakMap();
+
+var _popupWindow = /*#__PURE__*/new WeakMap();
 
 var _resetCallObject = /*#__PURE__*/new WeakSet();
 
@@ -61,6 +65,8 @@ var _sendEngine = /*#__PURE__*/new WeakSet();
 
 var _postHandler = /*#__PURE__*/new WeakSet();
 
+var _openNewPopup = /*#__PURE__*/new WeakSet();
+
 var _setCallObject = /*#__PURE__*/new WeakSet();
 
 var CallerPackage = /*#__PURE__*/function () {
@@ -70,6 +76,8 @@ var CallerPackage = /*#__PURE__*/function () {
     _classCallCheck(this, CallerPackage);
 
     _classPrivateMethodInitSpec(this, _setCallObject);
+
+    _classPrivateMethodInitSpec(this, _openNewPopup);
 
     _classPrivateMethodInitSpec(this, _postHandler);
 
@@ -96,7 +104,17 @@ var CallerPackage = /*#__PURE__*/function () {
       value: void 0
     });
 
+    _classPrivateFieldInitSpec(this, _config_channel, {
+      writable: true,
+      value: void 0
+    });
+
     _classPrivateFieldInitSpec(this, _callObject, {
+      writable: true,
+      value: void 0
+    });
+
+    _classPrivateFieldInitSpec(this, _popupWindow, {
       writable: true,
       value: void 0
     });
@@ -111,6 +129,8 @@ var CallerPackage = /*#__PURE__*/function () {
       _classPrivateMethodGet(_this, _receiveEngine, _receiveEngine2).call(_this, messageEvent.data);
     };
 
+    _classPrivateFieldSet(this, _config_channel, new BroadcastChannel(_constants.CONFIG_CHANNEL));
+
     _classPrivateFieldSet(this, _callObject, {
       sender: "",
       receiver: "",
@@ -119,6 +139,8 @@ var CallerPackage = /*#__PURE__*/function () {
       hold: false,
       mute: false
     });
+
+    _classPrivateFieldSet(this, _popupWindow, null);
   }
 
   _createClass(CallerPackage, [{
@@ -163,11 +185,12 @@ var CallerPackage = /*#__PURE__*/function () {
      *     2) If popup is not active, then it creates a new popup.
      * @param {function} callback
      */
-    function connect(callback) {
+    function connect(config, callback) {
       if (localStorage.getItem(_constants.IS_POPUP_ACTIVE) === null) {
         var popup_path = path.parse(__filename).dir + "/popup/popup.html";
-        window.open(popup_path, "connection", "left=".concat(_constants.POPUP_WINDOW_LEFT, ", top=").concat(_constants.POPUP_WINDOW_TOP, ", width=").concat(_constants.POPUP_WINDOW_WIDTH, ", height=").concat(_constants.POPUP_WINDOW_HEIGHT));
         console.log("popup path: " + popup_path);
+
+        _classPrivateMethodGet(this, _openNewPopup, _openNewPopup2).call(this, popup_path, config);
       } else {
         console.log("Session details request");
 
@@ -487,6 +510,18 @@ function _postHandler2(message) {
   _classPrivateFieldGet(this, _channel).postMessage(message);
 }
 
+function _openNewPopup2(popup_path, config) {
+  var _this2 = this;
+
+  if (_classPrivateFieldGet(this, _popupWindow)) _classPrivateFieldGet(this, _popupWindow).close();
+
+  _classPrivateFieldSet(this, _popupWindow, window.open(popup_path, "connection", "left=".concat(_constants.POPUP_WINDOW_LEFT, ", top=").concat(_constants.POPUP_WINDOW_TOP, ", width=").concat(_constants.POPUP_WINDOW_WIDTH, ", height=").concat(_constants.POPUP_WINDOW_HEIGHT)));
+
+  setTimeout(function () {
+    _classPrivateFieldGet(_this2, _config_channel).postMessage(config);
+  }, 1000);
+}
+
 function _setCallObject2(callObject) {
   if (callObject.sender) {
     _classPrivateFieldGet(this, _callObject).sender = callObject.sender;
@@ -524,18 +559,20 @@ module.exports = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.POPUP_WINDOW_WIDTH = exports.POPUP_WINDOW_TOP = exports.POPUP_WINDOW_LEFT = exports.POPUP_WINDOW_HEIGHT = exports.IS_POPUP_ACTIVE = exports.CLIENT_POPUP_CHANNEL = void 0;
+exports.POPUP_WINDOW_WIDTH = exports.POPUP_WINDOW_TOP = exports.POPUP_WINDOW_LEFT = exports.POPUP_WINDOW_HEIGHT = exports.IS_POPUP_ACTIVE = exports.CONFIG_CHANNEL = exports.CLIENT_POPUP_CHANNEL = void 0;
 var IS_POPUP_ACTIVE = "IS_POPUP_ACTIVE";
 exports.IS_POPUP_ACTIVE = IS_POPUP_ACTIVE;
 var CLIENT_POPUP_CHANNEL = "CLIENT_POPUP_CHANNEL";
 exports.CLIENT_POPUP_CHANNEL = CLIENT_POPUP_CHANNEL;
+var CONFIG_CHANNEL = "CONFIG_CHANNEL";
+exports.CONFIG_CHANNEL = CONFIG_CHANNEL;
 var POPUP_WINDOW_LEFT = 0;
 exports.POPUP_WINDOW_LEFT = POPUP_WINDOW_LEFT;
 var POPUP_WINDOW_TOP = 0;
 exports.POPUP_WINDOW_TOP = POPUP_WINDOW_TOP;
-var POPUP_WINDOW_WIDTH = 300;
+var POPUP_WINDOW_WIDTH = 200;
 exports.POPUP_WINDOW_WIDTH = POPUP_WINDOW_WIDTH;
-var POPUP_WINDOW_HEIGHT = 325;
+var POPUP_WINDOW_HEIGHT = 200;
 exports.POPUP_WINDOW_HEIGHT = POPUP_WINDOW_HEIGHT;
 
 },{}],3:[function(require,module,exports){
@@ -606,27 +643,20 @@ document.getElementById("socket-info").innerText = socket;
 document.getElementById("mute-info").innerText = hold;
 document.getElementById("hold-info").innerText = mute;
 displayCallObject();
-var connect_button = document.getElementById("connect");
+var connect_button = document.getElementById("configure");
 var call_button = document.getElementById("call");
 var hangup_button = document.getElementById("hangup");
 var mute_button = document.getElementById("mute");
 var unmute_button = document.getElementById("unmute");
 var hold_button = document.getElementById("hold");
 var unhold_button = document.getElementById("unhold");
-
-var toggleButtonState = function toggleButtonState(value) {
-  call_button.disabled = !value;
-  hangup_button.disabled = !value;
-  mute_button.disabled = !value;
-  unmute_button.disabled = !value;
-  hold_button.disabled = !value;
-  unhold_button.disabled = !value;
-};
-
 connect_button.addEventListener("click", function () {
-  callerPackage.connect(function () {
-    toggleButtonState(true);
-  });
+  callerPackage.connect({
+    sip: document.getElementById("username").value,
+    password: document.getElementById("password").value,
+    server_address: document.getElementById("server-address").value,
+    port: document.getElementById("port").value
+  }, function () {});
 });
 call_button.addEventListener("click", function () {
   //resetState();

@@ -26,7 +26,7 @@
             flex-direction: row;
             align-items: center;
             gap: 20px;
-            justify-content:center;
+            justify-content: center;
             overflow: hidden;
         }
 
@@ -49,13 +49,13 @@
         }
 
 
-        button{
+        button {
             background-color: #FFFFFF;
             border: 0;
             border-radius: .5rem;
             box-sizing: border-box;
             color: #111827;
-            font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+            font-family: "Inter var", ui-sans-serif, system-ui, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
             font-size: .875rem;
             font-weight: 600;
             line-height: 1.25rem;
@@ -71,50 +71,53 @@
         }
 
         button:hover {
-        background-color: rgb(249,250,251);
+            background-color: rgb(249, 250, 251);
         }
 
         button:focus {
-        outline: 2px solid transparent;
-        outline-offset: 2px;
+            outline: 2px solid transparent;
+            outline-offset: 2px;
         }
 
         button:focus-visible {
-        box-shadow: none;
+            box-shadow: none;
         }
-        input{
-                font-size: 18px;
-                border-radius: 6px;
-                line-height: 1.5;
-                padding: 5px 10px;
-                transition: box-shadow 100ms ease-in, border 100ms ease-in, background-color 100ms ease-in;
-                border: 2px solid #dee1e2;
-                color: rgb(14, 14, 16);
-                background: #ffffff;
-                display: block;
-                height: 36px;
+
+        input {
+            font-size: 18px;
+            border-radius: 6px;
+            line-height: 1.5;
+            padding: 5px 10px;
+            transition: box-shadow 100ms ease-in, border 100ms ease-in, background-color 100ms ease-in;
+            border: 2px solid #dee1e2;
+            color: rgb(14, 14, 16);
+            background: #ffffff;
+            display: block;
+            height: 36px;
         }
+
         input:hover {
-                    border-color: #ccc;
+            border-color: #ccc;
         }
-        input:focus{
-                    border-color: #000000;
-                    background: #fff;
-                    outline: none !important;
+
+        input:focus {
+            border-color: #000000;
+            background: #fff;
+            outline: none !important;
         }
-            
+
 
         button:disabled {
             visibility: hidden;
         }
-        
-        .card{
+
+        .card {
             background-color: #FFFFFF;
             border: 0;
             border-radius: .5rem;
             box-sizing: border-box;
             color: #111827;
-            font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+            font-family: "Inter var", ui-sans-serif, system-ui, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
             font-size: .875rem;
             font-weight: 600;
             line-height: 1.25rem;
@@ -129,16 +132,17 @@
             touch-action: manipulation;
         }
 
-        .header-card{
-            background-color: rgb(	173, 216, 230,.5);
-            border-radius:  0rem 0rem 0rem 0rem;
+        .header-card {
+            background-color: rgb(173, 216, 230, .5);
+            border-radius: 0rem 0rem 0rem 0rem;
             width: 100%;
             height: 50px;
             box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
             padding: 10px;
         }
-        .header-text{
-            font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+
+        .header-text {
+            font-family: "Inter var", ui-sans-serif, system-ui, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
             color: #ffffff;
             font-size: 1.5rem;
             font-weight: 600;
@@ -152,55 +156,70 @@
         <div class="header-text">CallerPackage Demo</div>
     </header>
     <div id="root-container">
+        <div id="sip-config">
+            <input type="text"
+                   id="username"
+                   placeholder="Username"
+                   value="1000">
+            <input type="password"
+                   id="password"
+                   placeholder="Password"
+                   value="1000_client">
+            <input type="text"
+                   id="server-address"
+                   placeholder="Server Address"
+                   value="18.212.171.223">
+            <input type="text"
+                   id="port"
+                   placeholder="Port"
+                   value="7443/ws">
+            <button id="configure">Connect</button>
+        </div>
+
         <div id="grid-container">
             <div class="grid-item-large">
-                <input 
-                       id="phone-number"
+                <input id="phone-number"
                        placeholder="phone number"
                        value="4153260912">
                 <!-- value="4153260912"> -->
                 <!-- value="6285004633"> -->
 
             </div>
-            <div class="grid-item-large">
-                <button id="connect">Connect</button>
+            <div class="grid-item">
+                <button id="call">Call</button>
             </div>
             <div class="grid-item">
-                <button id="call"
-                        disabled>Call</button>
+                <button id="hangup">Hangup</button>
             </div>
             <div class="grid-item">
-                <button id="hangup"
-                        disabled>Hangup</button>
+                <button id="mute">Mute</button>
             </div>
             <div class="grid-item">
-                <button id="mute"
-                        disabled>Mute</button>
+                <button id="unmute">Unmute</button>
             </div>
             <div class="grid-item">
-                <button id="unmute"
-                        disabled>Unmute</button>
+                <button id="hold">Hold</button>
             </div>
             <div class="grid-item">
-                <button id="hold"
-                        disabled>Hold</button>
-            </div>
-            <div class="grid-item">
-                <button id="unhold"
-                        disabled>Unhold</button>
+                <button id="unhold">Unhold</button>
             </div>
         </div>
         <div>
-            <p class='card' id="socket-info"></p>
-            <p class='card' id='hold-info'></p>
-            <p class='card' id="mute-info"></p>
-            <p class='card' id="call-active-info"></p>
-            <p class='card' id="call-object-info"></p>
-           </div> 
+            <p class='card'
+               id="socket-info"></p>
+            <p class='card'
+               id='hold-info'></p>
+            <p class='card'
+               id="mute-info"></p>
+            <p class='card'
+               id="call-active-info"></p>
+            <p class='card'
+               id="call-object-info"></p>
+        </div>
 
     </div>
-  
-    
+
+
 
     <script src="./bundle.js"
             type="module"></script>

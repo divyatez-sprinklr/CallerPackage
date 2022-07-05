@@ -8,44 +8,14 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
     <title>Call Connection</title>
-    <link rel="icon"
-          type="image/x-icon"
-          href="./media/logo.ico">
     <link rel="stylesheet"
           type="text/css"
           href="./popup.css">
 </head>
 
 <body>
-    <div id="before-login"
-         class="flex-container">
-        <h2>SIP CONFIGURATION</h2>
-        <form>
-            <input type="text"
-                   id="username"
-                   placeholder="Username"
-                   value="1000">
-            <input type="password"
-                   id="password"
-                   placeholder="Password"
-                   value="1000_client">
-            <input type="text"
-                   id="server-address"
-                   placeholder="Server Address"
-                   value="18.212.171.223">
-            <input type="text"
-                   id="port"
-                   placeholder="Port"
-                   value="7443/ws">
-            <button id="configure"
-                    type="submit">Submit</button>
-        </form>
-    </div>
-
-    <div id="after-login"
-         class="flex-container hidden">
-        <h1>CONNECTING</h1>
-        <br><br>
+    <div class="flex-container">
+        <h2>CONNECTING</h2>
         <div class="ripple">
             <div></div>
             <div></div>
@@ -60,7 +30,6 @@
                autoplay
                playsinline></video>
     </div>
-
     <script src="./bundle.js"
             type="module"></script>
 </body>

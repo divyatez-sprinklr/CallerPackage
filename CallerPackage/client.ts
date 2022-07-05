@@ -5,6 +5,7 @@ import { MESSAGE_TYPE, AGENT_TYPE } from "./static/enums";
 import { 
   IS_POPUP_ACTIVE,
   CLIENT_POPUP_CHANNEL,
+  CONFIG_CHANNEL,
   POPUP_WINDOW_LEFT,
   POPUP_WINDOW_TOP,
   POPUP_WINDOW_WIDTH,
@@ -30,6 +31,13 @@ interface CALLBACK {
   (): void
 }
 
+interface CONFIG {
+    sip: string,
+    password: string,
+    server_address: string,
+    port: string,
+}
+
 const EMPTY_CALL_OBJECT: CALL_OBJECT = {
     sender: "",
     receiver: "",
@@ -43,7 +51,9 @@ class CallerPackage {
   #callActive: boolean;
   #eventEmitter: typeof EventEmitter;
   #channel: BroadcastChannel;
+  #config_channel: BroadcastChannel;
   #callObject: CALL_OBJECT;
+  #popupWindow: Window;
 
   constructor() {
     this.#callActive = false;
@@ -52,6 +62,7 @@ class CallerPackage {
     this.#channel.onmessage = (messageEvent) => {
         this.#receiveEngine(messageEvent.data);
     };
+    this.#config_channel = new BroadcastChannel(CONFIG_CHANNEL);
     this.#callObject = {
       sender: "",
       receiver: "",
@@ -60,6 +71,7 @@ class CallerPackage {
       hold: false,
       mute: false,
     };
+    this.#popupWindow = null;
   }
 
   #resetCallObject(): void {
@@ -213,21 +225,32 @@ class CallerPackage {
     this.#channel.postMessage(message);
   }
 
+  #openNewPopup(popup_path: string, config: CONFIG): void {
+    if (this.#popupWindow)
+      this.#popupWindow.close();
+    
+    this.#popupWindow = window.open(
+        popup_path,
+        "connection",
+        `left=${POPUP_WINDOW_LEFT}, top=${POPUP_WINDOW_TOP}, width=${POPUP_WINDOW_WIDTH}, height=${POPUP_WINDOW_HEIGHT}`
+      );
+    
+    setTimeout(() => {
+      this.#config_channel.postMessage(config);
+    }, 1000);
+  }
+
   /**
    * This function :
    *     1) If popup is already active, gets details from them.
    *     2) If popup is not active, then it creates a new popup.
    * @param {function} callback
    */
-  connect(callback: CALLBACK): void {
+  connect(config: CONFIG, callback: CALLBACK): void {
     if (localStorage.getItem(IS_POPUP_ACTIVE) === null) {
       const popup_path = path.parse(__filename).dir + "/popup/popup.html";
-      window.open(
-        popup_path,
-        "connection",
-        `left=${POPUP_WINDOW_LEFT}, top=${POPUP_WINDOW_TOP}, width=${POPUP_WINDOW_WIDTH}, height=${POPUP_WINDOW_HEIGHT}`
-      );
       console.log("popup path: " + popup_path);
+      this.#openNewPopup(popup_path, config);
     } else {
       console.log("Session details request");
       this.#sendEngine({
