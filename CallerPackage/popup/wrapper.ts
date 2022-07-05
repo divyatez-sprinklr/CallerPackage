@@ -356,6 +356,7 @@ class Wrapper {
             object: {},
           });
         }, 0);
+        callObject.hold = true;
         console.log("ACK_CALL_HOLD");
       } else {
         setTimeout(() => {
@@ -382,6 +383,7 @@ class Wrapper {
             object: {},
           });
         }, 0);
+         callObject.hold = false;
         console.log("ACK_CALL_UNHOLD");
       } else {
         setTimeout(() => {
@@ -409,6 +411,7 @@ class Wrapper {
             object: {},
           });
         }, 0);
+        callObject.mute = true;
         console.log("ACK_CALL_MUTE");
       } else {
         setTimeout(() => {
@@ -435,6 +438,7 @@ class Wrapper {
             object: {},
           });
         }, 0);
+        callObject.mute = false;
         console.log("ACK_CALL_UNMUTE");
       } else {
         setTimeout(() => {

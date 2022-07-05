@@ -580,21 +580,17 @@ exports.POPUP_WINDOW_HEIGHT = POPUP_WINDOW_HEIGHT;
 },{}],3:[function(require,module,exports){
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+exports.__esModule = true;
 exports.MESSAGE_TYPE = exports.AGENT_TYPE = void 0;
 var AGENT_TYPE;
-exports.AGENT_TYPE = AGENT_TYPE;
 
 (function (AGENT_TYPE) {
   AGENT_TYPE["PARENT"] = "PARENT";
   AGENT_TYPE["POPUP"] = "POPUP";
   AGENT_TYPE["WRAPPER"] = "WRAPPER";
-})(AGENT_TYPE || (exports.AGENT_TYPE = AGENT_TYPE = {}));
+})(AGENT_TYPE = exports.AGENT_TYPE || (exports.AGENT_TYPE = {}));
 
 var MESSAGE_TYPE;
-exports.MESSAGE_TYPE = MESSAGE_TYPE;
 
 (function (MESSAGE_TYPE) {
   MESSAGE_TYPE["INFORM_SOCKET_CONNECTED"] = "INFORM_SOCKET_CONNECTED";
@@ -624,7 +620,7 @@ exports.MESSAGE_TYPE = MESSAGE_TYPE;
   MESSAGE_TYPE["ACK_CALL_UNMUTE_FAILED"] = "ACK_CALL_UNMUTE_FAILED";
   MESSAGE_TYPE["ACK_CALL_UNHOLD_FAILED"] = "ACK_CALL_UNHOLD_FAILED";
   MESSAGE_TYPE["ACK_CALL_HOLD_FAILED"] = "ACK_CALL_HOLD_FAILED";
-})(MESSAGE_TYPE || (exports.MESSAGE_TYPE = MESSAGE_TYPE = {}));
+})(MESSAGE_TYPE = exports.MESSAGE_TYPE || (exports.MESSAGE_TYPE = {}));
 
 },{}],4:[function(require,module,exports){
 "use strict";
