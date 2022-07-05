@@ -9,11 +9,35 @@ var _require = require("./popup.js"),
 window.addEventListener("DOMContentLoaded", function () {
   localStorage.setItem("is_popup_active", "true");
 });
-window.addEventListener("beforeunload", function () {
-  localStorage.clear(); //informUnload();
+/*
+  WINDOW RESTRICTIONS & DEVELOPER MODE
+*/
 
-  return "";
-});
+var outerWidth = window.outerWidth;
+var outerHeight = window.outerHeight;
+var isResized = null;
+
+var windowResizeHandler = function windowResizeHandler() {
+  clearTimeout(isResized);
+  isResized = setTimeout(function () {
+    window.resizeTo(outerWidth, outerHeight);
+  }, 200);
+};
+
+var windowUnloadHandler = function windowUnloadHandler(event) {
+  localStorage.clear();
+  event.preventDefault();
+  return event.returnValue = "";
+};
+
+var windowContextHandler = function windowContextHandler(event) {
+  event.preventDefault();
+  return false;
+};
+
+window.addEventListener("resize", windowResizeHandler);
+window.addEventListener("beforeunload", windowUnloadHandler);
+window.addEventListener("contextmenu", windowContextHandler);
 var popup = null;
 var config_channel = new BroadcastChannel(_constants.CONFIG_CHANNEL);
 

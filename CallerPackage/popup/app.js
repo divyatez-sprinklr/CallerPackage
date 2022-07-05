@@ -6,11 +6,33 @@ window.addEventListener("DOMContentLoaded", () => {
   localStorage.setItem("is_popup_active", "true");
 });
 
-window.addEventListener("beforeunload", function () {
+/*
+  WINDOW RESTRICTIONS & DEVELOPER MODE
+*/
+const outerWidth = window.outerWidth;
+const outerHeight = window.outerHeight;
+let isResized = null;
+const windowResizeHandler = () => {
+  clearTimeout(isResized);
+  isResized = setTimeout(() => {
+    window.resizeTo(outerWidth, outerHeight);
+  }, 200);
+};
+
+const windowUnloadHandler = (event) => {
   localStorage.clear();
-  //informUnload();
-  return "";
-});
+  event.preventDefault();
+  return (event.returnValue = "");
+};
+
+const windowContextHandler = (event) => {
+  event.preventDefault();
+  return false;
+};
+
+window.addEventListener("resize", windowResizeHandler);
+window.addEventListener("beforeunload", windowUnloadHandler);
+window.addEventListener("contextmenu", windowContextHandler);
 
 let popup = null;
 
