@@ -92,6 +92,8 @@ callerPackage.on("INFORM_SOCKET_CONNECTED", () => {
 callerPackage.on("INFORM_SOCKET_DISCONNECTED", () => {
   socket = "Socket : Disconnected";
   document.getElementById("socket-info").innerText = socket;
+
+  call_button.disabled = true;
 });
 
 callerPackage.on("ACK_OUTGOING_CALL_START", () => {

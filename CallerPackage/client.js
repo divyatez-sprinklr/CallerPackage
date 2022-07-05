@@ -1,7 +1,7 @@
 const EventEmitter = require("events");
 const path = require("path");
 import { MESSAGE_TYPE, AGENT_TYPE } from "./static/enums";
-import { IS_POPUP_ACTIVE, CLIENT_POPUP_CHANNEL, CONFIG_CHANNEL, POPUP_WINDOW_LEFT, POPUP_WINDOW_TOP, POPUP_WINDOW_WIDTH, POPUP_WINDOW_HEIGHT } from "./static/constants";
+import { IS_POPUP_ACTIVE, CLIENT_POPUP_CHANNEL, CONFIG_CHANNEL, PING_INTERVAL_MS, POPUP_WINDOW_LEFT, POPUP_WINDOW_TOP, POPUP_WINDOW_WIDTH, POPUP_WINDOW_HEIGHT } from "./static/constants";
 const EMPTY_CALL_OBJECT = {
     sender: "",
     receiver: "",
@@ -28,6 +28,13 @@ class CallerPackage {
             mute: false,
         };
         this.#popupWindow = null;
+        setInterval(() => {
+            if (this.#popupWindow) {
+                // console.log(this.#popupWindow.name);
+                if (this.#popupWindow.name === null || this.#popupWindow.name === "")
+                    this.#eventEmitter.emit(MESSAGE_TYPE.INFORM_SOCKET_DISCONNECTED);
+            }
+        }, PING_INTERVAL_MS);
     }
     #callActive;
     #eventEmitter;

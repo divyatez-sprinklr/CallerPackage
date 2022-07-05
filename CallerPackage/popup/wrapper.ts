@@ -134,6 +134,7 @@ class Wrapper {
           callObject = EMPTY_CALL_OBJECT;
           session = null;
         } else if (message.type == MESSAGE_TYPE.ACK_OUTGOING_CALL_FAIL) {
+          if (ring) ring.pause();
           callActive = false;
           channel.postMessage({
             to: AGENT_TYPE.PARENT,

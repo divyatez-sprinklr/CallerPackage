@@ -141,6 +141,13 @@ var CallerPackage = /*#__PURE__*/function () {
     });
 
     _classPrivateFieldSet(this, _popupWindow, null);
+
+    setInterval(function () {
+      if (_classPrivateFieldGet(_this, _popupWindow)) {
+        // console.log(this.#popupWindow.name);
+        if (_classPrivateFieldGet(_this, _popupWindow).name === null || _classPrivateFieldGet(_this, _popupWindow).name === "") _classPrivateFieldGet(_this, _eventEmitter).emit(_enums.MESSAGE_TYPE.INFORM_SOCKET_DISCONNECTED);
+      }
+    }, _constants.PING_INTERVAL_MS);
   }
 
   _createClass(CallerPackage, [{
@@ -545,13 +552,15 @@ module.exports = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.POPUP_WINDOW_WIDTH = exports.POPUP_WINDOW_TOP = exports.POPUP_WINDOW_LEFT = exports.POPUP_WINDOW_HEIGHT = exports.IS_POPUP_ACTIVE = exports.CONFIG_CHANNEL = exports.CLIENT_POPUP_CHANNEL = void 0;
+exports.POPUP_WINDOW_WIDTH = exports.POPUP_WINDOW_TOP = exports.POPUP_WINDOW_LEFT = exports.POPUP_WINDOW_HEIGHT = exports.PING_INTERVAL_MS = exports.IS_POPUP_ACTIVE = exports.CONFIG_CHANNEL = exports.CLIENT_POPUP_CHANNEL = void 0;
 var IS_POPUP_ACTIVE = "IS_POPUP_ACTIVE";
 exports.IS_POPUP_ACTIVE = IS_POPUP_ACTIVE;
 var CLIENT_POPUP_CHANNEL = "CLIENT_POPUP_CHANNEL";
 exports.CLIENT_POPUP_CHANNEL = CLIENT_POPUP_CHANNEL;
 var CONFIG_CHANNEL = "CONFIG_CHANNEL";
 exports.CONFIG_CHANNEL = CONFIG_CHANNEL;
+var PING_INTERVAL_MS = 2500;
+exports.PING_INTERVAL_MS = PING_INTERVAL_MS;
 var POPUP_WINDOW_LEFT = 0;
 exports.POPUP_WINDOW_LEFT = POPUP_WINDOW_LEFT;
 var POPUP_WINDOW_TOP = 0;
@@ -564,17 +573,21 @@ exports.POPUP_WINDOW_HEIGHT = POPUP_WINDOW_HEIGHT;
 },{}],3:[function(require,module,exports){
 "use strict";
 
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.MESSAGE_TYPE = exports.AGENT_TYPE = void 0;
 var AGENT_TYPE;
+exports.AGENT_TYPE = AGENT_TYPE;
 
 (function (AGENT_TYPE) {
   AGENT_TYPE["PARENT"] = "PARENT";
   AGENT_TYPE["POPUP"] = "POPUP";
   AGENT_TYPE["WRAPPER"] = "WRAPPER";
-})(AGENT_TYPE = exports.AGENT_TYPE || (exports.AGENT_TYPE = {}));
+})(AGENT_TYPE || (exports.AGENT_TYPE = AGENT_TYPE = {}));
 
 var MESSAGE_TYPE;
+exports.MESSAGE_TYPE = MESSAGE_TYPE;
 
 (function (MESSAGE_TYPE) {
   MESSAGE_TYPE["INFORM_SOCKET_CONNECTED"] = "INFORM_SOCKET_CONNECTED";
@@ -604,7 +617,7 @@ var MESSAGE_TYPE;
   MESSAGE_TYPE["ACK_CALL_UNMUTE_FAILED"] = "ACK_CALL_UNMUTE_FAILED";
   MESSAGE_TYPE["ACK_CALL_UNHOLD_FAILED"] = "ACK_CALL_UNHOLD_FAILED";
   MESSAGE_TYPE["ACK_CALL_HOLD_FAILED"] = "ACK_CALL_HOLD_FAILED";
-})(MESSAGE_TYPE = exports.MESSAGE_TYPE || (exports.MESSAGE_TYPE = {}));
+})(MESSAGE_TYPE || (exports.MESSAGE_TYPE = MESSAGE_TYPE = {}));
 
 },{}],4:[function(require,module,exports){
 "use strict";
@@ -696,6 +709,7 @@ callerPackage.on("INFORM_SOCKET_CONNECTED", function () {
 callerPackage.on("INFORM_SOCKET_DISCONNECTED", function () {
   socket = "Socket : Disconnected";
   document.getElementById("socket-info").innerText = socket;
+  call_button.disabled = true;
 });
 callerPackage.on("ACK_OUTGOING_CALL_START", function () {
   resetState();

@@ -6,6 +6,7 @@ import {
   IS_POPUP_ACTIVE,
   CLIENT_POPUP_CHANNEL,
   CONFIG_CHANNEL,
+  PING_INTERVAL_MS,
   POPUP_WINDOW_LEFT,
   POPUP_WINDOW_TOP,
   POPUP_WINDOW_WIDTH,
@@ -72,6 +73,14 @@ class CallerPackage {
       mute: false,
     };
     this.#popupWindow = null;
+
+    setInterval(() => {
+      if (this.#popupWindow) {
+        // console.log(this.#popupWindow.name);
+        if (this.#popupWindow.name === null || this.#popupWindow.name === "")
+          this.#eventEmitter.emit(MESSAGE_TYPE.INFORM_SOCKET_DISCONNECTED);
+      }
+    }, PING_INTERVAL_MS)
   }
 
   #resetCallObject(): void {
@@ -386,8 +395,6 @@ class CallerPackage {
       object: EMPTY_CALL_OBJECT,
     });
   }
-
-  // ping() {}
 }
 
 module.exports = { CallerPackage: CallerPackage };
