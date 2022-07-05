@@ -130,6 +130,8 @@
             user-select: none;
             -webkit-user-select: none;
             touch-action: manipulation;
+            width: 300px;
+            overflow: scroll;
         }
 
         .header-card {
@@ -148,6 +150,107 @@
             font-weight: 600;
             padding: 10px;
         }
+
+        .dialpad-wrapper{
+            position: absolute;
+            background-color: #313131;
+            width: 270px;
+            height: 400px;
+            color: #c2c2c2;
+            border-radius: 30px 30px 0px 0px;
+            bottom: 0px;
+            right: 30px;
+            visibility:hidden;
+        }
+        .dialpad-header{
+            background-color: transparent;
+            width: 250px;
+            height: 30px;
+            color: #ffffff;
+            border-radius: 30px 30px 0px 0px;
+        }
+
+        .dialpad-gap{
+            background-color: transparent;
+            width: 250px;
+        }
+
+        .height20{
+            height: 20px;
+        }
+
+        .height40{
+            height: 40px;
+        }
+
+        .flexCol{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .flexRow{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap:20px;
+        }
+        
+        .control-btn{
+            border-radius: 5px;
+            width: 80px;
+            height: 65px;
+            border: 2px solid #414141;
+        }
+
+        .control-btn:hover{
+            border: 2px solid #cbcbcb;
+        }
+
+        .control-btn-inactive{
+            background-color: #313131;
+        }
+
+        .control-btn-active{
+            background-color: #414141;
+        }
+        
+        .end-call-btn{
+            width: 65px;
+            height: 65px;
+            background-color: #CA3E47;
+            border-radius: 50%;
+        }
+
+        .end-call-btn:hover{
+            background-color: #820d14;
+        }
+
+        .btn-icon{
+            width: 40px;
+            height: 40px;
+            background-color: transparent;
+        } 
+        .user-icon{
+            width: 50px;
+            height: 50px;
+            background-color: transparent;
+        } 
+        .greyContainer{
+            background-color: #525252;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            
+        }
+        #user-number{
+            font-family: "Inter var", ui-sans-serif, system-ui, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+        #dialpad-timer{
+            font-family: "Inter var", ui-sans-serif, system-ui, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+
     </style>
 </head>
 
@@ -217,6 +320,39 @@
                id="call-object-info"></p>
         </div>
 
+    </div>
+
+    <div id="dialpad-box" class="dialpad-wrapper">
+        <div class="dialpad-header"></div>
+
+        <div class="flexCol">
+            <div id="dialpad-user" class="dialpad-user-container flexRow greyContainer">
+                <img class='user-icon' src="./icons/user-grey.png">
+            </div>
+            <div class="dialpad-gap height20"></div>
+            <div id="user-number">
+            </div>            
+        </div>
+        <div class="dialpad-gap height40"></div>
+        <div class="flexCol">
+            <div id="dialpad-timer" class=""></div>
+        </div>
+        <div class="dialpad-gap height40"></div>
+        <div class="dialpad-gap"></div>
+        <div id="dialpad-control-buttons" class="flexRow">
+            <div id="mute-call" class="flexCol control-btn control-btn-inactive">
+                <img class='btn-icon' src="./icons/microphone-grey-2.png">
+            </div>
+            <div id="hold-call" class="flexCol control-btn control-btn-inactive">
+                <img class='btn-icon' src="./icons/pause-grey-2.png">
+            </div>
+        </div>
+        <div class="dialpad-gap height20"></div>
+        <div id="dialpad-call-end" class="flexCol">
+            <div id="end-call" class="end-call-btn flexCol">
+                <img class='btn-icon' src="./icons/call-grey-2.png">
+            </div>
+        </div>
     </div>
 
 

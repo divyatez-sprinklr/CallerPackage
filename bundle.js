@@ -623,10 +623,27 @@ var MESSAGE_TYPE;
 },{}],4:[function(require,module,exports){
 "use strict";
 
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 var _require = require("./CallerPackage/client"),
     CallerPackage = _require.CallerPackage;
 
 var callerPackage = new CallerPackage();
+var onMute = false;
+var onHold = false;
+var onActiveCall = false;
+var receiver = "";
+var timerInterval;
 var mute = "Mute State : Unmute";
 var hold = "Hold State : Unhold";
 var socket = "Socket : Disconnected";
@@ -661,21 +678,31 @@ connect_button.addEventListener("click", function () {
 call_button.addEventListener("click", function () {
   //resetState();
   callerPackage.call(document.getElementById("phone-number").value);
+  updateInitiateCallUI();
+}); // hangup_button.addEventListener("click", () => {
+//   callerPackage.endOut();
+// });
+// hold_button.addEventListener("click", () => {
+//   callerPackage.hold();
+// });
+// unhold_button.addEventListener("click", () => {
+//   callerPackage.unhold();
+// });
+// mute_button.addEventListener("click", () => {
+//   callerPackage.mute();
+// });
+// unmute_button.addEventListener("click", () => {
+//   callerPackage.unmute();
+// });
+
+document.getElementById('mute-call').addEventListener('click', function () {
+  handleMute();
 });
-hangup_button.addEventListener("click", function () {
+document.getElementById('hold-call').addEventListener('click', function () {
+  handleHold();
+});
+document.getElementById('end-call').addEventListener('click', function () {
   callerPackage.endOut();
-});
-hold_button.addEventListener("click", function () {
-  callerPackage.hold();
-});
-unhold_button.addEventListener("click", function () {
-  callerPackage.unhold();
-});
-mute_button.addEventListener("click", function () {
-  callerPackage.mute();
-});
-unmute_button.addEventListener("click", function () {
-  callerPackage.unmute();
 });
 callerPackage.on("INFORM_SOCKET_CONNECTED", function () {
   socket = "Socket : Connected";
@@ -691,6 +718,7 @@ callerPackage.on("ACK_OUTGOING_CALL_START", function () {
   callObject = callerPackage.getCallObject();
   displayCallObject();
   document.getElementById("call-active-info").innerText = callActive;
+  updateConfirmCallUI();
 });
 callerPackage.on("ACK_OUTGOING_CALL_END", function () {
   resetState();
@@ -700,6 +728,7 @@ callerPackage.on("ACK_OUTGOING_CALL_END", function () {
   resetHold();
   resetMute();
   document.getElementById("call-active-info").innerText = callActive;
+  closeCallUI();
 });
 callerPackage.on("ACK_OUTGOING_CALL_FAIL", function () {
   resetState();
@@ -709,30 +738,39 @@ callerPackage.on("ACK_OUTGOING_CALL_FAIL", function () {
   resetHold();
   resetMute();
   document.getElementById("call-active-info").innerText = callActive;
+  closeCallUI();
 });
 callerPackage.on("ACK_CALL_HOLD", function () {
   hold = "Hold State : Hold";
   callObject = callerPackage.getCallObject();
   displayCallObject();
   document.getElementById("hold-info").innerText = hold;
+  onHold = true;
+  updateMuteUI(onHold);
 });
 callerPackage.on("ACK_CALL_UNHOLD", function () {
   hold = "Hold State : Unhold";
   callObject = callerPackage.getCallObject();
   displayCallObject();
   document.getElementById("hold-info").innerText = hold;
+  onHold = false;
+  updateMuteUI(onHold);
 });
 callerPackage.on("ACK_CALL_MUTE", function () {
   mute = "Mute State : Mute";
   callObject = callerPackage.getCallObject();
   displayCallObject();
   document.getElementById("mute-info").innerText = mute;
+  onMute = true;
+  updateMuteUI(onMute);
 });
 callerPackage.on("ACK_CALL_UNMUTE", function () {
   mute = "Mute State : Unmute";
   callObject = callerPackage.getCallObject();
   displayCallObject();
   document.getElementById("mute-info").innerText = mute;
+  onMute = false;
+  updateMuteUI(onMute);
 });
 callerPackage.on("ACK_SESSION_DETAILS", function () {
   console.log("Caught session details");
@@ -787,7 +825,125 @@ function resetState() {
   resetHold();
   resetMute();
   resetcallActive();
+} //// Dialpad Float ///
+
+
+var start_time = 0;
+
+var secondsPassed = function secondsPassed(start_time) {
+  return Math.round((Date.now() - start_time) / 1000);
+};
+
+var h = 0,
+    m = 0,
+    s = 0,
+    call_timer = null;
+
+function toggleTimer(start) {
+  if (start) {
+    call_timer = setInterval(function () {
+      s = secondsPassed(start_time);
+      h = Math.floor(s / 3600);
+      s = s - 3600 * h;
+      m = Math.floor(s / 60);
+      s = s - 60 * m;
+      var current_time = '';
+      current_time = (s < 10 ? "0" + s : s) + current_time;
+      current_time = (m < 10 ? "0" + m : m) + current_time;
+      current_time = (h < 10 ? "0" + h : h) + current_time;
+      document.getElementById('dialpad-timer').innerHTML = "".concat(current_time);
+    }, 1000);
+  } else {
+    console.log("Call duration: ".concat(h, ":").concat(m, ":").concat(s));
+    clearInterval(call_timer);
+    document.getElementById('dialpad-timer').innerHTML = "";
+    h = 0;
+    m = 0;
+    s = 0;
+    call_timer = null;
+  }
 }
+
+function getHMS(raw_time) {
+  raw_time = String(raw_time);
+
+  var _raw_time$match$0$spl = raw_time.match(/\d+:\d+:\d+/)[0].split(":"),
+      _raw_time$match$0$spl2 = _slicedToArray(_raw_time$match$0$spl, 3),
+      h = _raw_time$match$0$spl2[0],
+      m = _raw_time$match$0$spl2[1],
+      s = _raw_time$match$0$spl2[2];
+
+  return {
+    h: h,
+    m: m,
+    s: s
+  };
+}
+
+function startTimer() {
+  start_time = getHMS(callObject.startTime);
+  toggleTimer(true);
+}
+
+function endTimer() {
+  toggleTimer(false);
+}
+
+function closeCallUI() {
+  document.getElementById('dialpad-box').style.visibility = 'hidden';
+  endTimer();
+}
+
+function updateInitiateCallUI() {
+  document.getElementById('dialpad-box').style.visibility = 'inherit';
+  document.getElementById('user-number').innerHTML = "".concat(callObject.receiver);
+  document.getElementById('dialpad-timer').innerHTML = 'Ringing..';
+}
+
+function updateConfirmCallUI() {
+  startTimer();
+}
+
+function handleHold() {
+  if (!onHold) {
+    callerPackage.hold();
+  } else {
+    callerPackage.unhold();
+  }
+}
+
+function updateHoldUI(putOnHold) {
+  if (putOnHold) {
+    document.getElementById('hold-call').classList.remove('control-btn-inactive');
+    document.getElementById('hold-call').classList.add('control-btn-active');
+  } else {
+    document.getElementById('hold-call').classList.remove('control-btn-active');
+    document.getElementById('hold-call').classList.add('control-btn-inactive');
+  }
+}
+
+function handleMute() {
+  if (!onMute) {
+    callerPackage.mute();
+  } else {
+    callerPackage.unmute();
+  }
+}
+
+function updateMuteUI(putOnHold) {
+  if (putOnHold) {
+    document.getElementById('mute-call').classList.remove('control-btn-inactive');
+    document.getElementById('mute-call').classList.add('control-btn-active');
+  } else {
+    document.getElementById('mute-call').classList.remove('control-btn-active');
+    document.getElementById('mute-call').classList.add('control-btn-inactive');
+  }
+} // function updateConfirmCallUI(){
+//   startTimer();
+// }
+// updateInitiateCallUI();
+// updateHoldUI(true);
+// updateMuteUI(false);
 
 },{"./CallerPackage/client":1}],5:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
