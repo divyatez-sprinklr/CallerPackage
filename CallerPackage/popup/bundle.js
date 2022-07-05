@@ -353,7 +353,7 @@ var JsSIP_Wrapper = /*#__PURE__*/function () {
       // );
       // incomingCallAudio.loop = true;
 
-      var ring = new window.Audio("https://github.com/divyatez-sprinklr/CallerPackage/raw/main/CallerPackage/popup/media/abc.wav");
+      var ring = new window.Audio("./media/abc.wav");
       ring.loop = true;
       var remoteAudio = new window.Audio();
       remoteAudio.autoplay = true;

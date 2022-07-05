@@ -128,7 +128,7 @@ export default class JsSIP_Wrapper {
             connection_recovery_max_interval: 30,
             connection_recovery_min_interval: 2,
         };
-        let ring = new window.Audio("https://github.com/divyatez-sprinklr/CallerPackage/raw/main/CallerPackage/popup/media/abc.wav");
+        let ring = new window.Audio("./media/abc.wav");
         ring.loop = true;
         let remoteAudio = new window.Audio();
         remoteAudio.autoplay = true;

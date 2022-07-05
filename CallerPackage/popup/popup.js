@@ -278,9 +278,7 @@ class JsSIP_Wrapper {
     // );
     // incomingCallAudio.loop = true;
 
-    let ring = new window.Audio(
-      "https://github.com/divyatez-sprinklr/CallerPackage/raw/main/CallerPackage/popup/media/abc.wav"
-    );
+    let ring = new window.Audio("./media/abc.wav");
     ring.loop = true;
 
     let remoteAudio = new window.Audio();
