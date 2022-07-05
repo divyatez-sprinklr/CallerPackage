@@ -115,7 +115,7 @@ class Wrapper {
           callObject.startTime = session.start_time;
           callObject.sender = session.local_identity;
           callObject.receiver = session.remote_identity;
-
+          
           channel.postMessage({
             to: AGENT_TYPE.PARENT,
             from: AGENT_TYPE.POPUP,

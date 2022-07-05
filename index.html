@@ -11,7 +11,7 @@
     <style type="text/css">
         body {
             margin: 0;
-            padding: 20px;
+            padding: 0px;
             width: 100vw;
             height: 100vh;
             overflow: hidden;
@@ -23,8 +23,10 @@
             padding: 50px;
 
             display: flex;
+            flex-direction: row;
             align-items: center;
-            justify-content: center;
+            gap: 20px;
+            justify-content:center;
             overflow: hidden;
         }
 
@@ -36,8 +38,8 @@
             grid-template-columns: 1fr 1fr;
             column-gap: 30px;
             row-gap: 20px;
-            background-color: mintcream;
-            border: 5px solid darkturquoise;
+            background-color: rgb(235, 235, 235);
+            border: 1px solid rgb(201, 201, 201);
             border-radius: 10px;
         }
 
@@ -46,31 +48,113 @@
             grid-column-end: 3;
         }
 
-        input,
-        button {
-            font-size: 18px;
-            padding: 5px 15px;
-            border: 1px solid darkturquoise;
-            border-radius: 10px;
+
+        button{
+            background-color: #FFFFFF;
+            border: 0;
+            border-radius: .5rem;
+            box-sizing: border-box;
+            color: #111827;
+            font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+            font-size: .875rem;
+            font-weight: 600;
+            line-height: 1.25rem;
+            padding: .75rem 1rem;
+            text-align: center;
+            text-decoration: none #D1D5DB solid;
+            text-decoration-thickness: auto;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
         }
 
         button:hover {
-            cursor: pointer;
-            background-color: rgb(230, 230, 240);
-            box-shadow: 1px 1px 1px 1px darkturquoise;
+        background-color: rgb(249,250,251);
         }
+
+        button:focus {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+        }
+
+        button:focus-visible {
+        box-shadow: none;
+        }
+        input{
+                font-size: 18px;
+                border-radius: 6px;
+                line-height: 1.5;
+                padding: 5px 10px;
+                transition: box-shadow 100ms ease-in, border 100ms ease-in, background-color 100ms ease-in;
+                border: 2px solid #dee1e2;
+                color: rgb(14, 14, 16);
+                background: #ffffff;
+                display: block;
+                height: 36px;
+        }
+        input:hover {
+                    border-color: #ccc;
+        }
+        input:focus{
+                    border-color: #000000;
+                    background: #fff;
+                    outline: none !important;
+        }
+            
 
         button:disabled {
             visibility: hidden;
+        }
+        
+        .card{
+            background-color: #FFFFFF;
+            border: 0;
+            border-radius: .5rem;
+            box-sizing: border-box;
+            color: #111827;
+            font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+            font-size: .875rem;
+            font-weight: 600;
+            line-height: 1.25rem;
+            padding: .75rem 1rem;
+            text-align: center;
+            text-decoration: none #D1D5DB solid;
+            text-decoration-thickness: auto;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .header-card{
+            background-color: rgb(	173, 216, 230,.5);
+            border-radius:  0rem 0rem 0rem 0rem;
+            width: 100%;
+            height: 50px;
+            box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            padding: 10px;
+        }
+        .header-text{
+            font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: 600;
+            padding: 10px;
         }
     </style>
 </head>
 
 <body>
+    <header class="header-card">
+        <div class="header-text">CallerPackage Demo</div>
+    </header>
     <div id="root-container">
         <div id="grid-container">
             <div class="grid-item-large">
-                <input type="number"
+                <input 
                        id="phone-number"
                        placeholder="phone number"
                        value="4153260912">
@@ -106,14 +190,17 @@
                         disabled>Unhold</button>
             </div>
         </div>
+        <div>
+            <p class='card' id="socket-info"></p>
+            <p class='card' id='hold-info'></p>
+            <p class='card' id="mute-info"></p>
+            <p class='card' id="call-active-info"></p>
+            <p class='card' id="call-object-info"></p>
+           </div> 
 
     </div>
-
-    <p id="socket-info"></p>
-    <p id='hold-info'></p>
-    <p id="mute-info"></p>
-    <p id="call-active-info"></p>
-    <p id="call-object-info"></p>
+  
+    
 
     <script src="./bundle.js"
             type="module"></script>
