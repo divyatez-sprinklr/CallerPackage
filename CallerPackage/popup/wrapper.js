@@ -1,30 +1,32 @@
-const JsSIP = require("jssip");
+"use strict";
+exports.__esModule = true;
+var JsSIP = require("jssip");
 JsSIP.debug.enable("JsSIP:*");
-import { MESSAGE_TYPE, AGENT_TYPE } from "../static/enums";
-import { CLIENT_POPUP_CHANNEL } from "../static/constants";
-const EMPTY_CALL_OBJECT = {
+var enums_1 = require("../static/enums");
+var constants_1 = require("../static/constants");
+var EMPTY_CALL_OBJECT = {
     sender: "",
     receiver: "",
     startTime: "",
     endTime: "",
     hold: false,
-    mute: false,
+    mute: false
 };
-class Wrapper {
-    constructor(config) {
+var Wrapper = /** @class */ (function () {
+    function Wrapper(config) {
         this.config = config;
     }
-    connect(callback) {
-        const channel = new BroadcastChannel(CLIENT_POPUP_CHANNEL);
-        let userAgent = null;
-        let session = null;
-        let callActive = false;
-        let callObject = EMPTY_CALL_OBJECT;
-        channel.onmessage = (messageEvent) => {
+    Wrapper.prototype.connect = function (callback) {
+        var channel = new BroadcastChannel(constants_1.CLIENT_POPUP_CHANNEL);
+        var userAgent = null;
+        var session = null;
+        var callActive = false;
+        var callObject = EMPTY_CALL_OBJECT;
+        channel.onmessage = function (messageEvent) {
             receiveEngine(messageEvent.data);
         };
-        let { sip, password, server_address, port } = this.config;
-        const configuration = {
+        var _a = this.config, sip = _a.sip, password = _a.password, server_address = _a.server_address, port = _a.port;
+        var configuration = {
             sockets: [
                 new JsSIP.WebSocketInterface("wss://" + server_address + ":" + port),
             ],
@@ -37,77 +39,77 @@ class Wrapper {
             register: true,
             trace_sip: true,
             connection_recovery_max_interval: 30,
-            connection_recovery_min_interval: 2,
+            connection_recovery_min_interval: 2
         };
-        let ring = new window.Audio("./media/ring.wav");
+        var ring = new window.Audio("./media/ring.wav");
         ring.loop = true;
-        let remoteAudio = new window.Audio();
+        var remoteAudio = new window.Audio();
         remoteAudio.autoplay = true;
         userAgent = new JsSIP.UA(configuration);
         userAgent.start();
         function receiveEngine(message) {
-            if (message.to == AGENT_TYPE.WRAPPER) {
+            if (message.to == enums_1.AGENT_TYPE.WRAPPER) {
                 console.log("Recieved in Wrapper:", message);
-                if (message.type == MESSAGE_TYPE.REQUEST_OUTGOING_CALL_START) {
+                if (message.type == enums_1.MESSAGE_TYPE.REQUEST_OUTGOING_CALL_START) {
                     if (!callActive) {
                         callObject.receiver = message.object.receiver;
                         call_outgoing(callObject.receiver);
                     }
                 }
-                else if (message.type == MESSAGE_TYPE.REQUEST_OUTGOING_CALL_END) {
+                else if (message.type == enums_1.MESSAGE_TYPE.REQUEST_OUTGOING_CALL_END) {
                     call_terminate();
                 }
-                else if (message.type == MESSAGE_TYPE.REQUEST_CALL_HOLD) {
+                else if (message.type == enums_1.MESSAGE_TYPE.REQUEST_CALL_HOLD) {
                     call_hold();
                 }
-                else if (message.type == MESSAGE_TYPE.REQUEST_CALL_UNHOLD) {
+                else if (message.type == enums_1.MESSAGE_TYPE.REQUEST_CALL_UNHOLD) {
                     call_unhold();
                 }
-                else if (message.type == MESSAGE_TYPE.REQUEST_CALL_MUTE) {
+                else if (message.type == enums_1.MESSAGE_TYPE.REQUEST_CALL_MUTE) {
                     call_mute();
                 }
-                else if (message.type == MESSAGE_TYPE.REQUEST_SESSION_DETAILS) {
+                else if (message.type == enums_1.MESSAGE_TYPE.REQUEST_SESSION_DETAILS) {
                     channel.postMessage({
-                        to: AGENT_TYPE.PARENT,
-                        from: AGENT_TYPE.POPUP,
-                        type: MESSAGE_TYPE.ACK_SESSION_DETAILS,
-                        object: callObject,
+                        to: enums_1.AGENT_TYPE.PARENT,
+                        from: enums_1.AGENT_TYPE.POPUP,
+                        type: enums_1.MESSAGE_TYPE.ACK_SESSION_DETAILS,
+                        object: callObject
                     });
                 }
-                else if (message.type == MESSAGE_TYPE.REQUEST_CALL_UNMUTE) {
+                else if (message.type == enums_1.MESSAGE_TYPE.REQUEST_CALL_UNMUTE) {
                     call_unmute();
                 }
-                else if (message.type == MESSAGE_TYPE.ACK_OUTGOING_CALL_START) {
+                else if (message.type == enums_1.MESSAGE_TYPE.ACK_OUTGOING_CALL_START) {
                     //ring.pause();
                     callObject.startTime = session.start_time;
                     callObject.sender = session.local_identity;
                     callObject.receiver = session.remote_identity;
                     channel.postMessage({
-                        to: AGENT_TYPE.PARENT,
-                        from: AGENT_TYPE.POPUP,
-                        type: MESSAGE_TYPE.ACK_OUTGOING_CALL_START,
-                        object: callObject,
+                        to: enums_1.AGENT_TYPE.PARENT,
+                        from: enums_1.AGENT_TYPE.POPUP,
+                        type: enums_1.MESSAGE_TYPE.ACK_OUTGOING_CALL_START,
+                        object: callObject
                     });
                 }
-                else if (message.type == MESSAGE_TYPE.ACK_OUTGOING_CALL_END) {
+                else if (message.type == enums_1.MESSAGE_TYPE.ACK_OUTGOING_CALL_END) {
                     callObject.endTime = session.end_time;
                     callActive = false;
                     channel.postMessage({
-                        to: AGENT_TYPE.PARENT,
-                        from: AGENT_TYPE.POPUP,
-                        type: MESSAGE_TYPE.ACK_OUTGOING_CALL_END,
-                        object: callObject,
+                        to: enums_1.AGENT_TYPE.PARENT,
+                        from: enums_1.AGENT_TYPE.POPUP,
+                        type: enums_1.MESSAGE_TYPE.ACK_OUTGOING_CALL_END,
+                        object: callObject
                     });
                     callObject = EMPTY_CALL_OBJECT;
                     session = null;
                 }
-                else if (message.type == MESSAGE_TYPE.ACK_OUTGOING_CALL_FAIL) {
+                else if (message.type == enums_1.MESSAGE_TYPE.ACK_OUTGOING_CALL_FAIL) {
                     callActive = false;
                     channel.postMessage({
-                        to: AGENT_TYPE.PARENT,
-                        from: AGENT_TYPE.POPUP,
-                        type: MESSAGE_TYPE.ACK_OUTGOING_CALL_FAIL,
-                        object: callObject,
+                        to: enums_1.AGENT_TYPE.PARENT,
+                        from: enums_1.AGENT_TYPE.POPUP,
+                        type: enums_1.MESSAGE_TYPE.ACK_OUTGOING_CALL_FAIL,
+                        object: callObject
                     });
                     callObject = EMPTY_CALL_OBJECT;
                     session = null;
@@ -118,7 +120,7 @@ class Wrapper {
                 // }
             }
         }
-        const addEventListeners = () => {
+        var addEventListeners = function () {
             userAgent.on("newRTCSession", function (event) {
                 console.log("newRTCSession", event);
                 session = event.session;
@@ -148,26 +150,26 @@ class Wrapper {
                 });
             });
         };
-        userAgent.on("connected", (e) => {
-            setTimeout(() => {
+        userAgent.on("connected", function (e) {
+            setTimeout(function () {
                 channel.postMessage({
-                    to: AGENT_TYPE.PARENT,
-                    from: AGENT_TYPE.POPUP,
-                    type: MESSAGE_TYPE.INFORM_SOCKET_CONNECTED,
-                    object: {},
+                    to: enums_1.AGENT_TYPE.PARENT,
+                    from: enums_1.AGENT_TYPE.POPUP,
+                    type: enums_1.MESSAGE_TYPE.INFORM_SOCKET_CONNECTED,
+                    object: {}
                 });
             }, 0);
             addEventListeners();
             callback();
             console.log("INFORM_SOCKET_CONNECTED", e.data);
         });
-        userAgent.on("disconnected", (e) => {
-            setTimeout(() => {
+        userAgent.on("disconnected", function (e) {
+            setTimeout(function () {
                 channel.postMessage({
-                    to: AGENT_TYPE.PARENT,
-                    from: AGENT_TYPE.POPUP,
-                    type: MESSAGE_TYPE.INFORM_SOCKET_DISCONNECTED,
-                    object: {},
+                    to: enums_1.AGENT_TYPE.PARENT,
+                    from: enums_1.AGENT_TYPE.POPUP,
+                    type: enums_1.MESSAGE_TYPE.INFORM_SOCKET_DISCONNECTED,
+                    object: {}
                 });
             }, 0);
             console.log("INFORM_SOCKET_DISCONNECTED", e.data);
@@ -184,54 +186,57 @@ class Wrapper {
                     progress: function (e) {
                         console.log("call is in progress");
                     },
-                    failed: (e) => {
-                        setTimeout(() => {
-                            channel.postMessage({
-                                to: AGENT_TYPE.WRAPPER,
-                                from: AGENT_TYPE.WRAPPER,
-                                type: MESSAGE_TYPE.ACK_OUTGOING_CALL_FAIL,
-                                object: { object: e.data },
+                    failed: function (e) {
+                        setTimeout(function () {
+                            var self_channel = new BroadcastChannel(constants_1.CLIENT_POPUP_CHANNEL);
+                            self_channel.postMessage({
+                                to: enums_1.AGENT_TYPE.WRAPPER,
+                                from: enums_1.AGENT_TYPE.WRAPPER,
+                                type: enums_1.MESSAGE_TYPE.ACK_OUTGOING_CALL_FAIL,
+                                object: { object: e.data }
                             });
                         }, 0);
                         console.log("ACK_OUTGOING_CALL_FAILED", e.data);
                     },
-                    ended: (e) => {
-                        setTimeout(() => {
-                            channel.postMessage({
-                                to: AGENT_TYPE.WRAPPER,
-                                from: AGENT_TYPE.WRAPPER,
-                                type: MESSAGE_TYPE.ACK_OUTGOING_CALL_END,
-                                object: {},
+                    ended: function (e) {
+                        setTimeout(function () {
+                            var self_channel = new BroadcastChannel(constants_1.CLIENT_POPUP_CHANNEL);
+                            self_channel.postMessage({
+                                to: enums_1.AGENT_TYPE.WRAPPER,
+                                from: enums_1.AGENT_TYPE.WRAPPER,
+                                type: enums_1.MESSAGE_TYPE.ACK_OUTGOING_CALL_END,
+                                object: {}
                             });
                         }, 0);
                         console.log("ACK_OUTGOING_CALL_ENDED", e.data);
                     },
-                    confirmed: (e) => {
-                        setTimeout(() => {
-                            channel.postMessage({
-                                to: AGENT_TYPE.WRAPPER,
-                                from: AGENT_TYPE.WRAPPER,
-                                type: MESSAGE_TYPE.ACK_OUTGOING_CALL_START,
-                                object: {},
+                    confirmed: function (e) {
+                        setTimeout(function () {
+                            var self_channel = new BroadcastChannel(constants_1.CLIENT_POPUP_CHANNEL);
+                            self_channel.postMessage({
+                                to: enums_1.AGENT_TYPE.WRAPPER,
+                                from: enums_1.AGENT_TYPE.WRAPPER,
+                                type: enums_1.MESSAGE_TYPE.ACK_OUTGOING_CALL_START,
+                                object: {}
                             });
                         }, 0);
                         console.log("ACK_OUTGOING_CALL_STARTED");
-                    },
+                    }
                 },
                 pcConfig: {
                     rtcpMuxPolicy: "negotiate",
                     hackStripTcp: true,
                     iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
-                    iceTransportPolicy: "all",
+                    iceTransportPolicy: "all"
                 },
                 mediaConstraints: {
                     audio: true,
-                    video: false,
+                    video: false
                 },
                 rtcOfferConstraints: {
                     offerToReceiveAudio: true,
-                    offerToReceiveVideo: false,
-                },
+                    offerToReceiveVideo: false
+                }
             });
             addStreams();
         }
@@ -248,24 +253,24 @@ class Wrapper {
                         ended: function (e) {
                             console.log("call ended with cause: " + e.data);
                         },
-                        confirmed: (e) => {
+                        confirmed: function (e) {
                             console.log("call confirmed");
-                        },
+                        }
                     },
                     pcConfig: {
                         rtcpMuxPolicy: "negotiate",
                         hackStripTcp: true,
                         iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
-                        iceTransportPolicy: AGENT_TYPE.PARENT,
+                        iceTransportPolicy: enums_1.AGENT_TYPE.PARENT
                     },
                     mediaConstraints: {
                         audio: true,
-                        video: false,
+                        video: false
                     },
                     rtcOfferConstraints: {
                         offerToReceiveAudio: true,
-                        offerToReceiveVideo: false,
-                    },
+                        offerToReceiveVideo: false
+                    }
                 });
             }
         }
@@ -279,9 +284,9 @@ class Wrapper {
             session.connection.addEventListener("addstream", function (event) {
                 ring.pause();
                 remoteAudio.srcObject = event.stream;
-                let local = document.getElementById("localMedia");
+                var local = document.getElementById("localMedia");
                 local.srcObject = session.connection.getLocalStreams()[0];
-                let remote = document.getElementById("remoteMedia");
+                var remote = document.getElementById("remoteMedia");
                 remote.srcObject =
                     session.connection.getRemoteStreams()[0];
             });
@@ -296,23 +301,23 @@ class Wrapper {
             console.log("Request to hold caught by wrapper");
             session.hold();
             if (session.isOnHold().local) {
-                setTimeout(() => {
+                setTimeout(function () {
                     channel.postMessage({
-                        to: AGENT_TYPE.PARENT,
-                        from: AGENT_TYPE.POPUP,
-                        type: MESSAGE_TYPE.ACK_CALL_HOLD,
-                        object: {},
+                        to: enums_1.AGENT_TYPE.PARENT,
+                        from: enums_1.AGENT_TYPE.POPUP,
+                        type: enums_1.MESSAGE_TYPE.ACK_CALL_HOLD,
+                        object: {}
                     });
                 }, 0);
                 console.log("ACK_CALL_HOLD");
             }
             else {
-                setTimeout(() => {
+                setTimeout(function () {
                     channel.postMessage({
-                        to: AGENT_TYPE.PARENT,
-                        from: AGENT_TYPE.POPUP,
-                        type: MESSAGE_TYPE.ACK_CALL_HOLD_FAILED,
-                        object: {},
+                        to: enums_1.AGENT_TYPE.PARENT,
+                        from: enums_1.AGENT_TYPE.POPUP,
+                        type: enums_1.MESSAGE_TYPE.ACK_CALL_HOLD_FAILED,
+                        object: {}
                     });
                 }, 0);
                 console.log("ACK_CALL_HOLD_FAILED");
@@ -322,23 +327,23 @@ class Wrapper {
             console.log("Request to unhold caught by wrapper");
             session.unhold();
             if (!session.isOnHold().local) {
-                setTimeout(() => {
+                setTimeout(function () {
                     channel.postMessage({
-                        to: AGENT_TYPE.PARENT,
-                        from: AGENT_TYPE.POPUP,
-                        type: MESSAGE_TYPE.ACK_CALL_UNHOLD,
-                        object: {},
+                        to: enums_1.AGENT_TYPE.PARENT,
+                        from: enums_1.AGENT_TYPE.POPUP,
+                        type: enums_1.MESSAGE_TYPE.ACK_CALL_UNHOLD,
+                        object: {}
                     });
                 }, 0);
                 console.log("ACK_CALL_UNHOLD");
             }
             else {
-                setTimeout(() => {
+                setTimeout(function () {
                     channel.postMessage({
-                        to: AGENT_TYPE.PARENT,
-                        from: AGENT_TYPE.POPUP,
-                        type: MESSAGE_TYPE.ACK_CALL_UNHOLD_FAILED,
-                        object: {},
+                        to: enums_1.AGENT_TYPE.PARENT,
+                        from: enums_1.AGENT_TYPE.POPUP,
+                        type: enums_1.MESSAGE_TYPE.ACK_CALL_UNHOLD_FAILED,
+                        object: {}
                     });
                 }, 0);
                 console.log("ACK_CALL_UNHOLD_FAILED");
@@ -348,23 +353,23 @@ class Wrapper {
             console.log("Request to MUTE caught by wrapper");
             session.mute();
             if (session.isMuted().audio) {
-                setTimeout(() => {
+                setTimeout(function () {
                     channel.postMessage({
-                        to: AGENT_TYPE.PARENT,
-                        from: AGENT_TYPE.POPUP,
-                        type: MESSAGE_TYPE.ACK_CALL_MUTE,
-                        object: {},
+                        to: enums_1.AGENT_TYPE.PARENT,
+                        from: enums_1.AGENT_TYPE.POPUP,
+                        type: enums_1.MESSAGE_TYPE.ACK_CALL_MUTE,
+                        object: {}
                     });
                 }, 0);
                 console.log("ACK_CALL_MUTE");
             }
             else {
-                setTimeout(() => {
+                setTimeout(function () {
                     channel.postMessage({
-                        to: AGENT_TYPE.PARENT,
-                        from: AGENT_TYPE.POPUP,
-                        type: MESSAGE_TYPE.ACK_CALL_MUTE_FAILED,
-                        object: {},
+                        to: enums_1.AGENT_TYPE.PARENT,
+                        from: enums_1.AGENT_TYPE.POPUP,
+                        type: enums_1.MESSAGE_TYPE.ACK_CALL_MUTE_FAILED,
+                        object: {}
                     });
                 }, 0);
                 console.log("ACK_CALL_MUTE_FAILED");
@@ -374,29 +379,30 @@ class Wrapper {
             console.log("Request to UNMUTE caught by wrapper");
             session.unmute();
             if (!session.isMuted().audio) {
-                setTimeout(() => {
+                setTimeout(function () {
                     channel.postMessage({
-                        to: AGENT_TYPE.PARENT,
-                        from: AGENT_TYPE.POPUP,
-                        type: MESSAGE_TYPE.ACK_CALL_UNMUTE,
-                        object: {},
+                        to: enums_1.AGENT_TYPE.PARENT,
+                        from: enums_1.AGENT_TYPE.POPUP,
+                        type: enums_1.MESSAGE_TYPE.ACK_CALL_UNMUTE,
+                        object: {}
                     });
                 }, 0);
                 console.log("ACK_CALL_UNMUTE");
             }
             else {
-                setTimeout(() => {
+                setTimeout(function () {
                     channel.postMessage({
-                        to: AGENT_TYPE.PARENT,
-                        from: AGENT_TYPE.POPUP,
-                        type: MESSAGE_TYPE.ACK_CALL_UNMUTE_FAILED,
-                        object: {},
+                        to: enums_1.AGENT_TYPE.PARENT,
+                        from: enums_1.AGENT_TYPE.POPUP,
+                        type: enums_1.MESSAGE_TYPE.ACK_CALL_UNMUTE_FAILED,
+                        object: {}
                     });
                 }, 0);
                 console.log("ACK_CALL_UNMUTE_FAILED");
             }
             console.log("ACK_CALL_UNMUTE");
         }
-    }
-}
+    };
+    return Wrapper;
+}());
 module.exports = { Wrapper: Wrapper };

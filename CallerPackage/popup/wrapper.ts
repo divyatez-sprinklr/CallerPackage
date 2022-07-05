@@ -225,7 +225,8 @@ class Wrapper {
           },
           failed: (e) => {
             setTimeout(() => {
-              channel.postMessage({
+              let self_channel: BroadcastChannel = new BroadcastChannel(CLIENT_POPUP_CHANNEL);
+              self_channel.postMessage({
                 to: AGENT_TYPE.WRAPPER,
                 from: AGENT_TYPE.WRAPPER,
                 type: MESSAGE_TYPE.ACK_OUTGOING_CALL_FAIL,
@@ -236,7 +237,8 @@ class Wrapper {
           },
           ended: (e) => {
             setTimeout(() => {
-              channel.postMessage({
+              let self_channel: BroadcastChannel = new BroadcastChannel(CLIENT_POPUP_CHANNEL);
+              self_channel.postMessage({
                 to: AGENT_TYPE.WRAPPER,
                 from: AGENT_TYPE.WRAPPER,
                 type: MESSAGE_TYPE.ACK_OUTGOING_CALL_END,
@@ -247,7 +249,8 @@ class Wrapper {
           },
           confirmed: (e) => {
             setTimeout(() => {
-              channel.postMessage({
+              let self_channel: BroadcastChannel = new BroadcastChannel(CLIENT_POPUP_CHANNEL);
+              self_channel.postMessage({
                 to: AGENT_TYPE.WRAPPER,
                 from: AGENT_TYPE.WRAPPER,
                 type: MESSAGE_TYPE.ACK_OUTGOING_CALL_START,
