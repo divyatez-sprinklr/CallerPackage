@@ -137,7 +137,7 @@ callerPackage.on("ACK_CALL_HOLD", () => {
   document.getElementById("hold-info").innerText = hold;
 
   onHold = true;
-  updateMuteUI(onHold);
+  updateHoldUI(onHold);
 });
 
 callerPackage.on("ACK_CALL_UNHOLD", () => {
@@ -147,7 +147,7 @@ callerPackage.on("ACK_CALL_UNHOLD", () => {
   document.getElementById("hold-info").innerText = hold;
 
   onHold = false;
-  updateMuteUI(onHold);
+  updateHoldUI(onHold);
 });
 
 callerPackage.on("ACK_CALL_MUTE", () => {
@@ -173,6 +173,12 @@ callerPackage.on("ACK_CALL_UNMUTE", () => {
 callerPackage.on("ACK_SESSION_DETAILS", () => {
   console.log("Caught session details");
   callObject = callerPackage.getCallObject();
+
+  if (callObject.receiver != "" && callObject.startTime === "")
+    updateInitiateCallUI();
+  else if (callObject.startTime != "" && callObject.endTime === "")
+    updateConfirmCallUI();
+
   displayCallObject();
   if (callObject.mute == true) {
     mute = "Mute State : Mute";
@@ -317,8 +323,8 @@ function handleMute() {
   }
 }
 
-function updateMuteUI(putOnHold) {
-  if (putOnHold) {
+function updateMuteUI(putOnMute) {
+  if (putOnMute) {
     document
       .getElementById("mute-call")
       .classList.remove("control-btn-inactive");

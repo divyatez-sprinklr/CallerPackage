@@ -148,6 +148,13 @@ var CallerPackage = /*#__PURE__*/function () {
         if (_classPrivateFieldGet(_this, _popupWindow).name === null || _classPrivateFieldGet(_this, _popupWindow).name === "") _classPrivateFieldGet(_this, _eventEmitter).emit(_enums.MESSAGE_TYPE.INFORM_SOCKET_DISCONNECTED);
       }
     }, _constants.PING_INTERVAL_MS);
+
+    _classPrivateMethodGet(this, _sendEngine, _sendEngine2).call(this, {
+      to: _enums.AGENT_TYPE.WRAPPER,
+      from: _enums.AGENT_TYPE.PARENT,
+      type: _enums.MESSAGE_TYPE.REQUEST_SESSION_DETAILS,
+      object: EMPTY_CALL_OBJECT
+    });
   }
 
   _createClass(CallerPackage, [{
@@ -745,7 +752,7 @@ callerPackage.on("ACK_CALL_HOLD", function () {
   displayCallObject();
   document.getElementById("hold-info").innerText = hold;
   onHold = true;
-  updateMuteUI(onHold);
+  updateHoldUI(onHold);
 });
 callerPackage.on("ACK_CALL_UNHOLD", function () {
   hold = "Hold State : Unhold";
@@ -753,7 +760,7 @@ callerPackage.on("ACK_CALL_UNHOLD", function () {
   displayCallObject();
   document.getElementById("hold-info").innerText = hold;
   onHold = false;
-  updateMuteUI(onHold);
+  updateHoldUI(onHold);
 });
 callerPackage.on("ACK_CALL_MUTE", function () {
   mute = "Mute State : Mute";
@@ -774,6 +781,7 @@ callerPackage.on("ACK_CALL_UNMUTE", function () {
 callerPackage.on("ACK_SESSION_DETAILS", function () {
   console.log("Caught session details");
   callObject = callerPackage.getCallObject();
+  if (callObject.receiver != "" && callObject.startTime === "") updateInitiateCallUI();else if (callObject.startTime != "" && callObject.endTime === "") updateConfirmCallUI();
   displayCallObject();
 
   if (callObject.mute == true) {
@@ -929,8 +937,8 @@ function handleMute() {
   }
 }
 
-function updateMuteUI(putOnHold) {
-  if (putOnHold) {
+function updateMuteUI(putOnMute) {
+  if (putOnMute) {
     document.getElementById("mute-call").classList.remove("control-btn-inactive");
     document.getElementById("mute-call").classList.add("control-btn-active");
   } else {

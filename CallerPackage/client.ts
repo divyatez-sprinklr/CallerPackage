@@ -81,6 +81,13 @@ class CallerPackage {
           this.#eventEmitter.emit(MESSAGE_TYPE.INFORM_SOCKET_DISCONNECTED);
       }
     }, PING_INTERVAL_MS)
+
+    this.#sendEngine({
+      to: AGENT_TYPE.WRAPPER,
+      from: AGENT_TYPE.PARENT,
+      type: MESSAGE_TYPE.REQUEST_SESSION_DETAILS,
+      object: EMPTY_CALL_OBJECT,
+    });
   }
 
   #resetCallObject(): void {
