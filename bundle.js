@@ -2,15 +2,66 @@
 (function (__filename){(function (){
 "use strict";
 
+var _enums = require("./static/enums");
+
+var _constants = require("./static/constants");
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
+function _classPrivateMethodInitSpec(obj, privateSet) { _checkPrivateRedeclaration(obj, privateSet); privateSet.add(obj); }
+
+function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
+
+function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
+
+function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
+
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
+
+function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+
+function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "set"); _classApplyDescriptorSet(receiver, descriptor, value); return value; }
+
+function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
+
+function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
+
 var EventEmitter = require("events");
 
 var path = require("path");
+
+var EMPTY_CALL_OBJECT = {
+  sender: "",
+  receiver: "",
+  startTime: "",
+  endTime: "",
+  hold: false,
+  mute: false
+};
+
+var _callActive = /*#__PURE__*/new WeakMap();
+
+var _eventEmitter = /*#__PURE__*/new WeakMap();
+
+var _channel = /*#__PURE__*/new WeakMap();
+
+var _callObject = /*#__PURE__*/new WeakMap();
+
+var _resetCallObject = /*#__PURE__*/new WeakSet();
+
+var _receiveEngine = /*#__PURE__*/new WeakSet();
+
+var _setCallActive = /*#__PURE__*/new WeakSet();
+
+var _sendEngine = /*#__PURE__*/new WeakSet();
+
+var _postHandler = /*#__PURE__*/new WeakSet();
+
+var _setCallObject = /*#__PURE__*/new WeakSet();
 
 var CallerPackage = /*#__PURE__*/function () {
   function CallerPackage() {
@@ -18,45 +69,67 @@ var CallerPackage = /*#__PURE__*/function () {
 
     _classCallCheck(this, CallerPackage);
 
-    this.callActive = false;
-    this.eventEmitter = new EventEmitter();
-    this.channel = new BroadcastChannel("client_popup_channel");
+    _classPrivateMethodInitSpec(this, _setCallObject);
 
-    this.channel.onmessage = function (messageEvent) {
-      _this.receiveEngine(messageEvent.data);
+    _classPrivateMethodInitSpec(this, _postHandler);
+
+    _classPrivateMethodInitSpec(this, _sendEngine);
+
+    _classPrivateMethodInitSpec(this, _setCallActive);
+
+    _classPrivateMethodInitSpec(this, _receiveEngine);
+
+    _classPrivateMethodInitSpec(this, _resetCallObject);
+
+    _classPrivateFieldInitSpec(this, _callActive, {
+      writable: true,
+      value: void 0
+    });
+
+    _classPrivateFieldInitSpec(this, _eventEmitter, {
+      writable: true,
+      value: void 0
+    });
+
+    _classPrivateFieldInitSpec(this, _channel, {
+      writable: true,
+      value: void 0
+    });
+
+    _classPrivateFieldInitSpec(this, _callObject, {
+      writable: true,
+      value: void 0
+    });
+
+    _classPrivateFieldSet(this, _callActive, false);
+
+    _classPrivateFieldSet(this, _eventEmitter, new EventEmitter());
+
+    _classPrivateFieldSet(this, _channel, new BroadcastChannel(_constants.CLIENT_POPUP_CHANNEL));
+
+    _classPrivateFieldGet(this, _channel).onmessage = function (messageEvent) {
+      _classPrivateMethodGet(_this, _receiveEngine, _receiveEngine2).call(_this, messageEvent.data);
     };
 
-    this.callObject = {
+    _classPrivateFieldSet(this, _callObject, {
       sender: "",
       receiver: "",
       startTime: "",
       endTime: "",
       hold: false,
       mute: false
-    };
+    });
   }
 
   _createClass(CallerPackage, [{
-    key: "resetCallObject",
-    value: function resetCallObject() {
-      this.setCallObject({
-        sender: "",
-        receiver: "",
-        startTime: "",
-        endTime: "",
-        hold: false,
-        mute: false
-      });
-    }
+    key: "getCallObject",
+    value:
     /**
      * This returns the private call object variable.
      * @returns object
      */
-
-  }, {
-    key: "getCallObject",
-    value: function getCallObject() {
-      return this.callObject;
+    function getCallObject() {
+      return _classPrivateFieldGet(this, _callObject);
     }
     /**
      * This function handles recieved messege and directs the logic.
@@ -64,166 +137,45 @@ var CallerPackage = /*#__PURE__*/function () {
      */
 
   }, {
-    key: "receiveEngine",
-    value: function receiveEngine(message) {
-      if (message.to == "PARENT") {
-        console.log(message);
-
-        if (message.type == "INFORM_SOCKET_CONNECTED") {
-          this.eventEmitter.emit(message.type);
-        } else if (message.type == "INFORM_SOCKET_DISCONNECTED") {
-          this.eventEmitter.emit(message.type);
-        } else if (message.type == "ACK_OUTGOING_CALL_START") {
-          this.setCallObject({
-            startTime: message.object.startTime,
-            sender: message.object.sender,
-            receiver: message.object.receiver
-          });
-          this.eventEmitter.emit(message.type);
-        } else if (message.type == "ACK_OUTGOING_CALL_END") {
-          this.setCallObject({
-            hold: false,
-            mute: false,
-            endTime: message.object.endTime
-          });
-          this.setCallActive(false);
-          this.eventEmitter.emit(message.type);
-        } else if (message.type == "ACK_OUTGOING_CALL_FAIL") {
-          this.setCallObject({
-            hold: false,
-            mute: false,
-            startTime: "-|-",
-            endTime: "-|-"
-          });
-          this.setCallActive(false);
-          this.eventEmitter.emit(message.type);
-        } else if (message.type == "ACK_CALL_HOLD") {
-          this.setCallObject({
-            hold: true
-          });
-          this.eventEmitter.emit(message.type);
-        } else if (message.type == "ACK_CALL_UNHOLD") {
-          this.setCallObject({
-            hold: false
-          });
-          this.eventEmitter.emit(message.type);
-        } else if (message.type == "ACK_CALL_MUTE") {
-          this.setCallObject({
-            mute: true
-          });
-          this.eventEmitter.emit(message.type);
-        } else if (message.type == "ACK_CALL_UNMUTE") {
-          this.setCallObject({
-            mute: false
-          });
-          this.eventEmitter.emit(message.type);
-        } else if (message.type == "POPUP_CLOSED") {
-          this.eventEmitter.emit(message.type);
-        } else if (message.type == "PING_SESSION_DETAILS") {
-          this.eventEmitter.emit(message.type);
-        } else if (message.type == "PING_POPUP_ALIVE") {
-          this.eventEmitter.emit(message.type);
-        } else if (message.type == "ACK_SESSION_DETAILS") {
-          this.setCallObject(message.object);
-
-          if (this.callObject.startTime == "") {
-            this.setCallActive(false);
-          } else if (this.callObject.endTime == "") {
-            this.setCallActive(true);
-          }
-
-          this.eventEmitter.emit(message.type);
-        } else {
-          console.log("UNKNOWN TYPE: ", message);
-          this.eventEmitter.emit(message.type);
-        }
-      }
-    }
+    key: "on",
+    value:
     /**
-     * This function helps setup eventlistener on eventEmitter.
-     * @param {string} header
+     * This function helps setup eventlistener on #eventEmitter.
+     * @param {string} event
      * @param {function} callback
      */
-
-  }, {
-    key: "on",
-    value: function on(header, callback) {
-      this.eventEmitter.on(header, function () {
+    function on(event, callback) {
+      _classPrivateFieldGet(this, _eventEmitter).on(event, function () {
         callback();
       });
     }
     /**
-     * This function sets callActive variable.
+     * This function sets #callActive variable.
      * @param {boolean} ifActive
      */
 
   }, {
-    key: "setCallActive",
-    value: function setCallActive(ifActive) {
-      this.callActive = ifActive;
-    }
-    /**
-     * This function handle send request from Parent to Popup.
-     * @param {object} message
-     */
-
-  }, {
-    key: "sendEngine",
-    value: function sendEngine(message) {
-      console.log("Sending : " + message.type);
-
-      if (message.type == "REQUEST_OUTGOING_CALL_START") {
-        if (this.callActive == true) {
-          console.log("Call Already Active");
-        } else {
-          this.setCallActive(true);
-          this.postHandler(message);
-        }
-      } else if (message.type == "REQUEST_OUTGOING_CALL_END") {
-        this.postHandler(message);
-      } else if (message.type == "REQUEST_CALL_HOLD") {
-        this.postHandler(message);
-      } else if (message.type == "REQUEST_CALL_UNHOLD") {
-        this.postHandler(message);
-      } else if (message.type == "REQUEST_CALL_MUTE") {
-        this.postHandler(message);
-      } else if (message.type == "REQUEST_CALL_UNMUTE") {
-        this.postHandler(message);
-      } else if (message.type == "REQUEST_SESSION_DETAILS") {
-        this.postHandler(message);
-      }
-    }
-    /**
-     * This function posts message in broadcast channel.
-     * @param {object} message
-     */
-
-  }, {
-    key: "postHandler",
-    value: function postHandler(message) {
-      this.channel.postMessage(message);
-    }
+    key: "connect",
+    value:
     /**
      * This function :
      *     1) If popup is already active, gets details from them.
      *     2) If popup is not active, then it creates a new popup.
      * @param {function} callback
      */
-
-  }, {
-    key: "connect",
-    value: function connect(callback) {
-      if (localStorage.getItem("is_popup_active") === null) {
+    function connect(callback) {
+      if (localStorage.getItem(_constants.IS_POPUP_ACTIVE) === null) {
         var popup_path = path.parse(__filename).dir + "/popup/popup.html";
-        window.open(popup_path, "connection", "left=0, top=0, width=300, height=325");
+        window.open(popup_path, "connection", "left=".concat(_constants.POPUP_WINDOW_LEFT, ", top=").concat(_constants.POPUP_WINDOW_TOP, ", width=").concat(_constants.POPUP_WINDOW_WIDTH, ", height=").concat(_constants.POPUP_WINDOW_HEIGHT));
         console.log("popup path: " + popup_path);
       } else {
         console.log("Session details request");
-        this.sendEngine({
-          to: "WRAPPER",
-          from: "PARENT",
-          type: "REQUEST_SESSION_DETAILS",
-          object: {}
+
+        _classPrivateMethodGet(this, _sendEngine, _sendEngine2).call(this, {
+          to: _enums.AGENT_TYPE.WRAPPER,
+          from: _enums.AGENT_TYPE.PARENT,
+          type: _enums.MESSAGE_TYPE.REQUEST_SESSION_DETAILS,
+          object: EMPTY_CALL_OBJECT
         });
       }
 
@@ -231,82 +183,61 @@ var CallerPackage = /*#__PURE__*/function () {
     }
     /**
      * This function sets the local call object.
-     * @param {object} callObject
-     *
-     */
-
-  }, {
-    key: "setCallObject",
-    value: function setCallObject(callObject) {
-      if (!callObject.receiver) {
-        this.callObject.receiver = callObject.receiver;
-      }
-
-      if (!callObject.sender) {
-        this.callObject.sender = callObject.sender;
-      }
-
-      if (!callObject.receiver) {
-        this.callObject.receiver = callObject.receiver;
-      }
-
-      if (!callObject.startTime) {
-        this.callObject.startTime = callObject.startTime;
-      }
-
-      if (!callObject.endTime) {
-        this.callObject.endTime = callObject.endTime;
-      }
-
-      if (!callObject.hold) {
-        this.callObject.hold = callObject.hold;
-      }
-
-      if (!callObject.mute) {
-        this.callObject.mute = callObject.mute;
-      }
-    }
-    /**
-     * This function sends the request to popup to start an outgoing call.
-     * @param {string} receiver
+     * @param {object} #callObject
      */
 
   }, {
     key: "call",
-    value: function call(receiver) {
-      this.resetCallObject();
-      this.setCallObject({
-        receiver: receiver
+    value:
+    /**
+     * This function sends the request to popup to start an outgoing call.
+     * @param {string} receiver
+     */
+    function call(receiver) {
+      _classPrivateMethodGet(this, _resetCallObject, _resetCallObject2).call(this);
+
+      _classPrivateMethodGet(this, _setCallObject, _setCallObject2).call(this, {
+        sender: null,
+        receiver: receiver,
+        hold: null,
+        mute: null,
+        startTime: null,
+        endTime: null
       });
-      this.sendEngine({
-        to: "POPUP",
-        from: "PARENT",
-        type: "REQUEST_OUTGOING_CALL_START",
-        object: this.callObject
+
+      _classPrivateMethodGet(this, _sendEngine, _sendEngine2).call(this, {
+        to: _enums.AGENT_TYPE.POPUP,
+        from: _enums.AGENT_TYPE.PARENT,
+        type: _enums.MESSAGE_TYPE.REQUEST_OUTGOING_CALL_START,
+        object: _classPrivateFieldGet(this, _callObject)
       });
     }
     /**
-     * This function sends the request to popup to end the current outgoing call.
+     * Requests popup to end the current outgoing call.
      */
 
   }, {
     key: "endOut",
     value: function endOut() {
-      this.sendEngine({
-        to: "POPUP",
-        from: "PARENT",
-        type: "REQUEST_OUTGOING_CALL_END",
-        object: {}
+      _classPrivateMethodGet(this, _sendEngine, _sendEngine2).call(this, {
+        to: _enums.AGENT_TYPE.POPUP,
+        from: _enums.AGENT_TYPE.PARENT,
+        type: _enums.MESSAGE_TYPE.REQUEST_OUTGOING_CALL_END,
+        object: EMPTY_CALL_OBJECT
       });
     }
+    /**
+     * Requests popup to end the current incoming call.
+     */
+
   }, {
     key: "endIn",
     value: function endIn() {
-      this.sendEngine({
-        to: "POPUP",
-        from: "PARENT",
-        type: "REQUEST_INCOMING_CALL_END",
-        object: {}
+      _classPrivateMethodGet(this, _sendEngine, _sendEngine2).call(this, {
+        to: _enums.AGENT_TYPE.POPUP,
+        from: _enums.AGENT_TYPE.PARENT,
+        type: _enums.MESSAGE_TYPE.REQUEST_INCOMING_CALL_END,
+        object: EMPTY_CALL_OBJECT
       });
     }
     /**
@@ -316,11 +247,11 @@ var CallerPackage = /*#__PURE__*/function () {
   }, {
     key: "hold",
     value: function hold() {
-      this.sendEngine({
-        to: "POPUP",
-        from: "PARENT",
-        type: "REQUEST_CALL_HOLD",
-        object: {}
+      _classPrivateMethodGet(this, _sendEngine, _sendEngine2).call(this, {
+        to: _enums.AGENT_TYPE.POPUP,
+        from: _enums.AGENT_TYPE.PARENT,
+        type: _enums.MESSAGE_TYPE.REQUEST_CALL_HOLD,
+        object: EMPTY_CALL_OBJECT
       });
     }
     /**
@@ -330,11 +261,11 @@ var CallerPackage = /*#__PURE__*/function () {
   }, {
     key: "unhold",
     value: function unhold() {
-      this.sendEngine({
-        to: "POPUP",
-        from: "PARENT",
-        type: "REQUEST_CALL_UNHOLD",
-        object: {}
+      _classPrivateMethodGet(this, _sendEngine, _sendEngine2).call(this, {
+        to: _enums.AGENT_TYPE.POPUP,
+        from: _enums.AGENT_TYPE.PARENT,
+        type: _enums.MESSAGE_TYPE.REQUEST_CALL_UNHOLD,
+        object: EMPTY_CALL_OBJECT
       });
     }
     /**
@@ -344,11 +275,11 @@ var CallerPackage = /*#__PURE__*/function () {
   }, {
     key: "mute",
     value: function mute() {
-      this.sendEngine({
-        to: "POPUP",
-        from: "PARENT",
-        type: "REQUEST_CALL_MUTE",
-        object: {}
+      _classPrivateMethodGet(this, _sendEngine, _sendEngine2).call(this, {
+        to: _enums.AGENT_TYPE.POPUP,
+        from: _enums.AGENT_TYPE.PARENT,
+        type: _enums.MESSAGE_TYPE.REQUEST_CALL_MUTE,
+        object: EMPTY_CALL_OBJECT
       });
     }
     /**
@@ -358,40 +289,308 @@ var CallerPackage = /*#__PURE__*/function () {
   }, {
     key: "unmute",
     value: function unmute() {
-      this.sendEngine({
-        to: "POPUP",
-        from: "PARENT",
-        type: "REQUEST_CALL_UNMUTE",
-        object: {}
+      _classPrivateMethodGet(this, _sendEngine, _sendEngine2).call(this, {
+        to: _enums.AGENT_TYPE.POPUP,
+        from: _enums.AGENT_TYPE.PARENT,
+        type: _enums.MESSAGE_TYPE.REQUEST_CALL_UNMUTE,
+        object: EMPTY_CALL_OBJECT
       });
     }
+    /**
+     * This function sends the request to popup to accept incoming call.
+     */
+
   }, {
     key: "accept",
     value: function accept() {
-      this.sendEngine({
-        to: "POPUP",
-        from: "PARENT",
-        type: "REQUEST_INCOMING_CALL_START",
-        object: {}
+      _classPrivateMethodGet(this, _sendEngine, _sendEngine2).call(this, {
+        to: _enums.AGENT_TYPE.POPUP,
+        from: _enums.AGENT_TYPE.PARENT,
+        type: _enums.MESSAGE_TYPE.REQUEST_INCOMING_CALL_START,
+        object: EMPTY_CALL_OBJECT
       });
     }
+    /**
+     * This function sends the request to popup to decline incoming call.
+     */
+
   }, {
-    key: "ping",
-    value: function ping() {}
+    key: "decline",
+    value: function decline() {
+      _classPrivateMethodGet(this, _sendEngine, _sendEngine2).call(this, {
+        to: _enums.AGENT_TYPE.POPUP,
+        from: _enums.AGENT_TYPE.PARENT,
+        type: _enums.MESSAGE_TYPE.REQUEST_INCOMING_CALL_DECLINE,
+        object: EMPTY_CALL_OBJECT
+      });
+    }
   }]);
 
   return CallerPackage;
 }();
 
+function _resetCallObject2() {
+  _classPrivateMethodGet(this, _setCallObject, _setCallObject2).call(this, {
+    sender: "",
+    receiver: "",
+    startTime: "",
+    endTime: "",
+    hold: false,
+    mute: false
+  });
+}
+
+function _receiveEngine2(message) {
+  if (message.to == "PARENT") {
+    console.log(message);
+
+    if (message.type == _enums.MESSAGE_TYPE.INFORM_SOCKET_CONNECTED) {
+      _classPrivateFieldGet(this, _eventEmitter).emit(message.type);
+    } else if (message.type == _enums.MESSAGE_TYPE.INFORM_SOCKET_DISCONNECTED) {
+      _classPrivateFieldGet(this, _eventEmitter).emit(message.type);
+    } else if (message.type == _enums.MESSAGE_TYPE.ACK_OUTGOING_CALL_START) {
+      _classPrivateMethodGet(this, _setCallObject, _setCallObject2).call(this, {
+        startTime: message.object.startTime,
+        endTime: null,
+        hold: null,
+        mute: null,
+        sender: message.object.sender,
+        receiver: message.object.receiver
+      });
+
+      _classPrivateFieldGet(this, _eventEmitter).emit(message.type);
+    } else if (message.type == _enums.MESSAGE_TYPE.ACK_OUTGOING_CALL_END) {
+      _classPrivateMethodGet(this, _setCallObject, _setCallObject2).call(this, {
+        hold: false,
+        mute: false,
+        endTime: message.object.endTime,
+        startTime: null,
+        sender: null,
+        receiver: null
+      });
+
+      _classPrivateMethodGet(this, _setCallActive, _setCallActive2).call(this, false);
+
+      _classPrivateFieldGet(this, _eventEmitter).emit(message.type);
+    } else if (message.type == _enums.MESSAGE_TYPE.ACK_OUTGOING_CALL_FAIL) {
+      _classPrivateMethodGet(this, _setCallObject, _setCallObject2).call(this, {
+        hold: false,
+        mute: false,
+        startTime: "-|-",
+        endTime: "-|-",
+        sender: null,
+        receiver: null
+      });
+
+      _classPrivateMethodGet(this, _setCallActive, _setCallActive2).call(this, false);
+
+      _classPrivateFieldGet(this, _eventEmitter).emit(message.type);
+    } else if (message.type == _enums.MESSAGE_TYPE.ACK_CALL_HOLD) {
+      _classPrivateMethodGet(this, _setCallObject, _setCallObject2).call(this, {
+        hold: true,
+        mute: null,
+        startTime: null,
+        endTime: null,
+        sender: null,
+        receiver: null
+      });
+
+      _classPrivateFieldGet(this, _eventEmitter).emit(message.type);
+    } else if (message.type == _enums.MESSAGE_TYPE.ACK_CALL_UNHOLD) {
+      _classPrivateMethodGet(this, _setCallObject, _setCallObject2).call(this, {
+        hold: false,
+        mute: null,
+        startTime: null,
+        endTime: null,
+        sender: null,
+        receiver: null
+      });
+
+      _classPrivateFieldGet(this, _eventEmitter).emit(message.type);
+    } else if (message.type == _enums.MESSAGE_TYPE.ACK_CALL_MUTE) {
+      _classPrivateMethodGet(this, _setCallObject, _setCallObject2).call(this, {
+        mute: true,
+        hold: null,
+        startTime: null,
+        endTime: null,
+        sender: null,
+        receiver: null
+      });
+
+      _classPrivateFieldGet(this, _eventEmitter).emit(message.type);
+    } else if (message.type == _enums.MESSAGE_TYPE.ACK_CALL_UNMUTE) {
+      _classPrivateMethodGet(this, _setCallObject, _setCallObject2).call(this, {
+        mute: false,
+        hold: null,
+        startTime: null,
+        endTime: null,
+        sender: null,
+        receiver: null
+      });
+
+      _classPrivateFieldGet(this, _eventEmitter).emit(message.type);
+    } else if (message.type == _enums.MESSAGE_TYPE.POPUP_CLOSED) {
+      _classPrivateFieldGet(this, _eventEmitter).emit(message.type);
+    } else if (message.type == _enums.MESSAGE_TYPE.PING_SESSION_DETAILS) {
+      _classPrivateFieldGet(this, _eventEmitter).emit(message.type);
+    } else if (message.type == _enums.MESSAGE_TYPE.PING_POPUP_ALIVE) {
+      _classPrivateFieldGet(this, _eventEmitter).emit(message.type);
+    } else if (message.type == _enums.MESSAGE_TYPE.ACK_SESSION_DETAILS) {
+      _classPrivateMethodGet(this, _setCallObject, _setCallObject2).call(this, message.object);
+
+      if (_classPrivateFieldGet(this, _callObject).startTime == "") {
+        _classPrivateMethodGet(this, _setCallActive, _setCallActive2).call(this, false);
+      } else if (_classPrivateFieldGet(this, _callObject).endTime == "") {
+        _classPrivateMethodGet(this, _setCallActive, _setCallActive2).call(this, true);
+      }
+
+      _classPrivateFieldGet(this, _eventEmitter).emit(message.type);
+    } else {
+      console.log("UNKNOWN TYPE: ", message);
+
+      _classPrivateFieldGet(this, _eventEmitter).emit(message.type);
+    }
+  }
+}
+
+function _setCallActive2(ifActive) {
+  _classPrivateFieldSet(this, _callActive, ifActive);
+}
+
+function _sendEngine2(message) {
+  console.log("Sending : " + message.type);
+
+  if (message.type == _enums.MESSAGE_TYPE.REQUEST_OUTGOING_CALL_START) {
+    if (_classPrivateFieldGet(this, _callActive) == true) {
+      console.log("Call Already Active");
+    } else {
+      _classPrivateMethodGet(this, _setCallActive, _setCallActive2).call(this, true);
+
+      _classPrivateMethodGet(this, _postHandler, _postHandler2).call(this, message);
+    }
+  } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_OUTGOING_CALL_END) {
+    _classPrivateMethodGet(this, _postHandler, _postHandler2).call(this, message);
+  } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_CALL_HOLD) {
+    _classPrivateMethodGet(this, _postHandler, _postHandler2).call(this, message);
+  } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_CALL_UNHOLD) {
+    _classPrivateMethodGet(this, _postHandler, _postHandler2).call(this, message);
+  } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_CALL_MUTE) {
+    _classPrivateMethodGet(this, _postHandler, _postHandler2).call(this, message);
+  } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_CALL_UNMUTE) {
+    _classPrivateMethodGet(this, _postHandler, _postHandler2).call(this, message);
+  } else if (message.type == _enums.MESSAGE_TYPE.REQUEST_SESSION_DETAILS) {
+    _classPrivateMethodGet(this, _postHandler, _postHandler2).call(this, message);
+  }
+}
+
+function _postHandler2(message) {
+  _classPrivateFieldGet(this, _channel).postMessage(message);
+}
+
+function _setCallObject2(callObject) {
+  if (!callObject.sender) {
+    _classPrivateFieldGet(this, _callObject).sender = callObject.sender;
+  }
+
+  if (!callObject.receiver) {
+    _classPrivateFieldGet(this, _callObject).receiver = callObject.receiver;
+  }
+
+  if (!callObject.startTime) {
+    _classPrivateFieldGet(this, _callObject).startTime = callObject.startTime;
+  }
+
+  if (!callObject.endTime) {
+    _classPrivateFieldGet(this, _callObject).endTime = callObject.endTime;
+  }
+
+  if (!callObject.hold) {
+    _classPrivateFieldGet(this, _callObject).hold = callObject.hold;
+  }
+
+  if (!callObject.mute) {
+    _classPrivateFieldGet(this, _callObject).mute = callObject.mute;
+  }
+}
+
 module.exports = {
   CallerPackage: CallerPackage
 };
 
-}).call(this)}).call(this,"/CallerPackage/client.js")
-},{"events":3,"path":4}],2:[function(require,module,exports){
+}).call(this)}).call(this,"/CallerPackage_ts/client.js")
+},{"./static/constants":2,"./static/enums":3,"events":5,"path":6}],2:[function(require,module,exports){
 "use strict";
 
-var _require = require("./CallerPackage/client.js"),
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.POPUP_WINDOW_WIDTH = exports.POPUP_WINDOW_TOP = exports.POPUP_WINDOW_LEFT = exports.POPUP_WINDOW_HEIGHT = exports.IS_POPUP_ACTIVE = exports.CLIENT_POPUP_CHANNEL = void 0;
+var IS_POPUP_ACTIVE = "IS_POPUP_ACTIVE";
+exports.IS_POPUP_ACTIVE = IS_POPUP_ACTIVE;
+var CLIENT_POPUP_CHANNEL = "CLIENT_POPUP_CHANNEL";
+exports.CLIENT_POPUP_CHANNEL = CLIENT_POPUP_CHANNEL;
+var POPUP_WINDOW_LEFT = 0;
+exports.POPUP_WINDOW_LEFT = POPUP_WINDOW_LEFT;
+var POPUP_WINDOW_TOP = 0;
+exports.POPUP_WINDOW_TOP = POPUP_WINDOW_TOP;
+var POPUP_WINDOW_WIDTH = 300;
+exports.POPUP_WINDOW_WIDTH = POPUP_WINDOW_WIDTH;
+var POPUP_WINDOW_HEIGHT = 325;
+exports.POPUP_WINDOW_HEIGHT = POPUP_WINDOW_HEIGHT;
+
+},{}],3:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.MESSAGE_TYPE = exports.AGENT_TYPE = void 0;
+var AGENT_TYPE;
+exports.AGENT_TYPE = AGENT_TYPE;
+
+(function (AGENT_TYPE) {
+  AGENT_TYPE["PARENT"] = "PARENT";
+  AGENT_TYPE["POPUP"] = "POPUP";
+  AGENT_TYPE["WRAPPER"] = "WRAPPER";
+})(AGENT_TYPE || (exports.AGENT_TYPE = AGENT_TYPE = {}));
+
+var MESSAGE_TYPE;
+exports.MESSAGE_TYPE = MESSAGE_TYPE;
+
+(function (MESSAGE_TYPE) {
+  MESSAGE_TYPE["INFORM_SOCKET_CONNECTED"] = "INFORM_SOCKET_CONNECTED";
+  MESSAGE_TYPE["INFORM_SOCKET_DISCONNECTED"] = "INFORM_SOCKET_DISCONNECTED";
+  MESSAGE_TYPE["ACK_OUTGOING_CALL_START"] = "ACK_OUTGOING_CALL_START";
+  MESSAGE_TYPE["ACK_OUTGOING_CALL_END"] = "ACK_OUTGOING_CALL_END";
+  MESSAGE_TYPE["ACK_OUTGOING_CALL_FAIL"] = "ACK_OUTGOING_CALL_FAIL";
+  MESSAGE_TYPE["ACK_CALL_HOLD"] = "ACK_CALL_HOLD";
+  MESSAGE_TYPE["ACK_CALL_UNHOLD"] = "ACK_CALL_UNHOLD";
+  MESSAGE_TYPE["ACK_CALL_MUTE"] = "ACK_CALL_MUTE";
+  MESSAGE_TYPE["ACK_CALL_UNMUTE"] = "ACK_CALL_UNMUTE";
+  MESSAGE_TYPE["POPUP_CLOSED"] = "POPUP_CLOSED";
+  MESSAGE_TYPE["PING_SESSION_DETAILS"] = "PING_SESSION_DETAILS";
+  MESSAGE_TYPE["PING_POPUP_ALIVE"] = "PING_POPUP_ALIVE";
+  MESSAGE_TYPE["ACK_SESSION_DETAILS"] = "ACK_SESSION_DETAILS";
+  MESSAGE_TYPE["REQUEST_OUTGOING_CALL_START"] = "REQUEST_OUTGOING_CALL_START";
+  MESSAGE_TYPE["REQUEST_OUTGOING_CALL_END"] = "REQUEST_OUTGOING_CALL_END";
+  MESSAGE_TYPE["REQUEST_CALL_HOLD"] = "REQUEST_CALL_HOLD";
+  MESSAGE_TYPE["REQUEST_CALL_UNHOLD"] = "REQUEST_CALL_UNHOLD";
+  MESSAGE_TYPE["REQUEST_CALL_MUTE"] = "REQUEST_CALL_MUTE";
+  MESSAGE_TYPE["REQUEST_CALL_UNMUTE"] = "REQUEST_CALL_UNMUTE";
+  MESSAGE_TYPE["REQUEST_SESSION_DETAILS"] = "REQUEST_SESSION_DETAILS";
+  MESSAGE_TYPE["REQUEST_INCOMING_CALL_START"] = "REQUEST_INCOMING_CALL_START";
+  MESSAGE_TYPE["REQUEST_INCOMING_CALL_DECLINE"] = "REQUEST_INCOMING_CALL_DECLINE";
+  MESSAGE_TYPE["REQUEST_INCOMING_CALL_END"] = "REQUEST_INCOMING_CALL_END";
+  MESSAGE_TYPE["ACK_CALL_MUTE_FAILED"] = "ACK_CALL_MUTE_FAILED";
+  MESSAGE_TYPE["ACK_CALL_UNMUTE_FAILED"] = "ACK_CALL_UNMUTE_FAILED";
+  MESSAGE_TYPE["ACK_CALL_UNHOLD_FAILED"] = "ACK_CALL_UNHOLD_FAILED";
+  MESSAGE_TYPE["ACK_CALL_HOLD_FAILED"] = "ACK_CALL_HOLD_FAILED";
+})(MESSAGE_TYPE || (exports.MESSAGE_TYPE = MESSAGE_TYPE = {}));
+
+},{}],4:[function(require,module,exports){
+"use strict";
+
+var _require = require("./CallerPackage_ts/client"),
     CallerPackage = _require.CallerPackage;
 
 var callerPackage = new CallerPackage();
@@ -564,7 +763,7 @@ function resetState() {
   resetcallActive();
 }
 
-},{"./CallerPackage/client.js":1}],3:[function(require,module,exports){
+},{"./CallerPackage_ts/client":1}],5:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1063,7 +1262,7 @@ function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
   }
 }
 
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 (function (process){(function (){
 // 'path' module extracted from Node.js v8.11.1 (only the posix part)
 // transplited with Babel
@@ -1596,7 +1795,7 @@ posix.posix = posix;
 module.exports = posix;
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":5}],5:[function(require,module,exports){
+},{"_process":7}],7:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -1782,4 +1981,4 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}]},{},[2]);
+},{}]},{},[4]);
