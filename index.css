@@ -138,6 +138,7 @@ button:disabled {
     bottom: 0px;
     right: 30px;
     visibility: hidden;
+    box-shadow: 0 19px 38px 10px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
 }
 
 .dialpad-header {
@@ -176,6 +177,11 @@ button:disabled {
     gap: 20px;
 }
 
+.align-start{
+    justify-content:left;
+    gap: 0px;
+}
+
 .control-btn {
     padding: 2.5px 0;
     margin: 10px;
@@ -191,12 +197,15 @@ button:disabled {
 }
 
 .control-btn-inactive {
-    visibility: hidden;
     /* background-color: #969696; */
 }
 
 .control-btn-active {
     background-color: #414141;
+}
+
+.visibility{
+    visibility: hidden;
 }
 
 .end-call-btn {
@@ -264,4 +273,28 @@ button:disabled {
 #call-active-info,
 #call-object-info {
     display: none !important;
+}
+
+.margin0{
+    margin: 0;
+}
+
+.padding0{
+    padding: 0;
+}
+
+.color1{
+    color: #C9D75B;
+}
+
+.color2{
+    color: #E1251B;
+}
+
+.color3{
+    color: #FFCD2D;
+}
+
+.color4{
+    color: #28AAE1;
 }

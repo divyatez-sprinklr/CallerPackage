@@ -14,8 +14,12 @@
 </head>
 
 <body>
-    <header class="header-card">
-        <div class="header-text">CallerPackage Demo</div>
+    <header class="header-card flexRow align-start">
+        <div> <img class='user-icon'
+            src="./icons/sprinklr.png"></div>
+        </div>
+        <!-- <p class="margin0 padding0 color1">Caller</p> <p class="margin0 padding0 color2">Package</p> <p class="margin0 padding0 color3">Demo</p> <p class="margin0 padding0 color4">App</p> -->
+        <div class="header-text flexRow align-start">CallerPackage Demo</div>
     </header>
     <div id="root-container">
         <div class="flex-container">
@@ -63,10 +67,8 @@
 
     </div>
 
-    <div id="dialpad-box"
-         class="dialpad-wrapper">
-        <div class="dialpad-header"></div>
-
+    <div id="dialpad-box" class="dialpad-wrapper">
+         <div class="dialpad-gap height40"></div>
         <div class="flexCol">
             <div id="dialpad-user"
                  class="dialpad-user-container flexRow greyContainer">
@@ -77,6 +79,7 @@
             <div id="user-number">
             </div>
         </div>
+
         <div class="dialpad-gap height40"></div>
         <div class="flexCol">
             <div id="dialpad-timer"
@@ -85,7 +88,7 @@
         <div class="dialpad-gap height40"></div>
         <div class="dialpad-gap"></div>
         <div id="dialpad-control-buttons"
-             class="flexRow">
+             class="flexRow visibility">
             <div id="mute-call"
                  class="flexCol control-btn control-btn-inactive">
                 <img class='mute-btn-icon'

@@ -1,15 +1,15 @@
 const { CallerPackage } = require("./CallerPackage/client");
 
 let callerPackage = new CallerPackage();
-
+// updateConfirmCallUI();
 let onMute = false;
 let onHold = false;
 let onActiveCall = false;
 let receiver = "";
 let timerInterval;
 
-let mute = "Mute State : Unmute";
-let hold = "Hold State : Unhold";
+let mute = "Mute State : ";
+let hold = "Hold State : ";
 let socket = "Socket : Disconnected";
 let callActive = "CallActve : Inative";
 let callObject = {
@@ -210,12 +210,12 @@ function displayCallObject() {
 }
 
 function resetHold() {
-  hold = "Hold State : Unhold";
+  hold = "Hold State :";
   document.getElementById("hold-info").innerText = hold;
 }
 
 function resetMute() {
-  mute = "Mute State : Unmute";
+  mute = "Mute State : ";
   document.getElementById("mute-info").innerText = mute;
 }
 
@@ -302,6 +302,8 @@ function updateInitiateCallUI() {
   document.getElementById("dialpad-box").style.visibility = "inherit";
   document.getElementById("user-number").innerHTML = `${callObject.receiver}`;
   document.getElementById("dialpad-timer").innerHTML = "Ringing..";
+  document.getElementById("dialpad-control-buttons").classList.add("visibility");
+
 }
 
 function restoreInitiateCallUI() {
@@ -315,6 +317,14 @@ function updateConfirmCallUI() {
   document.getElementById(
     "user-number"
   ).innerHTML = `${callObject.receiver._uri._user}`;
+  hold = "Hold State : Unhold";
+  mute = "Mute State : Unmute";
+  document.getElementById("hold-info").innerText = hold;
+  document.getElementById("mute-info").innerText = mute;
+
+  document.getElementById("dialpad-control-buttons").classList.remove("visibility");
+  // document.getElementById("mute-call").classList.toggle("visibility");
+
   startTimer();
 }
 
@@ -337,7 +347,7 @@ function updateHoldUI(putOnHold) {
     document.getElementById("hold-call").classList.add("control-btn-inactive");
   }
 
-  document.querySelectorAll(".mute-btn-icon").forEach((each) => {
+  document.querySelectorAll(".hold-btn-icon").forEach((each) => {
     each.classList.toggle("hidden");
   });
 }

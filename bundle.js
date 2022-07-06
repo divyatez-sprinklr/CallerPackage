@@ -640,14 +640,15 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 var _require = require("./CallerPackage/client"),
     CallerPackage = _require.CallerPackage;
 
-var callerPackage = new CallerPackage();
+var callerPackage = new CallerPackage(); // updateConfirmCallUI();
+
 var onMute = false;
 var onHold = false;
 var onActiveCall = false;
 var receiver = "";
 var timerInterval;
-var mute = "Mute State : Unmute";
-var hold = "Hold State : Unhold";
+var mute = "Mute State : ";
+var hold = "Hold State : ";
 var socket = "Socket : Disconnected";
 var callActive = "CallActve : Inative";
 var callObject = {
@@ -811,12 +812,12 @@ function displayCallObject() {
 }
 
 function resetHold() {
-  hold = "Hold State : Unhold";
+  hold = "Hold State :";
   document.getElementById("hold-info").innerText = hold;
 }
 
 function resetMute() {
-  mute = "Mute State : Unmute";
+  mute = "Mute State : ";
   document.getElementById("mute-info").innerText = mute;
 }
 
@@ -912,6 +913,7 @@ function updateInitiateCallUI() {
   document.getElementById("dialpad-box").style.visibility = "inherit";
   document.getElementById("user-number").innerHTML = "".concat(callObject.receiver);
   document.getElementById("dialpad-timer").innerHTML = "Ringing..";
+  document.getElementById("dialpad-control-buttons").classList.add("visibility");
 }
 
 function restoreInitiateCallUI() {
@@ -923,6 +925,12 @@ function restoreInitiateCallUI() {
 function updateConfirmCallUI() {
   restoreInitiateCallUI();
   document.getElementById("user-number").innerHTML = "".concat(callObject.receiver._uri._user);
+  hold = "Hold State : Unhold";
+  mute = "Mute State : Unmute";
+  document.getElementById("hold-info").innerText = hold;
+  document.getElementById("mute-info").innerText = mute;
+  document.getElementById("dialpad-control-buttons").classList.remove("visibility"); // document.getElementById("mute-call").classList.toggle("visibility");
+
   startTimer();
 }
 
@@ -943,7 +951,7 @@ function updateHoldUI(putOnHold) {
     document.getElementById("hold-call").classList.add("control-btn-inactive");
   }
 
-  document.querySelectorAll(".mute-btn-icon").forEach(function (each) {
+  document.querySelectorAll(".hold-btn-icon").forEach(function (each) {
     each.classList.toggle("hidden");
   });
 }
