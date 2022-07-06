@@ -249,7 +249,7 @@ button:disabled {
     margin: 2rem 0 0 0;
 }
 
-/* #call-active-info,
+#call-active-info,
 #call-object-info {
     display: none !important;
-} */
+}
