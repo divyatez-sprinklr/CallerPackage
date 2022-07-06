@@ -942,6 +942,10 @@ function updateHoldUI(putOnHold) {
     document.getElementById("hold-call").classList.remove("control-btn-active");
     document.getElementById("hold-call").classList.add("control-btn-inactive");
   }
+
+  document.querySelectorAll(".mute-btn-icon").forEach(function (each) {
+    each.classList.toggle("hidden");
+  });
 }
 
 function handleMute() {
@@ -960,6 +964,10 @@ function updateMuteUI(putOnMute) {
     document.getElementById("mute-call").classList.remove("control-btn-active");
     document.getElementById("mute-call").classList.add("control-btn-inactive");
   }
+
+  document.querySelectorAll(".mute-btn-icon").forEach(function (each) {
+    each.classList.toggle("hidden");
+  });
 } // function updateConfirmCallUI(){
 //   startTimer();
 // }

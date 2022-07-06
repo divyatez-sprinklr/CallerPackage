@@ -8,6 +8,10 @@ body {
     font-family: Verdana, Geneva, Tahoma, sans-serif
 }
 
+.hidden {
+    display: none;
+}
+
 #root-container {
     margin: 0;
     padding: 50px;
@@ -126,7 +130,7 @@ button:disabled {
 
 .dialpad-wrapper {
     position: absolute;
-    background-color: #313131;
+    background-color: #0a0a14;
     width: 270px;
     height: 400px;
     color: #c2c2c2;
@@ -173,10 +177,13 @@ button:disabled {
 }
 
 .control-btn {
-    border-radius: 5px;
-    width: 80px;
-    height: 65px;
-    border: 2px solid #414141;
+    padding: 2.5px 0;
+    margin: 10px;
+    border-radius: 10px;
+    width: 60px;
+    height: 40px;
+    border: 2px solid #969696;
+    cursor: pointer;
 }
 
 .control-btn:hover {
@@ -184,7 +191,8 @@ button:disabled {
 }
 
 .control-btn-inactive {
-    background-color: #313131;
+    /* visibility: hidden; */
+    background-color: #969696;
 }
 
 .control-btn-active {
@@ -194,15 +202,18 @@ button:disabled {
 .end-call-btn {
     width: 65px;
     height: 65px;
-    background-color: #CA3E47;
+    background-color: rgb(225, 50, 25);
     border-radius: 50%;
+    cursor: pointer;
 }
 
 .end-call-btn:hover {
-    background-color: #820d14;
+    background-color: rgb(200, 25, 10);
 }
 
-.btn-icon {
+.mute-btn-icon,
+.hold-btn-icon,
+.call-btn-icon {
     width: 40px;
     height: 40px;
     background-color: transparent;

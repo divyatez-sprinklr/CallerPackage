@@ -105,7 +105,6 @@ callerPackage.on("ACK_OUTGOING_CALL_START", () => {
 
   updateConfirmCallUI();
   call_button.disabled = true;
-
 });
 
 callerPackage.on("ACK_OUTGOING_CALL_END", () => {
@@ -119,7 +118,6 @@ callerPackage.on("ACK_OUTGOING_CALL_END", () => {
 
   closeCallUI();
   call_button.disabled = false;
-
 });
 
 callerPackage.on("ACK_OUTGOING_CALL_FAIL", () => {
@@ -133,7 +131,6 @@ callerPackage.on("ACK_OUTGOING_CALL_FAIL", () => {
 
   closeCallUI();
   call_button.disabled = false;
-
 });
 
 callerPackage.on("ACK_CALL_HOLD", () => {
@@ -197,7 +194,6 @@ callerPackage.on("ACK_SESSION_DETAILS", () => {
     document.getElementById("hold-info").innerText = hold;
     onHold = true;
     updateHoldUI(onHold);
-
   }
   call_button.disabled = false;
 });
@@ -249,15 +245,17 @@ function resetState() {
 let start_time = 0;
 const secondsPassed = (start_time) => {
   let d = new Date();
-  return d.getHours()*3600 +d.getMinutes()*60 + d.getSeconds() - start_time;
-}
+  return (
+    d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() - start_time
+  );
+};
 let [h, m, s, call_timer] = [0, 0, 0, null];
 
 function toggleTimer(start) {
   if (start) {
     call_timer = setInterval(() => {
       s = secondsPassed(start_time);
-      console.log("s is",s );
+      console.log("s is", s);
       h = Math.floor(s / 3600);
       s = s - 3600 * h;
       m = Math.floor(s / 60);
@@ -265,9 +263,8 @@ function toggleTimer(start) {
       console.log(`Call duration: ${String(h)}:${String(m)}:${String(s)}`);
       let current_time = "";
       current_time = (s < 10 ? "0" + s : s) + current_time;
-      current_time = (m < 10 ? "0" + m : m) + ":"+ current_time;
-      if(h!=0)
-        current_time = (h < 10 ? "0" + h : h) + ":"+ current_time;
+      current_time = (m < 10 ? "0" + m : m) + ":" + current_time;
+      if (h != 0) current_time = (h < 10 ? "0" + h : h) + ":" + current_time;
       document.getElementById("dialpad-timer").innerHTML = `${current_time}`;
     }, 1000);
   } else {
@@ -282,8 +279,8 @@ function toggleTimer(start) {
 function getHMS(raw_time) {
   raw_time = String(raw_time);
   let [h, m, s] = raw_time.match(/\d+:\d+:\d+/)[0].split(":");
-  console.log(h,m,s);
-  return (parseInt(h,10)*3600 + parseInt(m,10)*60 + parseInt(s,10));
+  console.log(h, m, s);
+  return parseInt(h, 10) * 3600 + parseInt(m, 10) * 60 + parseInt(s, 10);
 }
 
 function startTimer() {
@@ -315,7 +312,9 @@ function restoreInitiateCallUI() {
 
 function updateConfirmCallUI() {
   restoreInitiateCallUI();
-  document.getElementById("user-number").innerHTML = `${callObject.receiver._uri._user}`;
+  document.getElementById(
+    "user-number"
+  ).innerHTML = `${callObject.receiver._uri._user}`;
   startTimer();
 }
 
@@ -337,6 +336,10 @@ function updateHoldUI(putOnHold) {
     document.getElementById("hold-call").classList.remove("control-btn-active");
     document.getElementById("hold-call").classList.add("control-btn-inactive");
   }
+
+  document.querySelectorAll(".mute-btn-icon").forEach((each) => {
+    each.classList.toggle("hidden");
+  });
 }
 
 function handleMute() {
@@ -357,6 +360,10 @@ function updateMuteUI(putOnMute) {
     document.getElementById("mute-call").classList.remove("control-btn-active");
     document.getElementById("mute-call").classList.add("control-btn-inactive");
   }
+
+  document.querySelectorAll(".mute-btn-icon").forEach((each) => {
+    each.classList.toggle("hidden");
+  });
 }
 
 // function updateConfirmCallUI(){
