@@ -191,8 +191,8 @@ button:disabled {
 }
 
 .control-btn-inactive {
-    /* visibility: hidden; */
-    background-color: #969696;
+    visibility: hidden;
+    /* background-color: #969696; */
 }
 
 .control-btn-active {
