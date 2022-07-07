@@ -274,29 +274,31 @@ callerPackage.on("ACK_CALL_UNMUTE", () => {
 
 This method is used to fetch call object from callerPackage.
 Whenever ```ACK_SESSION_DETAILS``` event is triggered, fetch the details into a local callObject.
->Fired when session details is recieved.
->Use this to retrive and update Dialer. 
->####  Example
->```
-> // This is session details , use this to store  details in parent window, 
-> // and update UI accordingly.
-> // Use start_time to handle timer.
->let callObject = {
-> sender: "",
-> receiver: "",
-> startTime: "",
-> endTime: "",
-> hold: false,
-> mute: false,
-> };
->```
+Fired when session details is recieved.
+##### callObject
+This is session details , use this to store  details in parent window, 
+Use this to retrive and update UI accordingly.
+For Example: 
+* Use start_time to handle timer on dialer.
+* Use end_time to show logs.
+* use reciever to update name.
+```
+let callObject = {
+ sender: "",
+ receiver: "",
+ startTime: "",
+ endTime: "",
+ hold: false,
+ mute: false,
+ };
+```
 
->```
->callerPackage.on('ACK_SESSION_DETAILS',()=>{
->let sessionDetails = callerPackage.getCallObject();
->	console.log(sessionDetails);
->});
->```
+```
+callerPackage.on('ACK_SESSION_DETAILS',()=>{
+let sessionDetails = callerPackage.getCallObject();
+	console.log(sessionDetails);
+});
+```
 ---
 
 
